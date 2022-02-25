@@ -12,15 +12,12 @@ Hawk's basic syntax is akin to that of ES6 or sometimes Rust. The goal with the 
 
 ##### Declare mutable
 
-`let var = val`;
+`let var = val`
 
 
 ##### Declare constant
 
-```
-const var = val
-const var: type = val
-```
+`const var = val`
 
 #### Conditionals:
 
