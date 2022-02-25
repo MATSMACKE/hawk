@@ -1,10 +1,9 @@
-pub enum TokenType {
-    Keyword(Keyword),
-    Literal(Literal),
-    Punctuation(Punctuation)
-}
+use std::str::Lines;
 
-pub enum Keyword {
+#[derive(Debug)]
+/// Differentiate between types of tokens
+pub enum TokenType {
+    // Keywords
     If,
     Else,
     Loop,
@@ -17,19 +16,17 @@ pub enum Keyword {
     Const,
     Null,
     Function,
-    Print
-}
+    Print,
 
-pub enum Literal {
+    // Literals
     Identifier,
     String,
     Int,
     Float,
     True,
-    False
-}
+    False,
 
-pub enum Punctuation {
+    // Punctuation
     ParenthesisLeft,
     ParenthesisRight,
     BraceLeft,
@@ -61,6 +58,10 @@ pub enum Punctuation {
     Or,
     EOF
 }
+
+
+#[derive(Debug)]
+/// Holds a token as recognized by the scanner.
 pub struct Token {
     token_type: TokenType,
     lexeme: String,
@@ -68,7 +69,13 @@ pub struct Token {
 }
 
 impl Token {
-    fn new(token_type: TokenType, lexeme: &str, line: usize) -> Self {
-        Token {token_type, lexeme: lexeme.to_string(), line}
+    pub fn new(token_type: TokenType, lexeme: String, line: usize) -> Self {
+        Token {token_type, lexeme: lexeme, line}
+    }
+}
+
+impl std::fmt::Display for Token {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Token: {:?} {} on line {}", self.token_type, self.lexeme, self.line)
     }
 }
