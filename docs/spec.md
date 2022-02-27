@@ -141,7 +141,7 @@ To use uncertain with a ± key:
 `let var = 1.2 ± 0.2`
 
 To use uncertain without a ± key:
-`let var = 1.2 pm 0.2`
+`let var = 1.2 +- 0.2`
 
 When doing calculations with uncertains, the value will be calculated as expected and the uncertainty will also be updated to be correct as per the calculations that have been performed.
 

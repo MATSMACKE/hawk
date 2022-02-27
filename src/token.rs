@@ -1,6 +1,4 @@
-use std::str::Lines;
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Differentiate between types of tokens
 pub enum TokenType {
     // Keywords
@@ -56,26 +54,46 @@ pub enum TokenType {
     NotEqual,
     And,
     Or,
+    Not,
     EOF
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Holds a token as recognized by the scanner.
 pub struct Token {
     token_type: TokenType,
-    lexeme: String,
-    line: usize
+    line: usize,
+    literal: Option<Object>
 }
 
 impl Token {
-    pub fn new(token_type: TokenType, lexeme: String, line: usize) -> Self {
-        Token {token_type, lexeme: lexeme, line}
+    pub fn new(token_type: TokenType, line: usize, literal: Option<Object>) -> Self {
+        Token {token_type, line, literal}
     }
 }
 
 impl std::fmt::Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Token: {:?} {} on line {}", self.token_type, self.lexeme, self.line)
+        write!(f, "Token: {:?}", self.token_type)
     }
+}
+
+pub struct Tokens(pub Vec<Token>);
+
+impl std::fmt::Display for Tokens {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        for token in self.0.iter() {
+            writeln!(f, "{:?} {:?}", token.token_type, token.literal);
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum Object {
+    Int(isize),
+    Float(f64),
+    String(String),
+    Identifier(String)
 }
