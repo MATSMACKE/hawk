@@ -4,7 +4,7 @@ use unicode_segmentation::UnicodeSegmentation;
 pub struct Lexer<'a> {
     characters: Vec<&'a str>,
     num_chars: usize,
-    tokens: Vec<Token>,
+    pub tokens: Vec<Token>,
     line: usize,
     lexeme_start: usize,
     index: usize
@@ -25,7 +25,10 @@ impl<'a> Lexer<'a> {
             self.consume_char();
             match c {
                 " " | "\r" | "\t" => {},
-                "\n" => self.line = self.line + 1,
+                "\n" => {
+                    self.line = self.line + 1;
+                    self.add_token(TokenType::EOL, None)
+                },
                 "(" => self.add_token(TokenType::ParenthesisLeft, None),
                 ")" => self.add_token(TokenType::ParenthesisRight, None),
                 "{" => self.add_token(TokenType::BraceLeft, None),
@@ -100,6 +103,9 @@ impl<'a> Lexer<'a> {
                     self.lexeme_start = self.index;
                     while (!self.peek("\"")) && self.index < self.num_chars {
                         self.consume_char();
+                        if self.peek("\n") {
+                            self.line = self.line + 1;
+                        }
                     }
                     self.add_token(TokenType::String, Some(Object::String(self.characters[self.lexeme_start..self.index].join(""))));
                     self.consume_char()
@@ -172,6 +178,8 @@ impl<'a> Lexer<'a> {
                                 "null" => self.add_token(TokenType::Null, None),
                                 "function" => self.add_token(TokenType::Function, None),
                                 "print" => self.add_token(TokenType::Print, None),
+                                "true" => self.add_token(TokenType::True, Some(Object::Boolean(true))),
+                                "false" => self.add_token(TokenType::False, Some(Object::Boolean(false))),
                                 _ => self.add_token(TokenType::Identifier, Some(Object::Identifier(current_token)))
                             }
 

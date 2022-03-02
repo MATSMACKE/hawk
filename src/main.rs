@@ -3,6 +3,8 @@ pub mod lexer;
 pub mod io;
 mod run;
 pub mod token;
+pub mod tree;
+pub mod parser;
 
 use std::env;
 

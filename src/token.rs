@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 /// Differentiate between types of tokens
 pub enum TokenType {
     // Keywords
@@ -55,16 +55,17 @@ pub enum TokenType {
     And,
     Or,
     Not,
-    EOF
+    EOF,
+    EOL
 }
 
 
 #[derive(Debug, Clone)]
 /// Holds a token as recognized by the scanner.
 pub struct Token {
-    token_type: TokenType,
-    line: usize,
-    literal: Option<Object>
+    pub token_type: TokenType,
+    pub line: usize,
+    pub literal: Option<Object>
 }
 
 impl Token {
@@ -92,8 +93,10 @@ impl std::fmt::Display for Tokens {
 
 #[derive(Debug, Clone)]
 pub enum Object {
+    Null,
     Int(isize),
     Float(f64),
     String(String),
+    Boolean(bool),
     Identifier(String)
 }
