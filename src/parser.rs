@@ -45,15 +45,27 @@ impl Parser {
             },
             TokenType::If => {
                 let condition = self.expression();
+                let block = Box::new(self.statement());
+                if let TokenType::Else = self.current().token_type {
+                    self.consume();
+                    let else_block = Box::new(self.statement());
+                    Statement::IfElse{condition, if_block: block, else_block}
+                } else {
+                    Statement::If{condition, block}
+                }
+            },
+            TokenType::While => {
+                let condition = self.expression();
                 let block = self.statement();
-                Statement::If{condition, block: Box::new(block)}
+                Statement::While{condition, block: Box::new(block)}
             },
             TokenType::BraceLeft => {
                 let mut block: Vec<Statement> = Vec::new();
                 let mut in_block = true;
                 while in_block {
                     if let TokenType::BraceRight = self.current().token_type {
-                        in_block = false
+                        in_block = false;
+                        self.consume();
                     } else {
                         block.push(self.statement())
                     }
@@ -151,7 +163,7 @@ impl Parser {
 
     fn unary(&mut self) -> Box<Expression> {
         if let 
-                TokenType::ExclamationMark 
+                  TokenType::ExclamationMark 
                 | TokenType::Minus = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();
@@ -179,6 +191,13 @@ impl Parser {
             } else {
                 panic!("Couldn't parse literal on line {}", self.current().line)
             }
+        } else if let TokenType::ParenthesisLeft = self.current().token_type {
+            self.consume();
+            let expression = self.equality();
+            if let TokenType::ParenthesisRight = self.current().token_type {
+                self.consume();
+            }
+            expression
         }
 
         else {

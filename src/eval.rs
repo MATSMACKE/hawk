@@ -24,10 +24,36 @@ impl Interpreter {
         match statement {
             Statement::Print(expr) => println!("{:?}", self.eval_expression(expr)),
             Statement::Definition{name, value} => {self.variables.insert(name, self.eval_expression(value));},
+            Statement::While{condition, block} => {
+                let is_true = true;
+                while is_true {
+                    if let Object::Boolean(is_true) = self.eval_expression(condition.clone()) {
+                        if is_true {
+                            self.run_statement(*block.clone())
+                        }
+                        else {
+                            break;
+                        }
+                    } else {
+                        panic!("Expected boolean as condition for if statement")
+                    }
+                }
+            },
             Statement::If{condition, block} => {
                 if let Object::Boolean(condition) = self.eval_expression(condition) {
                     if condition {
                         self.run_statement(*block)
+                    }
+                } else {
+                    panic!("Expected boolean as condition for if statement")
+                }
+            },
+            Statement::IfElse{condition, if_block, else_block} => {
+                if let Object::Boolean(condition) = self.eval_expression(condition) {
+                    if condition {
+                        self.run_statement(*if_block)
+                    } else {
+                        self.run_statement(*else_block)
                     }
                 } else {
                     panic!("Expected boolean as condition for if statement")
@@ -136,6 +162,9 @@ impl Interpreter {
                     },
                     TokenType::EqualEqual => {
                         Object::Boolean(eval_op1 == eval_op2)
+                    },
+                    TokenType::NotEqual => {
+                        Object::Boolean(eval_op1 != eval_op2)
                     },
                     _ => {
                         panic!("Problem")

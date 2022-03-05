@@ -7,7 +7,9 @@ pub enum Statement {
     Block(Vec<Statement>),
     EOF,
     Expression(Box<Expression>),
-    If{condition: Box<Expression>, block: Box<Statement>}
+    While{condition: Box<Expression>, block: Box<Statement>},
+    If{condition: Box<Expression>, block: Box<Statement>},
+    IfElse{condition: Box<Expression>, if_block: Box<Statement>, else_block: Box<Statement>}
 }
 
 #[derive(Debug, Clone)]

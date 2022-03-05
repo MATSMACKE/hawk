@@ -1,6 +1,0 @@
-if 5 + 7 == 12 {
-    print "hello"
-    print 3 + 5
-}
-
-if 9 == 8 print "world"
