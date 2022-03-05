@@ -26,6 +26,23 @@ impl Parser {
         match self.previous().token_type {
             TokenType::Print => Statement::Print(self.expression()),
             TokenType::EOF => Statement::EOF,
+            TokenType::Let => {
+                let name: String;
+                if let Some(Object::Identifier(x)) = self.current().literal {
+                    name = x
+                } else {
+                    panic!("Expected variable name to be String");
+                }
+                self.consume();
+                let value: Box<Expression>;
+                if let TokenType::Assign = self.current().token_type {
+                    self.consume();
+                    value = self.expression();
+                } else {
+                    value = Box::new(Expression::Literal(Object::Null));
+                }
+                Statement::Definition{name, value}
+            },
             _ => Statement::Expression(self.expression())
         }
     }

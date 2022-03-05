@@ -1,28 +1,34 @@
 use core::panic;
+use std::collections::HashMap;
 
 use crate::token::{TokenType, Object};
 use crate::tree::{Expression, Statement};
 
+/// Runs parsed code from the list of statements returned by the parser
 pub struct Interpreter {
-    statements: Vec<Statement>
+    statements: Vec<Statement>,
+    variables: HashMap<String, Object>
 }
 
 impl Interpreter {
     pub fn interpret(statements: Vec<Statement>) {
-        let mut interpreter = Interpreter{statements};
+        let mut interpreter = Interpreter{statements, variables: HashMap::new()};
 
         for index in 0..interpreter.statements.len() {
             interpreter.run_statement(index)
         }
     }
 
+    /// Executes a given statement
     fn run_statement(&mut self, index: usize) {
         match self.statements[index].clone() {
             Statement::Print(expr) => println!("{:?}", self.eval_expression(expr)),
+            Statement::Definition{name, value} => {self.variables.insert(name, self.eval_expression(value));},
             _ => {}
         }
     }
 
+    /// Traverses an expression tree to evaluate it and return an Object
     fn eval_expression(&self, expression: Box<Expression>) -> Object {
         match *expression {
             Expression::Binary{operand1, operand2, operator} => {
@@ -146,7 +152,15 @@ impl Interpreter {
                 }
             },
             Expression::Literal(obj) => {
-                obj
+                if let Object::Identifier(name) = obj {
+                    if let Some(x) = self.variables.get(&name) {
+                        x.clone()
+                    } else {
+                        panic!("Variable {name} is not defined")
+                    }
+                } else {
+                    obj
+                }
             },
             _ => Object::Null
         }

@@ -3,7 +3,8 @@ use crate::token::{TokenType, Object};
 #[derive(Debug, Clone)]
 pub enum Statement {
     Print(Box<Expression>),
-    Declaration{},
+    Definition{name: String, value: Box<Expression>},
+    Block(Vec<Statement>),
     EOF,
     Expression(Box<Expression>)
 }
