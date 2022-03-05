@@ -53,6 +53,13 @@ impl Parser {
                     Statement::If{condition, block}
                 }
             },
+            TokenType::Loop => {
+                let block = Box::new(self.statement());
+                Statement::Loop(block)
+            },
+            TokenType::Break => {
+                Statement::Break
+            },
             TokenType::While => {
                 let condition = self.expression();
                 let block = self.statement();
@@ -91,7 +98,36 @@ impl Parser {
     }
 
     fn expression(&mut self) -> Box<Expression> {
-        self.equality()
+        self.or()
+    }
+
+    fn or(&mut self) -> Box<Expression> {
+        let mut temp = self.and();
+
+        while let 
+                  TokenType::Or = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
+            let operand2 = self.and();
+
+            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+        }
+
+        temp
+    }
+
+    fn and(&mut self) -> Box<Expression> {
+        let mut temp = self.equality();
+
+        while let TokenType::And = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
+            let operand2 = self.equality();
+
+            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+        }
+
+        temp
     }
 
     fn equality(&mut self) -> Box<Expression> {

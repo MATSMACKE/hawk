@@ -192,6 +192,9 @@ impl<'a> Lexer<'a> {
                                 "print" => self.add_token(TokenType::Print, None),
                                 "true" => self.add_token(TokenType::True, Some(Object::Boolean(true))),
                                 "false" => self.add_token(TokenType::False, Some(Object::Boolean(false))),
+                                "or" => self.add_token(TokenType::Or, None),
+                                "and" => self.add_token(TokenType::And, None),
+                                "not" => self.add_token(TokenType::Not, None),
                                 _ => self.add_token(TokenType::Identifier, Some(Object::Identifier(current_token)))
                             }
 

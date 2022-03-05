@@ -166,6 +166,32 @@ impl Interpreter {
                     TokenType::NotEqual => {
                         Object::Boolean(eval_op1 != eval_op2)
                     },
+                    TokenType::Or => {
+                        if let Object::Boolean(op1) = eval_op1 {
+                            if let Object::Boolean(op2) = eval_op2 {
+                                Object::Boolean(op1 || op2)
+                            }
+                            else {
+                                panic!("Logical operations can only be performed on booleans")
+                            }
+                        }
+                        else {
+                            panic!("Logical operations can only be performed on booleans")
+                        }
+                    },
+                    TokenType::And => {
+                        if let Object::Boolean(op1) = eval_op1 {
+                            if let Object::Boolean(op2) = eval_op2 {
+                                Object::Boolean(op1 && op2)
+                            }
+                            else {
+                                panic!("Logical operations can only be performed on booleans")
+                            }
+                        }
+                        else {
+                            panic!("Logical operations can only be performed on booleans")
+                        }
+                    },
                     TokenType::LessThan => {
                         if let Object::Int(x) = eval_op1 {
                             if let Object::Int(y) = eval_op2 {

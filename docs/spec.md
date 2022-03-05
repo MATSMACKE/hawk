@@ -3,12 +3,12 @@
 
 ### Introduction
 
-Hawk is a language designed to help physicists automate tasks, such as performing calculations or processing data. As such, it has a lot of features (e.g. built in uncertainties) that will make these jobs easier.
+Hawk is a language designed to help physicists automate tasks, such as performing calculations or processing data. As such, it has features (e.g. built in uncertainties) that will make these jobs easier.
 
 Please note: Until 1.0.0, not all features in this spec are guaranteed to be implemented
 ### Basic Syntax
 
-Hawk has a C-style syntax, and is oftentimes similar to ES6. The syntax is very permissive, so any form of indication of a line ending is unnecessary, although newlines certainly help with code style and readability.
+Hawk has a C-style syntax, and is oftentimes similar to ES6. The syntax is very permissive. There are no semicolons and not even newlines are required, although they certainly help with code style and readability.
 
 #### Statements
 
@@ -22,18 +22,31 @@ Statements in Hawk can either be a single statement using a keyword such as `let
 
 #### Conditionals:
 
-##### For single line code
+##### With blocks
 ```
-if condition // code
-else if condition // code
-else // code
+if condition {
+    // code block
+}
+else {
+    // code block
+}
 ```
-##### For multi-line code
+##### For single statements
 ```
 if condition statement
 else statement
 ```
-As with other languages, `else` is optional. `else if` will also work.
+As with other languages, `else` is optional. `else if` is not hardcoded into the language itself but will work as a byproduct of the way `if` and `else` work.
+
+##### Unless
+
+```
+unless condition statement
+unless condition {
+    // block
+}
+```
+Using `if` is generally preferred in keeping with programming traditions, however, `unless` might be more readable in certain circumstances. 
 
 #### Loops
 
@@ -128,6 +141,7 @@ To use uncertain with a ± key:
 `let var = 1.2 ± 0.2`
 
 To use uncertain without a ± key:
+
 `let var = 1.2 +- 0.2`
 
 When doing calculations with uncertains, the value will be calculated as expected and the uncertainty will also be updated to be correct as per the calculations that have been performed.

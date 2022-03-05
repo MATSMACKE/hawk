@@ -103,5 +103,6 @@ pub enum Object {
     Float(f64),
     String(String),
     Boolean(bool),
+    Uncertain{value: f64, uncertainty: f64},
     Identifier(String)
 }

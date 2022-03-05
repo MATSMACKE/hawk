@@ -39,3 +39,14 @@ fn repl() {
         else {run::run(line)}
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lex_and_parse_expr() {
+
+    }
+}

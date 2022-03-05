@@ -8,6 +8,8 @@ pub enum Statement {
     EOF,
     Expression(Box<Expression>),
     While{condition: Box<Expression>, block: Box<Statement>},
+    Loop(Box<Statement>),
+    Break,
     If{condition: Box<Expression>, block: Box<Statement>},
     IfElse{condition: Box<Expression>, if_block: Box<Statement>, else_block: Box<Statement>}
 }
