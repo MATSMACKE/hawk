@@ -181,6 +181,7 @@ impl<'a> Lexer<'a> {
                                 "loop" => self.add_token(TokenType::Loop, None),
                                 "while" => self.add_token(TokenType::While, None),
                                 "for" => self.add_token(TokenType::For, None),
+                                "break" => self.add_token(TokenType::Break, None),
                                 "class" => self.add_token(TokenType::Class, None),
                                 "super" => self.add_token(TokenType::Super, None),
                                 "this" => self.add_token(TokenType::This, None),

@@ -1,0 +1,8 @@
+let i = 0
+
+while i <= 10 {
+    if i == 1 print 3
+    else if i < 4 print 4
+    else print "something"
+    i = i + 1
+}

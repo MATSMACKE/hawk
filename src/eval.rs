@@ -166,6 +166,90 @@ impl Interpreter {
                     TokenType::NotEqual => {
                         Object::Boolean(eval_op1 != eval_op2)
                     },
+                    TokenType::LessThan => {
+                        if let Object::Int(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x < y)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean((x as f64) < y)
+                            } else {
+                                panic!("Can't compare Int to this type")
+                            }
+                        } else if let Object::Float(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x < y as f64)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean(x < y)
+                            } else {
+                                panic!("Can't compare Float to this type")
+                            }
+                        } else {
+                            panic!("Can't compare non-numbers")
+                        }
+                    },
+                    TokenType::LessThanEqual => {
+                        if let Object::Int(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x <= y)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean((x as f64) <= y)
+                            } else {
+                                panic!("Can't compare Int to this type")
+                            }
+                        } else if let Object::Float(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x <= y as f64)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean(x <= y)
+                            } else {
+                                panic!("Can't compare Float to this type")
+                            }
+                        } else {
+                            panic!("Can't compare non-numbers")
+                        }
+                    },
+                    TokenType::GreaterThan => {
+                        if let Object::Int(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x > y)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean((x as f64) > y)
+                            } else {
+                                panic!("Can't compare Int to this type")
+                            }
+                        } else if let Object::Float(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x > y as f64)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean(x > y)
+                            } else {
+                                panic!("Can't compare Float to this type")
+                            }
+                        } else {
+                            panic!("Can't compare non-numbers")
+                        }
+                    },
+                    TokenType::GreaterThanEqual => {
+                        if let Object::Int(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x >= y)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean((x as f64) >= y)
+                            } else {
+                                panic!("Can't compare Int to this type")
+                            }
+                        } else if let Object::Float(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x >= y as f64)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean(x >= y)
+                            } else {
+                                panic!("Can't compare Float to this type")
+                            }
+                        } else {
+                            panic!("Can't compare non-numbers")
+                        }
+                    },
                     _ => {
                         panic!("Problem")
                     }

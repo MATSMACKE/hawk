@@ -1,13 +1,13 @@
 [package]
-name = "hawk"
+name = "hawk-lang"
 version = "0.1.0"
+rust-version = "1.59"
 edition = "2021"
 license = "MIT"
 description = "The original implementation of the Hawk programming language"
 repository = "https://github.com/MATSMACKE/hawk/"
 homepage = "https://github.com/MATSMACKE/hawk/"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Mats Macke"]
 
 [dependencies]
 unicode-segmentation = "1.9.0"

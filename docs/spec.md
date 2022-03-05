@@ -5,21 +5,20 @@
 
 Hawk is a language designed to help physicists automate tasks, such as performing calculations or processing data. As such, it has a lot of features (e.g. built in uncertainties) that will make these jobs easier.
 
-Please note until 1.0.0 not all features in this spec are guaranteed to be implemented
+Please note: Until 1.0.0, not all features in this spec are guaranteed to be implemented
 ### Basic Syntax
 
-Hawk's basic syntax is akin to that of ES6 or sometimes Rust. The goal with the syntax is to make it as easy as possible to understand and reason about. It uses newlines for line endings (no semicolons).
+Hawk has a C-style syntax, and is oftentimes similar to ES6. The syntax is very permissive, so any form of indication of a line ending is unnecessary, although newlines certainly help with code style and readability.
+
+#### Statements
+
+Statements in Hawk can either be a single statement using a keyword such as `let`, an expression statement, or a block (multiple statements encased in `{}`).
 
 #### Variables
 
 ##### Declare mutable
 
 `let var = val`
-
-
-##### Declare constant
-
-`const var = val`
 
 #### Conditionals:
 
@@ -31,16 +30,10 @@ else // code
 ```
 ##### For multi-line code
 ```
-if condition {
-    // code
-} else if condition {
-    // code
-}
-else {
-    // code
-}
+if condition statement
+else statement
 ```
-As with other languages, `else if` and `else` are optional.
+As with other languages, `else` is optional. `else if` will also work.
 
 #### Loops
 
@@ -58,27 +51,19 @@ Hawk will accept an infinite loop (without `break`), but this is not recommended
 
 ##### Loop while
 ```
-while condition {
-    // code
-}
+while condition statement
 ```
 
 ##### C-style for loop
 ```
-for (let i = 0; i < num_loops; i++) {
-    // code
-}
+for (let i = 0; i < num_loops; i++) statement
 ```
 
 ##### Loop through iterables or iterators
 ```
-for val in iterable {
-    // code
-}
+for val in iterable statement
 
-for (index, val) in iterable {
-    // code
-}
+for (index, val) in iterable statement
 ```
 
 #### Classes

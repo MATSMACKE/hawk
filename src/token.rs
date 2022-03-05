@@ -7,6 +7,7 @@ pub enum TokenType {
     Loop,
     While,
     For,
+    Break,
     Class,
     Super,
     This,
