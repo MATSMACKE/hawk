@@ -2,11 +2,12 @@
 name = "hawk"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "The original implementation of the Hawk programming language"
+repository = "https://github.com/MATSMACKE/hawk/"
+homepage = "https://github.com/MATSMACKE/hawk/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 unicode-segmentation = "1.9.0"
-
-[profile.release]
-strip = "debuginfo"

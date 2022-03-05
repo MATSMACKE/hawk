@@ -4,6 +4,8 @@
 ### Introduction
 
 Hawk is a language designed to help physicists automate tasks, such as performing calculations or processing data. As such, it has a lot of features (e.g. built in uncertainties) that will make these jobs easier.
+
+Please note until 1.0.0 not all features in this spec are guaranteed to be implemented
 ### Basic Syntax
 
 Hawk's basic syntax is akin to that of ES6 or sometimes Rust. The goal with the syntax is to make it as easy as possible to understand and reason about. It uses newlines for line endings (no semicolons).

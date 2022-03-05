@@ -16,8 +16,7 @@ impl Parser {
         while !parser.at_end() {
             statements.push(parser.statement())
         }
-
-        println!("{:?}\n\n", statements);
+        
         statements
     }
 

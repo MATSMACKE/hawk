@@ -1,4 +1,4 @@
-use crate::token::{Token, TokenType, Object, Tokens};
+use crate::token::{Token, TokenType, Object};
 use unicode_segmentation::UnicodeSegmentation;
 
 pub struct Lexer<'a> {
@@ -202,8 +202,6 @@ impl<'a> Lexer<'a> {
         }
 
         self.add_token(TokenType::EOF, None);
-
-        println!("{}", Tokens(self.tokens.clone()));
     }
 
     fn match_next(&mut self, expected: &str) -> bool {
