@@ -1,56 +1,50 @@
 use core::panic;
 
 use crate::token::{Token, TokenType, Object};
-use crate::tree::{Expression, Binary, Unary, Literal};
+use crate::tree::{Statement, Expression};
 
 pub struct Parser {
     tokens: Vec<Token>,
-    index: usize,
-    current: Token
+    index: usize
 }
 
 impl Parser {
-    pub fn parse(tokens: &Vec<Token>) -> Box<Expression> {
-        let mut parser = Parser{tokens: tokens.clone(), index: 0, current: tokens[0].clone()};
-        parser.equality()
-    }
+    pub fn parse(tokens: &Vec<Token>) -> Vec<Statement> {
+        let mut parser = Parser{tokens: tokens.clone(), index: 0};
+        let mut statements: Vec<Statement> = Vec::new();
 
-    fn match_token(&mut self, token_type: TokenType) -> bool {
-        if self.check(token_type) {
-            self.consume();
-            return true
+        while !parser.at_end() {
+            statements.push(parser.statement())
         }
-        false
+
+        println!("{:?}\n\n", statements);
+        statements
     }
 
-    fn check(&self, token_type: TokenType) -> bool {
-        self.next().token_type == token_type
+    fn statement(&mut self) -> Statement {
+        self.consume();
+        match self.previous().token_type {
+            TokenType::Print => Statement::Print(self.expression()),
+            TokenType::EOF => Statement::EOF,
+            _ => Statement::Expression(self.expression())
+        }
     }
 
-    fn next(&self) -> Token {
-        self.tokens[self.index + 1].clone()
-    }
-
-    fn previous(&self) -> Token {
-        self.tokens[self.index - 1].clone()
-    }
-
-    fn consume(&mut self) {
-        self.index = self.index + 1;
-        self.current = self.previous()
-    }
-
-    fn at_end(&self) -> bool {
-        self.next().token_type == TokenType::EOF
+    fn expression(&mut self) -> Box<Expression> {
+        self.equality()
     }
 
     fn equality(&mut self) -> Box<Expression> {
         let mut temp = self.comparison();
 
-        while self.match_token(TokenType::EqualEqual) || self.match_token(TokenType::NotEqual) {
-            let operator = self.previous().token_type;
+        while let 
+                  TokenType::EqualEqual 
+                | TokenType::NotEqual = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
             let operand2 = self.comparison();
-            temp = Box::new(Expression::Binary(Binary{operand1: temp.clone(), operand2, operator}));
+
+            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
         }
 
         temp
@@ -59,10 +53,16 @@ impl Parser {
     fn comparison(&mut self) -> Box<Expression> {
         let mut temp = self.term();
 
-        while self.match_token(TokenType::EqualEqual) || self.match_token(TokenType::NotEqual) {
-            let operator = self.previous().token_type;
+        while let 
+                  TokenType::LessThan 
+                | TokenType::LessThanEqual 
+                | TokenType::GreaterThan 
+                | TokenType::GreaterThanEqual = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
             let operand2 = self.term();
-            temp = Box::new(Expression::Binary(Binary{operand1: temp, operand2, operator}));
+
+            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
         }
 
         temp
@@ -71,10 +71,14 @@ impl Parser {
     fn term(&mut self) -> Box<Expression> {
         let mut temp = self.factor();
 
-        while self.match_token(TokenType::Minus) || self.match_token(TokenType::Plus) {
-            let operator = self.previous().token_type;
+        while let 
+                TokenType::Minus 
+                | TokenType::Plus = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
             let operand2 = self.factor();
-            temp = Box::new(Expression::Binary(Binary{operand1: temp, operand2, operator}));
+
+            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
         }
 
         temp
@@ -83,39 +87,69 @@ impl Parser {
     fn factor(&mut self) -> Box<Expression> {
         let mut temp = self.unary();
 
-        while self.match_token(TokenType::Slash) || self.match_token(TokenType::Asterisk) {
-            let operator = self.previous().token_type;
+        while let 
+                TokenType::Slash 
+                | TokenType::Asterisk = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
             let operand2 = self.unary();
-            temp = Box::new(Expression::Binary(Binary{operand1: temp, operand2, operator}));
+
+            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
         }
 
         temp
     }
 
     fn unary(&mut self) -> Box<Expression> {
-        if self.match_token(TokenType::ExclamationMark) || self.match_token(TokenType::Minus) {
-            let operator = self.previous().token_type;
+        if let 
+                TokenType::ExclamationMark 
+                | TokenType::Minus = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
             let operand = self.unary();
-            return Box::new(Expression::Unary(Unary{operand, operator}))
+            Box::new(Expression::Unary{operator, operand})
         }
-
-        self.primary()
+        else {
+            self.primary()
+        }
     }
 
     fn primary(&mut self) -> Box<Expression> {
-        if self.match_token(TokenType::False) || self.match_token(TokenType::True) {
-            if let Some(Object::Boolean(x)) = self.current.literal {
-                return Box::new(Expression::Literal(Literal::Boolean(x)))
-            }
-            else {
-                panic!("Couldn't parse Boolean on line {}", self.current.line);
+        if let 
+              TokenType::Int 
+            | TokenType::Float 
+            | TokenType::True 
+            | TokenType::False
+            | TokenType::String
+            | TokenType::Identifier 
+                = self.current().token_type {
+
+            if let Some(x) = self.current().literal {
+                self.consume();
+                Box::new(Expression::Literal(x))
+            } else {
+                panic!("Couldn't parse literal on line {}", self.current().line)
             }
         }
-        else if self.match_token(TokenType::Null) {
-            Box::new(Expression::Literal(Literal::Null))
-        }
+
         else {
-            Box::new(Expression::Literal(Literal::Null))
+            Box::new(Expression::Literal(Object::Null))
         }
+    }
+
+    pub fn at_end(&self) -> bool {
+        self.index.saturating_sub(1) == self.tokens.len() || self.current().token_type == TokenType::EOF
+    }
+
+    fn current(&self) -> Token {
+        self.tokens[self.index].clone()
+    }
+
+    fn previous(&self) -> Token {
+        self.tokens[self.index - 1].clone()
+    }
+    
+    fn consume(&mut self) {
+        self.index += 1;
     }
 }

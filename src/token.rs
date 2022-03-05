@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 /// Differentiate between types of tokens
 pub enum TokenType {
     // Keywords
@@ -56,6 +56,7 @@ pub enum TokenType {
     Or,
     Not,
     EOF,
+    SOF,
     EOL
 }
 
@@ -84,10 +85,15 @@ pub struct Tokens(pub Vec<Token>);
 
 impl std::fmt::Display for Tokens {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut problem = false;
         for token in self.0.iter() {
-            writeln!(f, "{:?} {:?}", token.token_type, token.literal);
+            if let Ok(_) = writeln!(f, "{:?} {:?}", token.token_type, token.literal) {
+                ()
+            } else {
+                problem = true
+            }
         }
-        Ok(())
+        if problem {Err(std::fmt::Error)} else {Ok(())}
     }
 }
 

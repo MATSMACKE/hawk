@@ -1,11 +1,12 @@
 mod utils;
 pub mod lexer;
-pub mod io;
 mod run;
 pub mod token;
 pub mod tree;
 pub mod parser;
+pub mod eval;
 
+use core::panic;
 use std::env;
 
 fn main() {
@@ -13,7 +14,7 @@ fn main() {
     match args.len() {
         1 => repl(),
         2 => run_script(args[1].clone()),
-        _ => io::error(io::ErrorType::CommandLineArgs, 0, "")
+        _ => panic!("incorrect args")
     }
 }
 
@@ -23,7 +24,7 @@ fn run_script(filename: String) {
         Result::Ok(source) => {
             run::run(source)
         }
-        Result::Err(_) => io::error(io::ErrorType::UnreadableFile, 0, "")
+        Result::Err(_) => panic!("couldn't read file")
     }
 }
 

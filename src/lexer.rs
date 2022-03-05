@@ -11,11 +11,15 @@ pub struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(source: &'a str) -> Self {
-        Lexer {characters: source.graphemes(true).collect::<Vec<&str>>(), num_chars: 0, tokens: Vec::new(), line: 0, lexeme_start: 0, index: 0}
+    pub fn lex(source: &'a str) -> Vec<Token> {
+        let mut code_lexer = Lexer {characters: source.graphemes(true).collect::<Vec<&str>>(), num_chars: 0, tokens: Vec::new(), line: 1, lexeme_start: 0, index: 0};
+
+        code_lexer.lex_code();
+
+        code_lexer.tokens
     }
 
-    pub fn lex(&mut self) {
+    pub fn lex_code(&mut self) {
         self.characters.push(" ");
 
         self.num_chars = self.characters.len();
@@ -52,6 +56,15 @@ impl<'a> Lexer<'a> {
                         self.add_token(TokenType::PlusMinus, None)
                     } else {
                         self.add_token(TokenType::Plus, None)
+                    }
+                },
+
+                // Equal and assignment
+                "=" => {
+                    if self.match_next("=") {
+                        self.add_token(TokenType::EqualEqual, None)
+                    } else {
+                        self.add_token(TokenType::Assign, None)
                     }
                 },
 
@@ -120,16 +133,17 @@ impl<'a> Lexer<'a> {
 
                         while let Ok(num) = self.characters[self.index].parse::<usize>() {
                             if self.characters[self.index + 1] == "." { // Check for .
+                                println!("found .");
                                 if let Ok(_) = self.characters[self.index + 2].parse::<usize>() {
                                     is_float = true;
+                                    println!("found float");
+                                    self.consume_char();
                                 }
                             }
                             int = int * 10 + num;
-
+                            
                             self.consume_char();
                         }
-
-                        self.consume_char();
 
                         if is_float {   // Get decimal part of number
                             let mut decimal_digits: Vec<usize> = Vec::new();

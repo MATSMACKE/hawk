@@ -1,9 +1,9 @@
-use crate::{lexer, parser};
+use crate::{lexer, parser, eval};
 
 pub fn run(source: String) {
-    let mut code_lexer = lexer::Lexer::new(&source);
+    let tokens = lexer::Lexer::lex(&source);
 
-    code_lexer.lex();
+    let statements = parser::Parser::parse(&tokens);
 
-    let syntax_tree = parser::Parser::parse(&code_lexer.tokens);
+    eval::Interpreter::interpret(statements)
 }

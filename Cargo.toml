@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 unicode-segmentation = "1.9.0"
+
+[profile.release]
+strip = "debuginfo"

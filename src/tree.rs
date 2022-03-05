@@ -1,31 +1,24 @@
-use crate::token::{TokenType};
+use crate::token::{TokenType, Object};
+
+#[derive(Debug, Clone)]
+pub enum Statement {
+    Print(Box<Expression>),
+    Declaration{},
+    EOF,
+    Expression(Box<Expression>)
+}
 
 #[derive(Debug, Clone)]
 pub enum Expression {
-    Literal(Literal),
-    Unary(Unary),
-    Binary(Binary),
+    Literal(Object),
+    Unary{
+        operand: Box<Expression>, 
+        operator: TokenType
+    },
+    Binary{
+        operand1: Box<Expression>, 
+        operand2: Box<Expression>, 
+        operator: TokenType
+    },
     Parenthesized(Box<Expression>)
-}
-
-#[derive(Debug, Clone)]
-pub enum Literal {
-    Null,
-    Boolean(bool),
-    Int(isize),
-    Float(isize),
-    String(String)
-}
-
-#[derive(Debug, Clone)]
-pub struct Binary {
-    pub operand1: Box<Expression>, 
-    pub operand2: Box<Expression>, 
-    pub operator: TokenType
-}
-
-#[derive(Debug, Clone)]
-pub struct Unary {
-    pub operand: Box<Expression>, 
-    pub operator: TokenType
 }
