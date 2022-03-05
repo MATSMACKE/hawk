@@ -31,7 +31,6 @@ impl<'a> Lexer<'a> {
                 " " | "\r" | "\t" => {},
                 "\n" => {
                     self.line = self.line + 1;
-                    self.add_token(TokenType::EOL, None)
                 },
                 "(" => self.add_token(TokenType::ParenthesisLeft, None),
                 ")" => self.add_token(TokenType::ParenthesisRight, None),
@@ -125,19 +124,16 @@ impl<'a> Lexer<'a> {
                 },
                 _   => {
                     // Int and float literals
-                    if let Ok(num) = c.parse::<usize>() {
+                    if let Ok(_) = c.parse::<usize>() {
                         let mut is_float = false;
 
-                        let mut int: usize = num;
+                        let mut int: usize = 0;
                         let mut decimal: f64 = 0.;
 
-                        while let Ok(num) = self.characters[self.index].parse::<usize>() {
-                            if self.characters[self.index + 1] == "." { // Check for .
-                                println!("found .");
-                                if let Ok(_) = self.characters[self.index + 2].parse::<usize>() {
+                        while let Ok(num) = self.characters[self.index - 1].parse::<usize>() {
+                            if self.characters[self.index] == "." { // Check for .
+                                if let Ok(_) = self.characters[self.index + 1].parse::<usize>() {
                                     is_float = true;
-                                    println!("found float");
-                                    self.consume_char();
                                 }
                             }
                             int = int * 10 + num;

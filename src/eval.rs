@@ -15,15 +15,29 @@ impl Interpreter {
         let mut interpreter = Interpreter{statements, variables: HashMap::new()};
 
         for index in 0..interpreter.statements.len() {
-            interpreter.run_statement(index)
+            interpreter.run_statement(interpreter.statements[index].clone())
         }
     }
 
     /// Executes a given statement
-    fn run_statement(&mut self, index: usize) {
-        match self.statements[index].clone() {
+    fn run_statement(&mut self, statement: Statement) {
+        match statement {
             Statement::Print(expr) => println!("{:?}", self.eval_expression(expr)),
             Statement::Definition{name, value} => {self.variables.insert(name, self.eval_expression(value));},
+            Statement::If{condition, block} => {
+                if let Object::Boolean(condition) = self.eval_expression(condition) {
+                    if condition {
+                        self.run_statement(*block)
+                    }
+                } else {
+                    panic!("Expected boolean as condition for if statement")
+                }
+            },
+            Statement::Block(block) => {
+                for statement in block {
+                    self.run_statement(statement)
+                }
+            },
             _ => {}
         }
     }
@@ -119,6 +133,9 @@ impl Interpreter {
                         } else {
                             panic!("Can't divide non-numbers")
                         }
+                    },
+                    TokenType::EqualEqual => {
+                        Object::Boolean(eval_op1 == eval_op2)
                     },
                     _ => {
                         panic!("Problem")

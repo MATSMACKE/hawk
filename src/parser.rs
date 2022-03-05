@@ -43,7 +43,39 @@ impl Parser {
                 }
                 Statement::Definition{name, value}
             },
-            _ => Statement::Expression(self.expression())
+            TokenType::If => {
+                let condition = self.expression();
+                let block = self.statement();
+                Statement::If{condition, block: Box::new(block)}
+            },
+            TokenType::BraceLeft => {
+                let mut block: Vec<Statement> = Vec::new();
+                let mut in_block = true;
+                while in_block {
+                    if let TokenType::BraceRight = self.current().token_type {
+                        in_block = false
+                    } else {
+                        block.push(self.statement())
+                    }
+                }
+                Statement::Block(block)
+            }
+            _ => {
+                match self.current().token_type {
+                    TokenType::Assign => {
+                        let name: String;
+                        if let Some(Object::Identifier(x)) = self.previous().literal {
+                            name = x
+                        } else {
+                            panic!("Expected variable name to be String");
+                        }
+                        self.consume();
+                        let value = self.expression();
+                        Statement::Definition{name, value}
+                    }
+                    _ => Statement::Expression(self.expression())
+                }
+            }
         }
     }
 

@@ -6,7 +6,8 @@ pub enum Statement {
     Definition{name: String, value: Box<Expression>},
     Block(Vec<Statement>),
     EOF,
-    Expression(Box<Expression>)
+    Expression(Box<Expression>),
+    If{condition: Box<Expression>, block: Box<Statement>}
 }
 
 #[derive(Debug, Clone)]

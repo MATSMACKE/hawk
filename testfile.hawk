@@ -1,3 +1,6 @@
-let var = "this string is a variable"
+if 5 + 7 == 12 {
+    print "hello"
+    print 3 + 5
+}
 
-print var
+if 9 == 8 print "world"

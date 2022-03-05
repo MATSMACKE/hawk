@@ -55,9 +55,7 @@ pub enum TokenType {
     And,
     Or,
     Not,
-    EOF,
-    SOF,
-    EOL
+    EOF
 }
 
 
@@ -97,7 +95,7 @@ impl std::fmt::Display for Tokens {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Object {
     Null,
     Int(isize),
