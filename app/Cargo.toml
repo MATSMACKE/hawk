@@ -8,9 +8,13 @@ description = "The original implementation of the Hawk programming language"
 repository = "https://github.com/MATSMACKE/hawk/"
 homepage = "https://github.com/MATSMACKE/hawk/"
 authors = ["Mats Macke"]
+build = "build.rs"
 
 [dependencies]
-unicode-segmentation = "1.9.0"
+hawk_lib = {path = "../lib"}
+
+[build-dependencies]
+hawk_lib = {path = "../lib"}
 
 [profile.release]
 strip = "debuginfo"

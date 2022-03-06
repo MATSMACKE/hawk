@@ -1,4 +1,5 @@
-/target
+/app/target
+/lib/target
 .DS_Store
 .vscode
 testfile.hawk

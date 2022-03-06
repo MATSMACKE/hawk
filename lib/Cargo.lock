@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "hawk-lang"
+name = "hawk_lib"
 version = "0.1.0"
 dependencies = [
  "unicode-segmentation",

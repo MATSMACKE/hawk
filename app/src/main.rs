@@ -1,12 +1,8 @@
 mod utils;
-pub mod lexer;
 mod run;
-pub mod token;
-pub mod tree;
-pub mod parser;
 pub mod eval;
-pub mod object;
 
+pub use hawk_lib::*;
 use core::panic;
 use std::{env, collections::HashMap};
 
