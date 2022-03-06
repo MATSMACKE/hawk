@@ -191,29 +191,45 @@ impl Interpreter {
                         }
                     },
                     TokenType::EqualEqual => {
-                        if let Object::Boolean(op1) = eval_op1 {
-                            if let Object::Boolean(op2) = eval_op2 {
-                                Object::Boolean(op1 == op2)
+                        if let Object::Int(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x == y)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean((x as f64) == y)
+                            } else {
+                                panic!("Can't compare Int to this type")
                             }
-                            else {
-                                panic!("Logical operations can only be performed on booleans")
+                        } else if let Object::Float(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x == y as f64)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean(x == y)
+                            } else {
+                                panic!("Can't compare Float to this type")
                             }
-                        }
-                        else {
-                            panic!("Logical operations can only be performed on booleans")
+                        } else {
+                            panic!("Can't compare non-numbers")
                         }
                     },
                     TokenType::NotEqual => {
-                        if let Object::Boolean(op1) = eval_op1 {
-                            if let Object::Boolean(op2) = eval_op2 {
-                                Object::Boolean(op1 != op2)
+                        if let Object::Int(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x != y)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean((x as f64) != y)
+                            } else {
+                                panic!("Can't compare Int to this type")
                             }
-                            else {
-                                panic!("Logical operations can only be performed on booleans")
+                        } else if let Object::Float(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Boolean(x != y as f64)
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Boolean(x != y)
+                            } else {
+                                panic!("Can't compare Float to this type")
                             }
-                        }
-                        else {
-                            panic!("Logical operations can only be performed on booleans")
+                        } else {
+                            panic!("Can't compare non-numbers")
                         }
                     },
                     TokenType::Or => {
