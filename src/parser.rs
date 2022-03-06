@@ -1,7 +1,8 @@
 use core::panic;
 
-use crate::token::{Token, TokenType, Object};
+use crate::token::{Token, TokenType};
 use crate::tree::{Statement, Expression};
+use crate::object::Object;
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -77,7 +78,32 @@ impl Parser {
                     }
                 }
                 Statement::Block(block)
-            }
+            },
+            TokenType::Function => {
+                if let Some(Object::Identifier(identifier)) = self.current().literal {
+                    self.consume();
+                    if let TokenType::ParenthesisLeft = self.current().token_type {
+                        self.consume();
+                        let mut params: Vec<String> = Vec::new();
+                        while let TokenType::Comma | TokenType::ParenthesisRight = self.next().token_type {
+                            if let Some(Object::Identifier(identifier)) = self.current().literal {
+                                params.push(identifier)
+                            } else {
+                                panic!("Expected identifier as function parameter")
+                            }
+                            self.consume();
+                            self.consume()
+                        }
+                        let block = Box::new(self.statement());
+                        Statement::Function{identifier, params, block}
+                    } else {
+                        panic!("Expected parenthesis after function identifier")
+                    }
+                } else {
+                    panic!("Functions need identifiers")
+                }
+            },
+            TokenType::Return => Statement::Return(self.expression()),
             _ => {
                 match self.current().token_type {
                     TokenType::Assign => {
@@ -85,13 +111,16 @@ impl Parser {
                         if let Some(Object::Identifier(x)) = self.previous().literal {
                             name = x
                         } else {
-                            panic!("Expected variable name to be String");
+                            panic!("Expected variable name to be String")
                         }
                         self.consume();
                         let value = self.expression();
                         Statement::Definition{name, value}
                     }
-                    _ => Statement::Expression(self.expression())
+                    _ => {
+                        self.index -= 1;
+                        Statement::Expression(self.expression())
+                    }
                 }
             }
         }
@@ -219,12 +248,29 @@ impl Parser {
             | TokenType::String
             | TokenType::Identifier 
                 = self.current().token_type {
+            if let TokenType::ParenthesisLeft = self.next().token_type {
+                if let Some(Object::Identifier(identifier)) = self.current().literal {
+                    self.consume();
+                    self.consume();
+                    let mut args: Vec<Box<Expression>> = Vec::new();
 
-            if let Some(x) = self.current().literal {
-                self.consume();
-                Box::new(Expression::Literal(x))
+                    while self.previous().token_type != TokenType::ParenthesisRight {
+                        
+                        args.push(self.expression());
+
+                        self.consume()
+                    }
+                    Box::new(Expression::FunctionCall{identifier, args})
+                } else {
+                    panic!("Couldn't get function parameters")
+                }
             } else {
-                panic!("Couldn't parse literal on line {}", self.current().line)
+                if let Some(x) = self.current().literal {
+                    self.consume();
+                    Box::new(Expression::Literal(x))
+                } else {
+                    panic!("Couldn't parse literal on line {}", self.current().line)
+                }
             }
         } else if let TokenType::ParenthesisLeft = self.current().token_type {
             self.consume();
@@ -250,6 +296,10 @@ impl Parser {
 
     fn previous(&self) -> Token {
         self.tokens[self.index - 1].clone()
+    }
+
+    fn next(&self) -> Token {
+        self.tokens[self.index + 1].clone()
     }
     
     fn consume(&mut self) {

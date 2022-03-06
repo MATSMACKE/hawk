@@ -1,3 +1,5 @@
+use crate::object::Object;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 /// Differentiate between types of tokens
 pub enum TokenType {
@@ -15,6 +17,7 @@ pub enum TokenType {
     Const,
     Null,
     Function,
+    Return,
     Print,
 
     // Literals
@@ -94,15 +97,4 @@ impl std::fmt::Display for Tokens {
         }
         if problem {Err(std::fmt::Error)} else {Ok(())}
     }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Object {
-    Null,
-    Int(isize),
-    Float(f64),
-    String(String),
-    Boolean(bool),
-    Uncertain{value: f64, uncertainty: f64},
-    Identifier(String)
 }

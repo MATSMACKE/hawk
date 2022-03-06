@@ -1,4 +1,5 @@
-use crate::token::{Token, TokenType, Object};
+use crate::token::{Token, TokenType};
+use crate::object::Object;
 use unicode_segmentation::UnicodeSegmentation;
 
 pub struct Lexer<'a> {
@@ -171,7 +172,8 @@ impl<'a> Lexer<'a> {
                                 if c.is_alphanumeric() {
                                     current_token = current_token + &c.to_string();
                                 } else {
-                                    break;
+                                    self.index -= 1;
+                                    break
                                 }
                             }
 
@@ -189,6 +191,7 @@ impl<'a> Lexer<'a> {
                                 "const" => self.add_token(TokenType::Const, None),
                                 "null" => self.add_token(TokenType::Null, None),
                                 "function" => self.add_token(TokenType::Function, None),
+                                "return" => self.add_token(TokenType::Return, None),
                                 "print" => self.add_token(TokenType::Print, None),
                                 "true" => self.add_token(TokenType::True, Some(Object::Boolean(true))),
                                 "false" => self.add_token(TokenType::False, Some(Object::Boolean(false))),

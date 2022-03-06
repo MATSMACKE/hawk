@@ -5,6 +5,7 @@ pub mod token;
 pub mod tree;
 pub mod parser;
 pub mod eval;
+pub mod object;
 
 use core::panic;
 use std::env;
@@ -43,8 +44,6 @@ fn repl() {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_lex_and_parse_expr() {
 

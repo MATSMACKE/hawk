@@ -1,18 +1,20 @@
-use core::panic;
 use std::collections::HashMap;
 
-use crate::token::{TokenType, Object};
+use crate::token::{TokenType};
 use crate::tree::{Expression, Statement};
+use crate::object::Object;
 
 /// Runs parsed code from the list of statements returned by the parser
 pub struct Interpreter {
     statements: Vec<Statement>,
-    variables: HashMap<String, Object>
+    variables: HashMap<String, Object>,
+    scopes: Vec<HashMap<String, Object>>,
+    loops: usize
 }
 
 impl Interpreter {
     pub fn interpret(statements: Vec<Statement>) {
-        let mut interpreter = Interpreter{statements, variables: HashMap::new()};
+        let mut interpreter = Interpreter{statements, variables: HashMap::new(), loops: 0, scopes: Vec::new()};
 
         for index in 0..interpreter.statements.len() {
             interpreter.run_statement(interpreter.statements[index].clone())
@@ -23,22 +25,45 @@ impl Interpreter {
     fn run_statement(&mut self, statement: Statement) {
         match statement {
             Statement::Print(expr) => println!("{:?}", self.eval_expression(expr)),
-            Statement::Definition{name, value} => {self.variables.insert(name, self.eval_expression(value));},
+            Statement::Definition{name, value} => {
+                let val = self.eval_expression(value);
+                self.variables.insert(name, val);
+            },
             Statement::While{condition, block} => {
                 let is_true = true;
+                self.loops += 1;
+                let current_loop = self.loops;
                 while is_true {
                     if let Object::Boolean(is_true) = self.eval_expression(condition.clone()) {
-                        if is_true {
+                        if is_true && (self.loops == current_loop) {
                             self.run_statement(*block.clone())
                         }
                         else {
-                            break;
+                            if !(self.loops == current_loop) {
+                                break
+                            } else {
+                                self.loops -= 1;
+                                break
+                            }
                         }
                     } else {
                         panic!("Expected boolean as condition for if statement")
                     }
                 }
             },
+            Statement::Loop(block) => {
+                self.loops += 1;
+                let current_loop = self.loops;
+                loop {
+                    if self.loops == current_loop {
+                        self.run_statement(*block.clone())
+                    }
+                    else {
+                        break
+                    }
+                }
+            },
+            Statement::Break => {self.loops -= 1},
             Statement::If{condition, block} => {
                 if let Object::Boolean(condition) = self.eval_expression(condition) {
                     if condition {
@@ -64,12 +89,17 @@ impl Interpreter {
                     self.run_statement(statement)
                 }
             },
+            Statement::Function{identifier, params, block} => {self.variables.insert(identifier, Object::Function{params, block});},
+            Statement::Return(expr) => {
+                let val = self.eval_expression(expr);
+                self.insert_top_scope(String::from("return"), val)
+            },
             _ => {}
         }
     }
 
     /// Traverses an expression tree to evaluate it and return an Object
-    fn eval_expression(&self, expression: Box<Expression>) -> Object {
+    fn eval_expression(&mut self, expression: Box<Expression>) -> Object {
         match *expression {
             Expression::Binary{operand1, operand2, operator} => {
                 let eval_op1 = self.eval_expression(operand1);
@@ -161,10 +191,30 @@ impl Interpreter {
                         }
                     },
                     TokenType::EqualEqual => {
-                        Object::Boolean(eval_op1 == eval_op2)
+                        if let Object::Boolean(op1) = eval_op1 {
+                            if let Object::Boolean(op2) = eval_op2 {
+                                Object::Boolean(op1 == op2)
+                            }
+                            else {
+                                panic!("Logical operations can only be performed on booleans")
+                            }
+                        }
+                        else {
+                            panic!("Logical operations can only be performed on booleans")
+                        }
                     },
                     TokenType::NotEqual => {
-                        Object::Boolean(eval_op1 != eval_op2)
+                        if let Object::Boolean(op1) = eval_op1 {
+                            if let Object::Boolean(op2) = eval_op2 {
+                                Object::Boolean(op1 != op2)
+                            }
+                            else {
+                                panic!("Logical operations can only be performed on booleans")
+                            }
+                        }
+                        else {
+                            panic!("Logical operations can only be performed on booleans")
+                        }
                     },
                     TokenType::Or => {
                         if let Object::Boolean(op1) = eval_op1 {
@@ -308,17 +358,48 @@ impl Interpreter {
                 }
             },
             Expression::Literal(obj) => {
-                if let Object::Identifier(name) = obj {
-                    if let Some(x) = self.variables.get(&name) {
-                        x.clone()
-                    } else {
-                        panic!("Variable {name} is not defined")
-                    }
+                if let Object::Identifier(identifier) = obj {
+                    self.get_variable(identifier)
                 } else {
                     obj
                 }
             },
+            Expression::FunctionCall{identifier, args} => {
+                self.scopes.push(HashMap::new());
+                if let Object::Function{params, block} = self.get_variable(identifier) {
+                    for (index, param) in params.iter().enumerate() {
+                        let val = self.eval_expression(args[index].clone());
+                        self.insert_top_scope(param.clone(), val)
+                    }
+                    self.run_statement(*block);
+                    let result = self.get_variable(String::from("return"));
+                    self.scopes.pop();
+                    result
+                } else {
+                    panic!("can only call functions")
+                }
+            }
             _ => Object::Null
         }
+    }
+
+    fn get_variable(&self, identifier: String) -> Object {
+        let mut index = self.scopes.len() as isize - 1;
+        while index >= 0 {
+            if let Some(x) = self.scopes[index as usize].get(&identifier) {
+                return x.clone()
+            }
+            index -= 1
+        }
+        if let Some(x) = self.variables.get(&identifier) {
+            x.clone()
+        } else {
+            panic!("variable {identifier} is not defined")
+        }
+    }
+
+    fn insert_top_scope(&mut self, identifier: String, value: Object) {
+        let index = self.scopes.len() - 1;
+        self.scopes[index].insert(identifier, value);
     }
 }
