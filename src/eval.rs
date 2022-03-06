@@ -158,6 +158,27 @@ impl Interpreter {
                             panic!("Can't multiply non-numbers")
                         }
                     },
+                    TokenType::Caret => {
+                        if let Object::Int(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Int(x.pow(y as u32))
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Float((x as f64).powf(y))
+                            } else {
+                                panic!("Can't multiply this type to Int")
+                            }
+                        } else if let Object::Float(x) = eval_op1 {
+                            if let Object::Int(y) = eval_op2 {
+                                Object::Float(x.powf(y as f64))
+                            } else if let Object::Float(y) = eval_op2 {
+                                Object::Float(x.powf(y))
+                            } else {
+                                panic!("Can't multiply this type to Float")
+                            }
+                        } else {
+                            panic!("Can't multiply non-numbers")
+                        }
+                    },
                     TokenType::Minus => {
                         if let Object::Int(x) = eval_op1 {
                             if let Object::Int(y) = eval_op2 {

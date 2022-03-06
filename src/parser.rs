@@ -195,11 +195,26 @@ impl Parser {
     }
 
     fn term(&mut self) -> Box<Expression> {
-        let mut temp = self.factor();
+        let mut temp = self.power();
 
         while let 
                 TokenType::Minus 
                 | TokenType::Plus = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
+            let operand2 = self.power();
+
+            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+        }
+
+        temp
+    }
+
+    fn power(&mut self) -> Box<Expression> {
+        let mut temp = self.factor();
+
+        while let 
+                TokenType::Caret = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();
             let operand2 = self.factor();
