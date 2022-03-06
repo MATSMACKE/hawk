@@ -450,7 +450,11 @@ impl Interpreter {
     }
 
     fn insert_top_scope(&mut self, identifier: String, value: Object) {
-        let index = self.scopes.len() - 1;
-        self.scopes[index].insert(identifier, value);
+        if self.scopes.len() > 0 {
+            let index = self.scopes.len() - 1;
+            self.scopes[index].insert(identifier, value);
+        } else {
+            self.globals.insert(identifier, value);
+        }
     }
 }

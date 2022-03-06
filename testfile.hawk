@@ -21,4 +21,6 @@ function gcd(x, y) {
     }
 }
 
-print gcd(45, 25)
+let var = gcd(45, 25)
+
+print var
