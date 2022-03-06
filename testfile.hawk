@@ -1,3 +1,23 @@
-import "library.hawk"
+function mod(dividend, divisor) {
+    if divisor == 0 return -1
+    else 
+        if divisor > dividend return dividend
+        else {
+            let product = dividend / divisor
+            return dividend - product * divisor
+        }
+}
 
-print factorial(5) ^ 2
+function gcd(x, y) {
+    if x == y return x
+    else {
+        while y != 0 {
+            let r = mod(x, y)
+            x = y
+            y = r
+        }
+        return x
+    }
+}
+
+print gcd (45, 10)

@@ -10,12 +10,13 @@ pub struct Interpreter {
     statements: Vec<Statement>,
     globals: HashMap<String, Object>,
     scopes: Vec<HashMap<String, Object>>,
-    loops: usize
+    loops: usize,
+    function_flag: bool,
 }
 
 impl Interpreter {
     pub fn interpret(statements: Vec<Statement>, global_state: HashMap<String, Object>) -> HashMap<String, Object> {
-        let mut interpreter = Interpreter{statements, globals: global_state, loops: 0, scopes: Vec::new()};
+        let mut interpreter = Interpreter{statements, globals: global_state, loops: 0, scopes: Vec::new(), function_flag: false};
 
         for index in 0..interpreter.statements.len() {
             interpreter.run_statement(interpreter.statements[index].clone())
@@ -30,7 +31,7 @@ impl Interpreter {
             Statement::Print(expr) => println!("{:?}", self.eval_expression(expr)),
             Statement::Definition{name, value} => {
                 let val = self.eval_expression(value);
-                self.globals.insert(name, val);
+                self.insert_top_scope(name, val)
             },
             Statement::While{condition, block} => {
                 let is_true = true;
@@ -415,6 +416,9 @@ impl Interpreter {
                 self.scopes.push(HashMap::new());
                 if let Object::Function{params, block} = self.get_variable(identifier) {
                     for (index, param) in params.iter().enumerate() {
+                        if self.function_flag {
+                            break
+                        }
                         let val = self.eval_expression(args[index].clone());
                         self.insert_top_scope(param.clone(), val)
                     }
@@ -441,7 +445,7 @@ impl Interpreter {
         if let Some(x) = self.globals.get(&identifier) {
             x.clone()
         } else {
-            panic!("variable {identifier} is not defined")
+            Object::Null
         }
     }
 

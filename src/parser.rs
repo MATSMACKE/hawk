@@ -85,14 +85,18 @@ impl Parser {
                     if let TokenType::ParenthesisLeft = self.current().token_type {
                         self.consume();
                         let mut params: Vec<String> = Vec::new();
-                        while let TokenType::Comma | TokenType::ParenthesisRight = self.next().token_type {
-                            if let Some(Object::Identifier(identifier)) = self.current().literal {
-                                params.push(identifier)
-                            } else {
-                                panic!("Expected identifier as function parameter")
-                            }
+                        if let TokenType::ParenthesisRight = self.current().token_type {
                             self.consume();
-                            self.consume()
+                        } else {
+                            while let TokenType::Comma | TokenType::ParenthesisRight = self.next().token_type {
+                                if let Some(Object::Identifier(identifier)) = self.current().literal {
+                                    params.push(identifier)
+                                } else {
+                                    panic!("Expected identifier as function parameter")
+                                }
+                                self.consume();
+                                self.consume()
+                            }
                         }
                         let block = Box::new(self.statement());
                         Statement::Function{identifier, params, block}
