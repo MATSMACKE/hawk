@@ -19,6 +19,7 @@ pub enum TokenType {
     Function,
     Return,
     Print,
+    Import,
 
     // Literals
     Identifier,

@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::token::{TokenType};
 use crate::tree::{Expression, Statement};
 use crate::object::Object;
+use crate::run_script;
 
 /// Runs parsed code from the list of statements returned by the parser
 pub struct Interpreter {
@@ -96,6 +97,13 @@ impl Interpreter {
                 let val = self.eval_expression(expr);
                 self.insert_top_scope(String::from("return"), val)
             },
+            Statement::Import(expr) => {
+                if let Object::String(filename) = self.eval_expression(expr) {
+                    self.globals = run_script(filename, self.globals.clone());
+                } else {
+                    panic!("Expected filename to be a string")
+                }
+            }
             _ => {}
         }
     }

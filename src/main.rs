@@ -16,16 +16,16 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     match args.len() {
         1 => repl(),
-        2 => run_script(args[1].clone()),
+        2 => {run_script(args[1].clone(), HashMap::new());},
         _ => panic!("incorrect args")
     }
 }
 
-fn run_script(filename: String) {
+fn run_script(filename: String, global_state: HashMap<String, Object>) -> HashMap<String, Object> {
     let source = std::fs::read_to_string(filename);
     match source {
         Result::Ok(source) => {
-            run::run(source, HashMap::new());
+            run::run(source, global_state)
         }
         Result::Err(_) => panic!("couldn't read file")
     }

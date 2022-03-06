@@ -8,6 +8,7 @@ pub enum Object {
     String(String),
     Boolean(bool),
     Uncertain{value: f64, uncertainty: f64},
-    Function{params: Vec<String>, block: Box<Statement>},
+    Function{params: Vec<String>, block: Box<Statement>},   
+    Array(Vec<Object>),
     Identifier(String)
 }

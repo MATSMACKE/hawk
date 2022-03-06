@@ -104,6 +104,7 @@ impl Parser {
                 }
             },
             TokenType::Return => Statement::Return(self.expression()),
+            TokenType::Import => Statement::Import(self.expression()),
             _ => {
                 match self.current().token_type {
                     TokenType::Assign => {
@@ -264,7 +265,8 @@ impl Parser {
                 } else {
                     panic!("Couldn't get function parameters")
                 }
-            } else {
+            }
+            else {
                 if let Some(x) = self.current().literal {
                     self.consume();
                     Box::new(Expression::Literal(x))
@@ -279,6 +281,16 @@ impl Parser {
                 self.consume();
             }
             expression
+        } else if let TokenType::BracketLeft = self.current().token_type {
+            self.consume();
+            let mut items: Vec<Box<Expression>> = Vec::new();
+
+            while self.previous().token_type != TokenType::BracketRight {
+                items.push(self.expression());
+
+                self.consume()
+            }
+            Box::new(Expression::Array(items))
         }
 
         else {
