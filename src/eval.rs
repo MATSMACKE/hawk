@@ -7,18 +7,20 @@ use crate::object::Object;
 /// Runs parsed code from the list of statements returned by the parser
 pub struct Interpreter {
     statements: Vec<Statement>,
-    variables: HashMap<String, Object>,
+    globals: HashMap<String, Object>,
     scopes: Vec<HashMap<String, Object>>,
     loops: usize
 }
 
 impl Interpreter {
-    pub fn interpret(statements: Vec<Statement>) {
-        let mut interpreter = Interpreter{statements, variables: HashMap::new(), loops: 0, scopes: Vec::new()};
+    pub fn interpret(statements: Vec<Statement>, global_state: HashMap<String, Object>) -> HashMap<String, Object> {
+        let mut interpreter = Interpreter{statements, globals: global_state, loops: 0, scopes: Vec::new()};
 
         for index in 0..interpreter.statements.len() {
             interpreter.run_statement(interpreter.statements[index].clone())
         }
+
+        interpreter.globals
     }
 
     /// Executes a given statement
@@ -27,7 +29,7 @@ impl Interpreter {
             Statement::Print(expr) => println!("{:?}", self.eval_expression(expr)),
             Statement::Definition{name, value} => {
                 let val = self.eval_expression(value);
-                self.variables.insert(name, val);
+                self.globals.insert(name, val);
             },
             Statement::While{condition, block} => {
                 let is_true = true;
@@ -89,7 +91,7 @@ impl Interpreter {
                     self.run_statement(statement)
                 }
             },
-            Statement::Function{identifier, params, block} => {self.variables.insert(identifier, Object::Function{params, block});},
+            Statement::Function{identifier, params, block} => {self.globals.insert(identifier, Object::Function{params, block});},
             Statement::Return(expr) => {
                 let val = self.eval_expression(expr);
                 self.insert_top_scope(String::from("return"), val)
@@ -407,7 +409,7 @@ impl Interpreter {
             }
             index -= 1
         }
-        if let Some(x) = self.variables.get(&identifier) {
+        if let Some(x) = self.globals.get(&identifier) {
             x.clone()
         } else {
             panic!("variable {identifier} is not defined")

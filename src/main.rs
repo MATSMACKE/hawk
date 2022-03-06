@@ -8,7 +8,9 @@ pub mod eval;
 pub mod object;
 
 use core::panic;
-use std::env;
+use std::{env, collections::HashMap};
+
+use crate::object::Object;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -23,21 +25,24 @@ fn run_script(filename: String) {
     let source = std::fs::read_to_string(filename);
     match source {
         Result::Ok(source) => {
-            run::run(source)
+            run::run(source, HashMap::new());
         }
         Result::Err(_) => panic!("couldn't read file")
     }
 }
 
 fn repl() {
+    let mut state: HashMap<String, Object> = HashMap::new();
     println!("Welcome to Hawk REPL");
     loop {
         let mut line = String::new();
         std::io::stdin()
             .read_line(&mut line)
             .expect("failed to read line");
-        if line == "exit()" {break}
-        else {run::run(line)}
+        if line == "exit\n" {break}
+        else {
+            state = run::run(line, state)
+        }
     }
 }
 
