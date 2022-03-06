@@ -414,7 +414,7 @@ impl Interpreter {
             },
             Expression::FunctionCall{identifier, args} => {
                 self.scopes.push(HashMap::new());
-                if let Object::Function{params, block} = self.get_variable(identifier) {
+                if let Object::Function{params, block} = self.get_variable(identifier.clone()) {
                     for (index, param) in params.iter().enumerate() {
                         if self.function_flag {
                             break
@@ -427,7 +427,7 @@ impl Interpreter {
                     self.scopes.pop();
                     result
                 } else {
-                    panic!("can only call functions")
+                    panic!("The variable {identifier} does not appear to be a function. Did you define it? Is it in a file you haven't imported?")
                 }
             }
             _ => Object::Null

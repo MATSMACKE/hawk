@@ -128,6 +128,15 @@ finder suvat(s, u, v, a, t) {
 
 Please note the two kinds of finders can be mixed and matched. If they are combined, cases will be preferred and general solutions will be a fallback. 
 
+
+#### Building projects
+
+##### Importing files
+
+```
+import "filename.hawk"
+```
+
 ### The Physics Engine
 
 #### Physics data types

@@ -11,13 +11,14 @@ function mod(dividend, divisor) {
 function gcd(x, y) {
     if x == y return x
     else {
-        while y != 0 {
+        loop {
             let r = mod(x, y)
             x = y
             y = r
+            if y == 0 break
         }
         return x
     }
 }
 
-print gcd (45, 10)
+print gcd(45, 25)
