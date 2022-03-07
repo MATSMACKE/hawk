@@ -1,0 +1,51 @@
+
+function sin(x) {
+    sum = 0
+    i = 1
+    if x > 0 {
+       while x > (2 * pi()) {
+            x = x - 2 * pi()
+        } 
+    } else {
+        while x < -(2 * pi()) {
+            x = x + 2 * pi()
+        } 
+    }
+    while i < 20 {
+        sum = sum + ((x ^ i) * ((-1) ^ ((i - 1)/2))) / factorial(i)
+        i = i + 2
+    }
+    return sum
+}
+
+function cos(x) {
+    return sin(x + pi()/2)
+}
+
+function tan(x) {
+    return sin(x) / cos(x)
+}
+
+function csc(x) {
+    return 1 / sin(x)
+}
+
+function sec(x) {
+    return 1 / cos(x)
+}
+
+function cot(x) {
+    return 1 / tan(x)
+}
+
+function sinh(x) {
+    return (eNum(x) - eNum(-x))/2
+}
+
+function cosh(x) {
+    return (eNum(x) + eNum(-x))/2
+}
+
+function tanh(x) {
+    return sinh(x)/cosh(x)
+}
