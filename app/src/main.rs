@@ -1,10 +1,17 @@
 mod utils;
 mod run;
 pub mod eval;
+// pub mod standard_lib_hawk;
+// pub mod standard_lib_rs;
+// pub mod standard_lib;
 
 pub use hawk_lib::*;
 use core::panic;
 use std::{env, collections::HashMap};
+
+pub mod standard_lib;
+pub mod standard_lib_rs;
+pub mod standard_lib_hawk;
 
 use crate::object::Object;
 

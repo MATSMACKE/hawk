@@ -10,7 +10,7 @@ pub fn run(source: String, global_state: HashMap<String, Object>) -> HashMap<Str
 
     let statements = parser::Parser::parse(&tokens);
 
-    //println!("{:?}", statements);
+    //println!("{:?}\n", statements);
 
     eval::Interpreter::interpret(statements, global_state)
 }

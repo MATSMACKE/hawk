@@ -93,7 +93,7 @@ impl Interpreter {
                     self.run_statement(statement)
                 }
             },
-            Statement::Function{identifier, params, block} => {self.globals.insert(identifier, Object::Function{params, block});},
+            Statement::Function{identifier, params, block} => {self.insert_top_scope(identifier, Object::Function{params, block});},
             Statement::Return(expr) => {
                 let val = self.eval_expression(expr);
                 self.insert_top_scope(String::from("return"), val)
@@ -413,8 +413,8 @@ impl Interpreter {
                 }
             },
             Expression::FunctionCall{identifier, args} => {
-                self.scopes.push(HashMap::new());
                 if let Object::Function{params, block} = self.get_variable(identifier.clone()) {
+                    self.scopes.push(HashMap::new());
                     for (index, param) in params.iter().enumerate() {
                         if self.function_flag {
                             break
@@ -427,7 +427,27 @@ impl Interpreter {
                     self.scopes.pop();
                     result
                 } else {
-                    panic!("The variable {identifier} does not appear to be a function. Did you define it? Is it in a file you haven't imported?")
+                    let check_std = crate::standard_lib::run_fn_std(identifier.clone()); // Check if function exists in standard library
+                    if let Some(Object::Function{params, block}) = check_std.clone() {
+                        self.globals.insert(identifier.clone(), Object::Function{params: params.clone(), block: block.clone()});
+                        self.scopes.push(HashMap::new());
+                        for (index, param) in params.iter().enumerate() {
+                            if self.function_flag {
+                                break
+                            }
+                            let val = self.eval_expression(args[index].clone());
+                            self.insert_top_scope(param.clone(), val)
+                        }
+                        self.run_statement(*block);
+                        let result = self.get_variable(String::from("return"));
+                        self.scopes.pop();
+                        result
+                    } else if let Some(x) = check_std {
+                        x
+                    }
+                    else {
+                        panic!("The variable {identifier} does not appear to be a function. Did you define it? Is it in a file you haven't imported?")    
+                    }
                 }
             }
             _ => Object::Null

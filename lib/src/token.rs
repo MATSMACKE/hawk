@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter, Result, Error};
+
 use crate::object::Object;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -63,6 +65,11 @@ pub enum TokenType {
     EOF
 }
 
+impl Display for TokenType {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f, "TokenType::{:?}", self)
+    }
+}
 
 #[derive(Debug, Clone)]
 /// Holds a token as recognized by the scanner.
@@ -78,24 +85,25 @@ impl Token {
     }
 }
 
-impl std::fmt::Display for Token {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Token: {:?}", self.token_type)
+impl Display for Token {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f, "Token: {:?} {:?}", self.token_type, self.literal)
     }
 }
 
 pub struct Tokens(pub Vec<Token>);
 
-impl std::fmt::Display for Tokens {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Display for Tokens {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         let mut problem = false;
         for token in self.0.iter() {
-            if let Ok(_) = writeln!(f, "{:?} {:?}", token.token_type, token.literal) {
+            if let Ok(_) = writeln!(f, "{}", token) {
                 ()
             } else {
                 problem = true
             }
         }
-        if problem {Err(std::fmt::Error)} else {Ok(())}
+        if problem {Err(Error)} else {Ok(())}
     }
 }
+

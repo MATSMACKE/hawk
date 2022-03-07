@@ -158,7 +158,7 @@ impl<'a> Lexer<'a> {
 
                             self.add_token(TokenType::Float, Some(Object::Float(number)));
                         } else {
-                            self.add_token(TokenType::Int, Some(Object::Int(int as isize)));
+                            self.add_token(TokenType::Int, Some(Object::Int(int as i128)));
                             self.index = self.index - 1
                         }
                     }
