@@ -89,7 +89,7 @@ impl Display for Expressions {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let mut problem = false;
         for expression in self.0.iter() {
-            if let Ok(_) = writeln!(f, "Box::new({})", expression) {
+            if let Ok(_) = writeln!(f, "Box::new({}),", expression) {
                 ()
             } else {
                 problem = true

@@ -1,4 +1,7 @@
+<img src="docs/logo_v1.svg" alt="logo" width="40%"/>
+
 # Hawk
+
 ## A programming language for physicists
 
 ### Getting Started

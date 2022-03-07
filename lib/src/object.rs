@@ -23,7 +23,9 @@ impl Display for Object {
             Self::String(x) => write!(f, "Object::String(\"{}\".to_string())", x),
             Self::Boolean(x) => write!(f, "Object::Boolean({})", x),
             Self::Uncertain{value, uncertainty} => write!(f, "Object::Uncertain{{value: {}, uncertainty: {}}}", value, uncertainty),
-            Self::Function{params, block} => write!(f, "Object::Function{{params: vec!{:?}.iter().map(|x| x.to_string()).collect(), block: Box::new({})}}", params, block),
+            Self::Function{params, block} => {
+                if params.len() != 0 {write!(f, "Object::Function{{params: vec!{:?}.iter().map(|x| x.to_string()).collect(), block: Box::new({})}}", params, block)}
+                else {write!(f, "Object::Function{{params: Vec::new(), block: Box::new({})}}", block)}},
             Self::Array(x) => write!(f, "Object::Array({})", Objects(x.clone())),
             Self::Identifier(x) => write!(f, "Object::Identifier(\"{}\".to_string())", x)
         }
@@ -34,7 +36,7 @@ impl Display for Objects {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let mut problem = false;
         for object in self.0.iter() {
-            if let Ok(_) = writeln!(f, "{}", object) {
+            if let Ok(_) = writeln!(f, "{},", object) {
                 ()
             } else {
                 problem = true

@@ -26,7 +26,7 @@ fn create_match() -> String {
     let mut string = String::new();
     for file in hawk_files {
         if let Ok(file) = file {
-            string = format!("{string}\n{}", create_match_arms(file));
+            string = format!("\n{string}\n{}", create_match_arms(file));
         }
     }
     string
