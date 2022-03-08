@@ -131,25 +131,7 @@ impl Interpreter {
                         Interpreter::divide(operand1, operand2)
                     },
                     TokenType::Caret => {
-                        if let Object::Int(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Int(x.pow(y as u32))
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Float((x as f64).powf(y))
-                            } else {
-                                panic!("Can't multiply this type to Int")
-                            }
-                        } else if let Object::Float(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Float(x.powf(y as f64))
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Float(x.powf(y))
-                            } else {
-                                panic!("Can't multiply this type to Float")
-                            }
-                        } else {
-                            panic!("Can't multiply non-numbers")
-                        }
+                        Interpreter::exponent(operand1, operand2)
                     },
                     TokenType::EqualEqual => {
                         if let Object::Int(x) = operand1 {
@@ -574,6 +556,33 @@ impl Interpreter {
                 }
             },
             _ => panic!("Can't divide {dividend}")
+        }
+    }
+
+    fn exponent(base: Object, power: Object) -> Object {
+        match base {
+            Object::Int(x) => {
+                match power {
+                    Object::Int(y) => Object::Int(x.pow(y as u32)),
+                    Object::Float(y) => Object::Float((x as f64).powf(y)),
+                    _ => panic!("Can't raise Int to {}", power)
+                }
+            },
+            Object::Float(x) => {
+                match power {
+                    Object::Int(y) => Object::Float(x.powf(y as f64)),
+                    Object::Float(y) => Object::Float(x.powf(y)),
+                    _ => panic!("Can't raise Float to {}", power)
+                }
+            },
+            Object::Uncertain{value: x, uncertainty: u1} => {
+                match power {
+                    Object::Int(y) => Object::Uncertain{value: x.powf(y as f64), uncertainty: x.powf(y as f64) * (y as f64) * (u1 / x)},
+                    Object::Float(y) => Object::Uncertain{value: x.powf(y), uncertainty: x.powf(y) * y * (u1 / x)},
+                    _ => panic!("Can't raise Uncertain to {}", power)
+                }
+            },
+            _ => panic!("Can't exponentiate {base}")
         }
     }
 }
