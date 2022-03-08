@@ -62,5 +62,20 @@ impl Object {
     }
 }
 
+pub struct Column{
+    title: String,
+    values: Vec<Object>
+}
+
+impl Column {
+    pub fn map(&mut self, function: Object) {
+        if let Object::Function{params, block} = function {
+
+        } else {
+            panic!("Map function needs to be a function with parameter x")
+        }
+    }
+}
+
 /// A utility struct to work around inability to `impl Display for Vec<Object>`
 pub struct Objects(Vec<Object>);

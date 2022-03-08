@@ -169,7 +169,7 @@ impl<'a> Lexer<'a> {
                             let mut current_token = String::from(c);
                             while let Some(c) = self.characters[self.index].chars().nth(0) {
                                 self.consume_char();
-                                if c.is_alphanumeric() {
+                                if c.is_alphanumeric() || c == '_' {
                                     current_token = current_token + &c.to_string();
                                 } else {
                                     self.index -= 1;
