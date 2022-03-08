@@ -1,5 +1,7 @@
-- [ ] import
+- [x] import
 - [ ] array
-- [ ] reading and writing data
-- [ ] data processing
+- [x] reading and writing data
 - [ ] uncertain
+- [ ] data table type
+- [ ] data table methods
+- [ ] reading and writing CSV

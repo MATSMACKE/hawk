@@ -285,6 +285,17 @@ impl Parser {
                     panic!("Couldn't get function parameters")
                 }
             }
+            else if let TokenType::BracketLeft = self.next().token_type {
+                if let Some(Object::Identifier(identifier)) = self.current().literal {
+                    self.consume();
+                    self.consume();
+                    let index = self.expression();
+                    self.consume();
+                    Box::new(Expression::ArrayIndex{identifier, index})
+                } else {
+                    panic!("Couldn't get function parameters")
+                }
+            }
             else {
                 if let Some(x) = self.current().literal {
                     self.consume();

@@ -450,6 +450,31 @@ impl Interpreter {
                         panic!("The variable {identifier} does not appear to be a function. Did you define it? Is it in a file you haven't imported?")    
                     }
                 }
+            },
+            Expression::Array(exprs) => {
+                let mut vals: Vec<Object> = Vec::new();
+                for expr in exprs {
+                    vals.push(self.eval_expression(expr));
+                }
+                Object::Array(vals)
+            },
+            Expression::ArrayIndex{identifier, index} => {
+                let index = self.eval_expression(index);
+                if let Object::Int(index) = index {
+                    if index >= 0 {
+                        let array = self.get_variable(identifier);
+                        if let Object::Array(array) = array {
+                            array[index as usize].clone()
+                        } else {
+                            panic!("Can only index an array")
+                        }
+                    }
+                    else {
+                        panic!("Index must be 0 or above")
+                    }
+                } else {
+                    panic!("Index must be an int")
+                }
             }
             _ => Object::Null
         }

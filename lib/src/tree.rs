@@ -68,6 +68,7 @@ pub enum Expression {
     },
     Parenthesized(Box<Expression>),
     FunctionCall{identifier: String, args: Vec<Box<Expression>>},
+    ArrayIndex{identifier: String, index: Box<Expression>},
     Array(Vec<Box<Expression>>)
 }
 
@@ -79,7 +80,8 @@ impl Display for Expression {
             Self::Array(x) => write!(f, "Expression::Array({})", Expressions(x.clone())),
             Self::Unary{operand, operator} => write!(f, "Expression::Unary{{operand: Box::new({}), operator: {}}}", operand, operator),
             Self::Binary{operand1, operand2, operator} => write!(f, "Expression::Binary{{operand1: Box::new({}), operand2: Box::new({}), operator: {}}}", operand1, operand2, operator),
-            Self::FunctionCall{identifier, args} => write!(f, "Expression::FunctionCall{{identifier: \"{}\".to_string(), args: vec![{}]}}", identifier, Expressions(args.clone()))
+            Self::FunctionCall{identifier, args} => write!(f, "Expression::FunctionCall{{identifier: \"{}\".to_string(), args: vec![{}]}}", identifier, Expressions(args.clone())),
+            Self::ArrayIndex{identifier, index} => write!(f, "Expression::ArrayIndex{{identifier: \"{}\".to_string(), index: {}", identifier, index)
         }.unwrap();
         Ok(())
     }
