@@ -26,7 +26,7 @@ impl Interpreter {
     }
 
     /// Executes a given statement
-    fn run_statement(&mut self, statement: Statement) {
+    pub fn run_statement(&mut self, statement: Statement) {
         match statement {
             Statement::Print(expr) => println!("{:?}", self.eval_expression(expr)),
             Statement::Definition{name, value} => {
@@ -104,13 +104,14 @@ impl Interpreter {
                 } else {
                     panic!("Expected filename to be a string")
                 }
-            }
+            },
+            Statement::Expression(expr) => {self.eval_expression(expr);},
             _ => {}
         }
     }
 
     /// Traverses an expression tree to evaluate it and return an Object
-    fn eval_expression(&mut self, expression: Box<Expression>) -> Object {
+    pub fn eval_expression(&mut self, expression: Box<Expression>) -> Object {
         match *expression {
             Expression::Binary{operand1, operand2, operator} => {
                 let eval_op1 = self.eval_expression(operand1);
@@ -427,7 +428,7 @@ impl Interpreter {
                     self.scopes.pop();
                     result
                 } else {
-                    let check_std = crate::standard_lib::run_fn_std(identifier.clone()); // Check if function exists in standard library
+                    let check_std = self.run_fn_std(identifier.clone(), args.clone()); // Check if function exists in standard library
                     if let Some(Object::Function{params, block}) = check_std.clone() {
                         self.globals.insert(identifier.clone(), Object::Function{params: params.clone(), block: block.clone()});
                         self.scopes.push(HashMap::new());

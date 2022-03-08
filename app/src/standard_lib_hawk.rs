@@ -39,6 +39,8 @@ Statement::While{condition: Box::new(Expression::Binary{operand1: Box::new(Expre
 Statement::Return(Box::new(Expression::Literal(Object::Identifier("sum".to_string())))),
 ]))}),
 
+"abs" => Some(Object::Function{params: vec!["x"].iter().map(|x| x.to_string()).collect(), block: Box::new(Statement::IfElse{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_string()))), operand2: Box::new(Expression::Literal(Object::Int(0))), operator: TokenType::LessThan}), if_block: Box::new(Statement::Return(Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Identifier("x".to_string()))), operator: TokenType::Minus}))), else_block: Box::new(Statement::Return(Box::new(Expression::Literal(Object::Identifier("x".to_string())))))})}),
+
 
 "sin" => Some(Object::Function{params: vec!["x"].iter().map(|x| x.to_string()).collect(), block: Box::new(Statement::Block(vec![Statement::Definition{name: "sum".to_string(), value: Box::new(Expression::Literal(Object::Int(0)))},
 Statement::Definition{name: "i".to_string(), value: Box::new(Expression::Literal(Object::Int(1)))},
