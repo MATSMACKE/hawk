@@ -101,6 +101,10 @@ impl Display for Expressions {
     }
 }
 
+/// A utility struct to work around inability to `impl Display for Vec<Statement>`
+
 pub struct Statements(pub Vec<Statement>);
+
+/// A utility struct to work around inability to `impl Display for Vec<Box::Expression>`
 
 pub struct Expressions(pub Vec<Box<Expression>>);

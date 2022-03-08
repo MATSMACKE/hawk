@@ -46,4 +46,21 @@ impl Display for Objects {
     }
 }
 
+impl Object {
+    pub fn user_print(&self) -> String {
+        match self.clone() {
+            Self::Boolean(x) =>format!("{x}"),
+            Self::Float(x) => format!("{x}"),
+            Self::Int(x) => format!("{x}"),
+            Self::String(x) => format!("{x}"),
+            Self::Identifier(x) => format!("{x}"),
+            Self::Function{params, block} => format!("Function: params: {:?}, block: {block}", params),
+            Self::Array(x) => format!("{}", Objects(x)),
+            Self::Null => String::from("Null"),
+            Self::Uncertain{value, uncertainty} => format!("{value} ± {uncertainty}")
+        }
+    }
+}
+
+/// A utility struct to work around inability to `impl Display for Vec<Object>`
 pub struct Objects(Vec<Object>);

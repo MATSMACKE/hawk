@@ -231,10 +231,23 @@ impl Parser {
     }
 
     fn power(&mut self) -> Box<Expression> {
+        let mut temp = self.uncertainty();
+
+        while let TokenType::Caret = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
+            let operand2 = self.uncertainty();
+
+            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+        }
+
+        temp
+    }
+
+    fn uncertainty(&mut self) -> Box<Expression> {
         let mut temp = self.unary();
 
-        while let 
-                TokenType::Caret = self.current().token_type {
+        while let TokenType::PlusMinus = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();
             let operand2 = self.unary();

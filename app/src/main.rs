@@ -6,6 +6,7 @@ pub mod eval;
 // pub mod standard_lib;
 
 pub use hawk_lib::*;
+
 use core::panic;
 use std::{env, collections::HashMap};
 
@@ -36,8 +37,15 @@ fn run_script(filename: String, global_state: HashMap<String, Object>) -> HashMa
 
 fn repl() {
     let mut state: HashMap<String, Object> = HashMap::new();
-    println!("Welcome to Hawk REPL");
+    if let Some(size) = termsize::get() {
+        for _ in 0..size.cols {
+            print!("=")
+        }
+    }
+    print!("\nWelcome to Hawk REPL. Exit the repl by running 'exit' or pressing ctrl + C.");
     loop {
+        print!("\n>> ");
+        std::io::Write::flush(&mut std::io::stdout()).expect("flush failed!");
         let mut line = String::new();
         std::io::stdin()
             .read_line(&mut line)
@@ -45,6 +53,11 @@ fn repl() {
         if line == "exit\n" {break}
         else {
             state = run::run(line, state)
+        }
+    }
+    if let Some(size) = termsize::get() {
+        for _ in 0..size.cols {
+            print!("=")
         }
     }
 }

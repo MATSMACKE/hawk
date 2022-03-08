@@ -12,6 +12,7 @@ build = "build.rs"
 
 [dependencies]
 hawk_lib = {path = "../lib"}
+termsize = "0.1.6"
 
 [build-dependencies]
 hawk_lib = {path = "../lib"}
