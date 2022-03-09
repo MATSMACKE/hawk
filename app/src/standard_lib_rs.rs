@@ -1,4 +1,5 @@
 use hawk_lib::tree::Expression;
+use hawk_lib::csv::{csv_to_datatable, datatable_to_csv};
 use std::fs::{write, read_to_string};
 
 use crate::{Object, eval::Interpreter};
@@ -27,6 +28,26 @@ impl Interpreter {
                         } else {
                             panic!("Couldn't write file");
                         }
+                    } else {
+                        panic!("Incorrect filename");
+                    }
+                }
+                Some(Object::Null)
+            },
+            "read" => {
+                let filename = self.eval_expression(args[0].clone());
+                if let Object::String(filename) = filename {
+                    Some(csv_to_datatable(filename))
+                } else {
+                    panic!("Expected string, found {}", filename)
+                }
+            },
+            "write" => {
+                let val = self.eval_expression(args[1].clone());
+                let file = self.eval_expression(args[0].clone());
+                if let Object::DataTable(_) = val {
+                    if let Object::String(filename) = file {
+                        datatable_to_csv(filename, val);
                     } else {
                         panic!("Incorrect filename");
                     }

@@ -190,7 +190,6 @@ impl<'a> Lexer<'a> {
                                 "super" => self.add_token(TokenType::Super, None),
                                 "this" => self.add_token(TokenType::This, None),
                                 "let" => self.add_token(TokenType::Let, None),
-                                "const" => self.add_token(TokenType::Const, None),
                                 "null" => self.add_token(TokenType::Null, None),
                                 "function" => self.add_token(TokenType::Function, None),
                                 "return" => self.add_token(TokenType::Return, None),
@@ -203,9 +202,7 @@ impl<'a> Lexer<'a> {
                                 "import" => self.add_token(TokenType::Import, None),
                                 "process" => self.add_token(TokenType::Process, None),
                                 _ => self.add_token(TokenType::Identifier, Some(Object::Identifier(current_token)))
-                            }
-
-                            
+                            }                            
                         }
                     }
                 }

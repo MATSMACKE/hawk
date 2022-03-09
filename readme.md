@@ -1,4 +1,4 @@
-<img src="docs/logo_v1.svg" alt="logo" width="40%"/>
+<img src="docs/logo_v1.png" alt="logo" width="40%"/>
 
 # Hawk
 

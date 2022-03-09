@@ -1,17 +1,58 @@
 use crate::object::Object;
-use crate::token::{Token, TokenType, Tokens};
-use core::panic;
+use crate::token::{Token, TokenType};
 use std::fs::{write, read_to_string};
 use unicode_segmentation::UnicodeSegmentation;
 
 pub fn csv_to_datatable(filename: String) -> Object {
     if let Ok(csvfile) = read_to_string(&filename) {
         let tokens = Lexer::lex(csvfile.as_str());
-        println!("{}", Tokens(tokens));
+        parse_csv(tokens)
     } else {
         panic!("Couldn't read file: {filename}")
     }
-    Object::Null
+}
+
+fn parse_csv(tokens: Vec<Token>) -> Object {
+    let mut values: Vec<Vec<Object>> = Vec::new();
+    let mut titles: Vec<String> = Vec::new();
+    let mut i = 0;
+    while tokens[i].token_type != TokenType::NewLine {
+        if let Some(Object::String(title)) = tokens[i].literal.clone() {
+            titles.push(title)
+        } else if tokens[i].token_type == TokenType::Comma {}
+        else if let Some(x) = tokens[i].literal.clone() {
+            panic!("Expected Identifier, found {}", x)
+        } else {
+            panic!("Expected a literal, found None (there's probably 2 commas without a value in between in your CSV)")
+        }
+        i += 1
+    }
+    i += 1;
+    let mut row = 0;
+    while tokens[i].token_type != TokenType::EOF {
+        values.push(Vec::new());
+        while tokens[i].token_type != TokenType::NewLine && tokens[i].token_type != TokenType::EOF {
+            if let Some(x) = &tokens[i].literal {
+                values[row].push(x.clone())
+            }
+            i += 1;
+        }
+        if tokens[i].token_type == TokenType::NewLine {
+            i += 1;
+        }
+        row += 1;
+    }
+    let mut columns: Vec<Object> = Vec::new();
+    let num_cols = titles.len();
+    let num_rows = values.len();
+    for j in 0..num_cols {
+        let mut vals = Vec::new();
+        for k in 0..num_rows {
+            vals.push(values[j][k].clone());
+        }
+        columns.push(Object::Column{title: titles[j].clone(), data: vals});
+    }
+    Object::DataTable(columns)
 }
 
 struct Lexer<'a> {
@@ -26,12 +67,12 @@ impl<'a> Lexer<'a> {
     pub fn lex(source: &'a str) -> Vec<Token> {
         let mut code_lexer = Lexer {characters: source.graphemes(true).collect::<Vec<&str>>(), num_chars: 0, tokens: Vec::new(), line: 1, index: 0};
 
-        code_lexer.lex_code();
+        code_lexer.lex_csv();
 
         code_lexer.tokens
     }
 
-    pub fn lex_code(&mut self) {
+    pub fn lex_csv(&mut self) {
         self.characters.push(" ");
 
         self.num_chars = self.characters.len();

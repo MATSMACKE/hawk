@@ -16,7 +16,6 @@ pub enum TokenType {
     Super,
     This,
     Let,
-    Const,
     Null,
     Function,
     Return,
