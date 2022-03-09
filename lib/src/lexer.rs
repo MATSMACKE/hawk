@@ -63,6 +63,8 @@ impl<'a> Lexer<'a> {
                 "=" => {
                     if self.match_next("=") {
                         self.add_token(TokenType::EqualEqual, None)
+                    } else if self.match_next(">") {
+                        self.add_token(TokenType::FatArrow, None)
                     } else {
                         self.add_token(TokenType::Assign, None)
                     }
@@ -169,7 +171,7 @@ impl<'a> Lexer<'a> {
                             let mut current_token = String::from(c);
                             while let Some(c) = self.characters[self.index].chars().nth(0) {
                                 self.consume_char();
-                                if c.is_alphanumeric() {
+                                if c.is_alphanumeric() || c == '_' {
                                     current_token = current_token + &c.to_string();
                                 } else {
                                     self.index -= 1;
@@ -199,6 +201,7 @@ impl<'a> Lexer<'a> {
                                 "and" => self.add_token(TokenType::And, None),
                                 "not" => self.add_token(TokenType::Not, None),
                                 "import" => self.add_token(TokenType::Import, None),
+                                "process" => self.add_token(TokenType::Process, None),
                                 _ => self.add_token(TokenType::Identifier, Some(Object::Identifier(current_token)))
                             }
 

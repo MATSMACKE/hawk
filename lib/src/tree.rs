@@ -16,7 +16,8 @@ pub enum Statement {
     IfElse{condition: Box<Expression>, if_block: Box<Statement>, else_block: Box<Statement>},
     Function{identifier: String, params: Vec<String>, block: Box<Statement>},
     Return(Box<Expression>),
-    Import(Box<Expression>)
+    Import(Box<Expression>),
+    Process{filename: Box<Expression>, block: Box<Statement>}
 }
 
 impl Display for Statement {
@@ -28,6 +29,7 @@ impl Display for Statement {
             Self::Definition{name, value} => write!(f, "Statement::Definition{{name: \"{}\".to_string(), value: Box::new({})}}", name, value),
             Self::Function{identifier, params, block} => write!(f, "Statement::Function{{identifier: \"{}\".to_string(), params: vec!{:?}.iter().map(|x| x.to_string()).collect(), block: Box::new({})}}", identifier, params, block),
             Self::Import(x) => write!(f, "Statement::Import(Box::new({}))", x),
+            Self::Process{filename, block} => write!(f, "Statement::Process(Box::new({filename}), Box::new({block}))"),
             Self::If{condition, block} => write!(f, "Statement::If{{condition: Box::new({}), block: Box::new({})}}", condition, block),
             Self::IfElse{condition, if_block, else_block} => write!(f, "Statement::IfElse{{condition: Box::new({}), if_block: Box::new({}), else_block: Box::new({})}}", condition, if_block, else_block),
             Self::Return(x) => write!(f, "Statement::Return(Box::new({}))", x),
@@ -68,6 +70,8 @@ pub enum Expression {
     },
     Parenthesized(Box<Expression>),
     FunctionCall{identifier: String, args: Vec<Box<Expression>>},
+    MethodCall{object: String, method: String, args: Vec<Box<Expression>>},
+    ArrayIndex{identifier: String, index: Box<Expression>},
     Array(Vec<Box<Expression>>)
 }
 
@@ -79,7 +83,9 @@ impl Display for Expression {
             Self::Array(x) => write!(f, "Expression::Array({})", Expressions(x.clone())),
             Self::Unary{operand, operator} => write!(f, "Expression::Unary{{operand: Box::new({}), operator: {}}}", operand, operator),
             Self::Binary{operand1, operand2, operator} => write!(f, "Expression::Binary{{operand1: Box::new({}), operand2: Box::new({}), operator: {}}}", operand1, operand2, operator),
-            Self::FunctionCall{identifier, args} => write!(f, "Expression::FunctionCall{{identifier: \"{}\".to_string(), args: vec![{}]}}", identifier, Expressions(args.clone()))
+            Self::FunctionCall{identifier, args} => write!(f, "Expression::FunctionCall{{identifier: \"{}\".to_string(), args: vec![{}]}}", identifier, Expressions(args.clone())),
+            Self::MethodCall{object, method, args} => write!(f, "Expression::FunctionCall{{object: \"{}\".to_string(), method: \"{}\".to_string(), args: vec![{}]}}", object, method, Expressions(args.clone())),
+            Self::ArrayIndex{identifier, index} => write!(f, "Expression::ArrayIndex{{identifier: \"{}\".to_string(), index: {}", identifier, index)
         }.unwrap();
         Ok(())
     }
@@ -99,6 +105,10 @@ impl Display for Expressions {
     }
 }
 
+/// A utility struct to work around inability to `impl Display for Vec<Statement>`
+
 pub struct Statements(pub Vec<Statement>);
+
+/// A utility struct to work around inability to `impl Display for Vec<Box::Expression>`
 
 pub struct Expressions(pub Vec<Box<Expression>>);

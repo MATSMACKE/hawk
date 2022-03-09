@@ -1,5 +1,9 @@
 /app/target
+/app/Cargo.lock
 /lib/target
+/lib/Cargo.lock
+/cas/target
+/cas/Cargo.lock
 .DS_Store
 .vscode
 testfile.hawk

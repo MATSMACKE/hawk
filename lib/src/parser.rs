@@ -109,6 +109,11 @@ impl Parser {
             },
             TokenType::Return => Statement::Return(self.expression()),
             TokenType::Import => Statement::Import(self.expression()),
+            TokenType::Process => {
+                let filename = self.expression();
+                let block = Box::new(self.statement());
+                Statement::Process{filename, block}
+            },
             _ => {
                 match self.current().token_type {
                     TokenType::Assign => {
@@ -231,10 +236,23 @@ impl Parser {
     }
 
     fn power(&mut self) -> Box<Expression> {
+        let mut temp = self.uncertainty();
+
+        while let TokenType::Caret = self.current().token_type {
+            let operator = self.current().token_type;
+            self.consume();
+            let operand2 = self.uncertainty();
+
+            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+        }
+
+        temp
+    }
+
+    fn uncertainty(&mut self) -> Box<Expression> {
         let mut temp = self.unary();
 
-        while let 
-                TokenType::Caret = self.current().token_type {
+        while let TokenType::PlusMinus = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();
             let operand2 = self.unary();
@@ -281,6 +299,40 @@ impl Parser {
                         self.consume()
                     }
                     Box::new(Expression::FunctionCall{identifier, args})
+                } else {
+                    panic!("Couldn't get function parameters")
+                }
+            }
+            else if let TokenType::BracketLeft = self.next().token_type {
+                if let Some(Object::Identifier(identifier)) = self.current().literal {
+                    self.consume();
+                    self.consume();
+                    let index = self.expression();
+                    self.consume();
+                    Box::new(Expression::ArrayIndex{identifier, index})
+                } else {
+                    panic!("Couldn't get function parameters")
+                }
+            }
+            else if let TokenType::Dot = self.next().token_type {
+                if let Some(Object::Identifier(identifier)) = self.current().literal {
+                    if let Some(Object::Identifier(methodname)) = self.tokens[self.index + 2].literal.clone() {
+                        self.consume();
+                        self.consume();
+                        self.consume();
+                        let mut args: Vec<Box<Expression>> = Vec::new();
+
+                        while self.previous().token_type != TokenType::ParenthesisRight {
+                            
+                            args.push(self.expression());
+
+                            self.consume()
+                        }
+                        Box::new(Expression::MethodCall{object: identifier, method: methodname, args})
+                    } else {
+                        panic!("Method call needs method name")
+                    }
+                    
                 } else {
                     panic!("Couldn't get function parameters")
                 }
