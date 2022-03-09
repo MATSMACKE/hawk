@@ -17,6 +17,10 @@ pub mod standard_lib_hawk;
 use crate::object::Object;
 
 fn main() {
+    let testtable1 = Object::DataTable(vec![Object::Column{title: String::from("sdbjkc"), data: vec![Object::DataTable(vec![Object::Column{title: String::from("sdbjkc"), data: vec![Object::Int(5), Object::Int(4)]}, Object::Column{title: String::from("absjk"), data: vec![Object::Int(3), Object::Uncertain{value: 4., uncertainty: 0.2}]}]), Object::Int(4)]}, Object::Column{title: String::from("absjk"), data: vec![Object::Int(3), Object::Uncertain{value: 4., uncertainty: 0.2}]}]);
+    println!("{}", Object::user_print(&testtable1));
+    let testtable2 = Object::DataTable(vec![Object::Column{title: String::from("sdbjkc"), data: vec![Object::Float(0.4), Object::Int(4)]}, Object::Column{title: String::from("absjk"), data: vec![Object::Int(3), Object::Uncertain{value: 4., uncertainty: 0.2}]}]);
+    hawk_lib::csv::datatable_to_csv("test.csv".to_string(), testtable2);
     let args: Vec<String> = env::args().collect();
     match args.len() {
         1 => repl(),
@@ -42,7 +46,7 @@ fn repl() {
             print!("=")
         }
     }
-    print!("\nWelcome to Hawk REPL. Exit the repl by running 'exit' or pressing ctrl + C.");
+    print!("\nWelcome to Hawk REPL. Exit the REPL by running 'exit' or pressing ctrl + C.");
     loop {
         print!("\n>> ");
         std::io::Write::flush(&mut std::io::stdout()).expect("flush failed!");

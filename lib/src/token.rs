@@ -22,6 +22,7 @@ pub enum TokenType {
     Return,
     Print,
     Import,
+    Process,
 
     // Literals
     Identifier,
@@ -62,6 +63,7 @@ pub enum TokenType {
     And,
     Or,
     Not,
+    FatArrow,
     EOF
 }
 
