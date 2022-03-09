@@ -5,5 +5,6 @@
 - [ ] methods
 - [x] data table type
 - [ ] data table methods
-- [ ] reading and writing CSV
+- [ ] reading CSV
+- [x] writing CSV
 - [ ] error handling

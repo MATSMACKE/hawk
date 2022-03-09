@@ -64,6 +64,7 @@ pub enum TokenType {
     Or,
     Not,
     FatArrow,
+    NewLine,
     EOF
 }
 
