@@ -50,9 +50,9 @@ fn parse_csv(tokens: Vec<Token>) -> Object {
         for k in 0..num_rows {
             vals.push(values[j][k].clone());
         }
-        columns.push(Object::Column{title: titles[j].clone(), data: vals});
+        columns.push(Object::Column(vals));
     }
-    Object::DataTable(columns)
+    Object::DataTable{names: titles, data: columns}
 }
 
 struct Lexer<'a> {
@@ -161,7 +161,7 @@ impl<'a> Lexer<'a> {
 
 /// Writes an `Object::DataTable` to a `.csv` file
 pub fn datatable_to_csv(filename: String, datatable: Object) {
-    if let Object::DataTable(_) = &datatable {
+    if let Object::DataTable{names: _, data: _} = &datatable {
         let str = datatable.format_for_csv();
         if let Ok(()) = write(&filename, str) {
             ()
@@ -182,34 +182,30 @@ impl Object {
             Self::Int(x) => format!("{x}"),
             Self::String(x) => format!("{x}"),
             Self::Uncertain{value, uncertainty: _} => format!("{value}"),
-            Self::DataTable(columns) => {
+            Self::DataTable{names, data} => {
                 let mut str = String::from("");
-                for (idx, col) in columns.iter().enumerate() {
-                    if let Object::Column{title, data: _} = col {
-                        if idx < columns.len() - 1 {
-                            str = format!("{str}{title}, ");
-                        } else {
-                            str = format!("{str}{title}");
-                        }
+                for (idx, name) in names.iter().enumerate() {
+                    if idx < names.len() - 1 {
+                        str = format!("{str}{name}, ");
                     } else {
-                        panic!("Expected column, instead found {}", col.user_print())
+                        str = format!("{str}{name}");
                     }
                     
                 }
                 let len: usize;
-                if let Object::Column{title: _, data} = columns[0].clone() {
-                    len = data.len()
+                if let Object::Column(vals) = data[0].clone() {
+                    len = vals.len()
                 } else {
-                    panic!("Expected Column, instead got {}", columns[0].user_print())
+                    panic!("Expected Column, instead got {}", data[0].user_print())
                 }
                 for i in 0..len {
                     str = format!("{str}\n");
-                    for (idx, column) in columns.iter().enumerate() {
-                        if let Object::Column{title: _, data} = column {
-                            if idx < columns.len() - 1 {
-                                str = format!("{str}{}, ", data[i].format_for_csv());
+                    for (idx, column) in data.iter().enumerate() {
+                        if let Object::Column(vals) = column {
+                            if idx < data.len() - 1 {
+                                str = format!("{str}{}, ", vals[i].format_for_csv());
                             } else {
-                                str = format!("{str}{}", data[i].format_for_csv());
+                                str = format!("{str}{}", vals[i].format_for_csv());
                             }
                         }
                     }

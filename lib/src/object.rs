@@ -1,8 +1,7 @@
 use std::{fmt::{Display, Formatter, Result, Error}, i128};
 use crate::tree::Statement;
 use term_table::{
-    row::Row,
-    table_cell::TableCell,
+    row::Row
 };
 use term_table::{Table, TableStyle};
 
@@ -17,8 +16,8 @@ pub enum Object {
     Function{params: Vec<String>, block: Box<Statement>},   
     Array(Vec<Object>),
     Identifier(String),
-    Column{title: String, data: Vec<Object>},
-    DataTable(Vec<Object>)
+    Column(Vec<Object>),
+    DataTable{names: Vec<String>, data:Vec<Object>}
 }
 
 impl Display for Object {
@@ -35,8 +34,8 @@ impl Display for Object {
                 else {write!(f, "Object::Function{{params: Vec::new(), block: Box::new({})}}", block)}},
             Self::Array(x) => write!(f, "Object::Array({})", Objects(x.clone())),
             Self::Identifier(x) => write!(f, "Object::Identifier(\"{}\".to_string())", x),
-            Self::Column{title, data} => write!(f, "Object::Column(title: \"{title}\".to_string(), data: {})", Objects(data.clone())),
-            Self::DataTable(x) => write!(f, "Object::DataTable({})", Objects(x.clone()))
+            Self::Column(data) => write!(f, "Object::Column({})", Objects(data.clone())),
+            Self::DataTable{names, data} => write!(f, "Object::DataTable{{ names: vec!{:?}.iter().map(|x| x.to_string()).collect(), data: {} }}", names, Objects(data.clone()))
         }
     }
 }
@@ -77,10 +76,10 @@ impl Object {
             },
             Self::Null => String::from("Null"),
             Self::Uncertain{value, uncertainty} => format!("{value} ± {uncertainty}"),
-            Self::Column{title, data} => {
-                let mut str = String::from(format!("{title}: ["));
-                for (idx, obj) in data.iter().enumerate() {
-                    if idx < data.len() - 1 {
+            Self::Column(x) => {
+                let mut str = String::from("[");
+                for (idx, obj) in x.iter().enumerate() {
+                    if idx < x.len() - 1 {
                         str = format!("{str}{}, ", obj.user_print());
                     } else {
                         str = format!("{str}{}", obj.user_print());
@@ -88,22 +87,20 @@ impl Object {
                 }
                 format!("{str}]")
             },
-            Self::DataTable(columns) => {
+            Self::DataTable{names, data} => {
                 let mut table = Table::new();
                 table.style = TableStyle::extended();
-                if let Object::Column{data, title: _} = columns[0].clone() {
+                if let Object::Column(_) = data[0].clone() {
                     let mut title_row = Vec::new();
-                    for column in columns.clone() {
-                        if let Object::Column{title, data: _} = column {
-                            title_row.push(TableCell::new(title))
-                        }
+                    for name in names {
+                        title_row.push(name)
                     }
                     table.add_row(Row::new(title_row));
                     for i in 0..data.len() {
                         let mut row = Vec::new();
-                        for column in columns.clone() {
-                            if let Object::Column{title: _, data} = column {
-                                row.push(data[i].user_print())
+                        for column in data.clone() {
+                            if let Object::Column(objs) = column {
+                                row.push(objs[i].user_print())
                             } else {
                                 panic!("Expected Column")
                             }

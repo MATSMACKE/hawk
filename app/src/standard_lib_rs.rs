@@ -45,7 +45,7 @@ impl Interpreter {
             "write" => {
                 let val = self.eval_expression(args[1].clone());
                 let file = self.eval_expression(args[0].clone());
-                if let Object::DataTable(_) = val {
+                if let Object::DataTable{names: _, data: _} = val {
                     if let Object::String(filename) = file {
                         datatable_to_csv(filename, val);
                     } else {

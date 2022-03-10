@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use hawk_lib::csv::csv_to_datatable;
+
 use crate::token::{TokenType};
 use crate::tree::{Expression, Statement};
 use crate::object::Object;
@@ -106,6 +108,12 @@ impl Interpreter {
                 }
             },
             Statement::Expression(expr) => {self.eval_expression(expr);},
+            Statement::Process{readfile, writefile, block} => {
+                self.scopes.push(HashMap::new());
+                if let Object::String(readfile) = self.eval_expression(readfile) {
+                    let datatable = csv_to_datatable(readfile);
+                }
+            },
             _ => {}
         }
     }
@@ -458,6 +466,9 @@ impl Interpreter {
                     Object::Uncertain{value: y, uncertainty: u2} => Object::Uncertain{value: x + y, uncertainty: u1 + u2},
                     _ => panic!("Can't add Uncertain to {}", addend)
                 }
+            },
+            Object::Column(data) => {
+                Object::Column(data)
             },
             Object::String(x) => {
                 match addend {

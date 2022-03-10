@@ -110,9 +110,11 @@ impl Parser {
             TokenType::Return => Statement::Return(self.expression()),
             TokenType::Import => Statement::Import(self.expression()),
             TokenType::Process => {
-                let filename = self.expression();
+                let readfile = self.expression();
+                let writefile = self.expression();
+
                 let block = Box::new(self.statement());
-                Statement::Process{filename, block}
+                Statement::Process{readfile, writefile, block}
             },
             _ => {
                 match self.current().token_type {

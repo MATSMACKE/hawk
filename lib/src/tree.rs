@@ -17,7 +17,7 @@ pub enum Statement {
     Function{identifier: String, params: Vec<String>, block: Box<Statement>},
     Return(Box<Expression>),
     Import(Box<Expression>),
-    Process{filename: Box<Expression>, block: Box<Statement>}
+    Process{readfile: Box<Expression>, writefile: Box<Expression>, block: Box<Statement>}
 }
 
 impl Display for Statement {
@@ -29,7 +29,7 @@ impl Display for Statement {
             Self::Definition{name, value} => write!(f, "Statement::Definition{{name: \"{}\".to_string(), value: Box::new({})}}", name, value),
             Self::Function{identifier, params, block} => write!(f, "Statement::Function{{identifier: \"{}\".to_string(), params: vec!{:?}.iter().map(|x| x.to_string()).collect(), block: Box::new({})}}", identifier, params, block),
             Self::Import(x) => write!(f, "Statement::Import(Box::new({}))", x),
-            Self::Process{filename, block} => write!(f, "Statement::Process(Box::new({filename}), Box::new({block}))"),
+            Self::Process{readfile, writefile, block} => write!(f, "Statement::Process{{readfile: Box::new({readfile}), readfile: Box::new({writefile}), Box::new({block})}}"),
             Self::If{condition, block} => write!(f, "Statement::If{{condition: Box::new({}), block: Box::new({})}}", condition, block),
             Self::IfElse{condition, if_block, else_block} => write!(f, "Statement::IfElse{{condition: Box::new({}), if_block: Box::new({}), else_block: Box::new({})}}", condition, if_block, else_block),
             Self::Return(x) => write!(f, "Statement::Return(Box::new({}))", x),
