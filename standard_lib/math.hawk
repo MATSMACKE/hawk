@@ -44,3 +44,10 @@ function ln(x) {
     }
     return sum + decimal * 2.30258509299
 }
+
+function log(x, base) return ln(x)/ln(base)
+
+function abs(x) {
+    if x < 0 return -x
+    else return x
+}
