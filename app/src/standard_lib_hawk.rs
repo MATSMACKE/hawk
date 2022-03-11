@@ -44,6 +44,13 @@ Statement::Definition{name: "i".to_string(), value: Box::new(Expression::Binary{
 Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("sum".to_string()))), operand2: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("decimal".to_string()))), operand2: Box::new(Expression::Literal(Object::Float(2.30258509299))), operator: TokenType::Asterisk}), operator: TokenType::Plus})),
 ]))}),
 
+"log" => Some(Object::Function{params: vec!["x", "base"].iter().map(|x| x.to_string()).collect(), block: Box::new(Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "ln".to_string(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_string()))),
+]}), operand2: Box::new(Expression::FunctionCall{identifier: "ln".to_string(), args: vec![Box::new(Expression::Literal(Object::Identifier("base".to_string()))),
+]}), operator: TokenType::Slash})))}),
+
+"abs" => Some(Object::Function{params: vec!["x"].iter().map(|x| x.to_string()).collect(), block: Box::new(Statement::Block(vec![Statement::IfElse{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_string()))), operand2: Box::new(Expression::Literal(Object::Int(0))), operator: TokenType::LessThan}), if_block: Box::new(Statement::Return(Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Identifier("x".to_string()))), operator: TokenType::Minus}))), else_block: Box::new(Statement::Return(Box::new(Expression::Literal(Object::Identifier("x".to_string())))))},
+]))}),
+
 
 "sin" => Some(Object::Function{params: vec!["x"].iter().map(|x| x.to_string()).collect(), block: Box::new(Statement::Block(vec![Statement::Definition{name: "sum".to_string(), value: Box::new(Expression::Literal(Object::Int(0)))},
 Statement::Definition{name: "i".to_string(), value: Box::new(Expression::Literal(Object::Int(1)))},
@@ -98,6 +105,32 @@ Statement::Return(Box::new(Expression::Literal(Object::Identifier("sum".to_strin
 "tanh" => Some(Object::Function{params: vec!["x"].iter().map(|x| x.to_string()).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "sinh".to_string(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_string()))),
 ]}), operand2: Box::new(Expression::FunctionCall{identifier: "cosh".to_string(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_string()))),
 ]}), operator: TokenType::Slash})),
+]))}),
+
+"arcsin" => Some(Object::Function{params: vec!["x"].iter().map(|x| x.to_string()).collect(), block: Box::new(Statement::Block(vec![Statement::IfElse{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "abs".to_string(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_string()))),
+]}), operand2: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::GreaterThan}), if_block: Box::new(Statement::Return(Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::Minus}))), else_block: Box::new(Statement::Block(vec![Statement::Definition{name: "sum".to_string(), value: Box::new(Expression::Literal(Object::Identifier("x".to_string())))},
+Statement::Definition{name: "i".to_string(), value: Box::new(Expression::Literal(Object::Int(3)))},
+Statement::Definition{name: "k".to_string(), value: Box::new(Expression::Literal(Object::Int(1)))},
+Statement::While{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_string()))), operand2: Box::new(Expression::Literal(Object::Int(26))), operator: TokenType::LessThan}), block: Box::new(Statement::Block(vec![Statement::Definition{name: "sum".to_string(), value: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("sum".to_string()))), operand2: Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_string()))), operand2: Box::new(Expression::Literal(Object::Identifier("i".to_string()))), operator: TokenType::Caret}), operand2: Box::new(Expression::Literal(Object::Identifier("k".to_string()))), operator: TokenType::Asterisk}), operand2: Box::new(Expression::FunctionCall{identifier: "factorial".to_string(), args: vec![Box::new(Expression::Literal(Object::Identifier("i".to_string()))),
+]}), operator: TokenType::Slash}), operator: TokenType::Plus})},
+Statement::Definition{name: "k".to_string(), value: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("k".to_string()))), operand2: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_string()))), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Caret}), operator: TokenType::Asterisk})},
+Statement::Definition{name: "i".to_string(), value: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_string()))), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Plus})},
+]))},
+Statement::Return(Box::new(Expression::Literal(Object::Identifier("sum".to_string())))),
+]))},
+]))}),
+
+"arccos" => Some(Object::Function{params: vec!["x"].iter().map(|x| x.to_string()).collect(), block: Box::new(Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "pi".to_string(), args: vec![Box::new(Expression::Literal(Object::Null)),
+]}), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Slash}), operand2: Box::new(Expression::FunctionCall{identifier: "arcsin".to_string(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_string()))),
+]}), operator: TokenType::Minus})))}),
+
+"arctan" => Some(Object::Function{params: vec!["x"].iter().map(|x| x.to_string()).collect(), block: Box::new(Statement::Block(vec![Statement::IfElse{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "abs".to_string(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_string()))),
+]}), operand2: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::GreaterThan}), if_block: Box::new(Statement::Return(Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::Minus}))), else_block: Box::new(Statement::Block(vec![Statement::Definition{name: "sum".to_string(), value: Box::new(Expression::Literal(Object::Int(0)))},
+Statement::Definition{name: "i".to_string(), value: Box::new(Expression::Literal(Object::Int(1)))},
+Statement::While{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_string()))), operand2: Box::new(Expression::Literal(Object::Int(20))), operator: TokenType::LessThan}), block: Box::new(Statement::Block(vec![Statement::Definition{name: "sum".to_string(), value: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("sum".to_string()))), operand2: Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_string()))), operand2: Box::new(Expression::Literal(Object::Identifier("i".to_string()))), operator: TokenType::Caret}), operand2: Box::new(Expression::Binary{operand1: Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::Minus}), operand2: Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_string()))), operand2: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::Minus}), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Slash}), operator: TokenType::Caret}), operator: TokenType::Asterisk}), operand2: Box::new(Expression::Literal(Object::Identifier("i".to_string()))), operator: TokenType::Slash}), operator: TokenType::Plus})},
+Statement::Definition{name: "i".to_string(), value: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_string()))), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Plus})},
+]))},
+]))},
 ]))}),
 
 
