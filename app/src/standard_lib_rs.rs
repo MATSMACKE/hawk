@@ -1,14 +1,13 @@
-use hawk_lib::tree::Expression;
 use hawk_lib::csv::{csv_to_datatable, datatable_to_csv};
 use std::fs::{write, read_to_string};
 
 use crate::{Object, eval::Interpreter};
 
 impl Interpreter {
-    pub fn get_std_rs_fn(&mut self, identifier: String, args: Vec<Box<Expression>>) -> Option<Object> {
+    pub fn get_std_rs_fn(&mut self, identifier: String, args: Vec<Object>) -> Option<Object> {
         match identifier.as_str() {
             "readfilestr" => {
-                if let Object::String(file) = self.eval_expression(args[0].clone()) {
+                if let Object::String(file) = args[0].clone() {
                     if let Ok(str) = read_to_string(file) {
                         Some(Object::String(str))
                     } else {
@@ -19,8 +18,8 @@ impl Interpreter {
                 }
             },
             "writefile" => {
-                let val = self.eval_expression(args[1].clone());
-                let file = self.eval_expression(args[0].clone());
+                let val = args[1].clone();
+                let file = args[0].clone();
                 if let Object::String(str) = val {
                     if let Object::String(filename) = file {
                         if let Ok(()) = write(filename, str) {
@@ -35,7 +34,7 @@ impl Interpreter {
                 Some(Object::Null)
             },
             "read" => {
-                let filename = self.eval_expression(args[0].clone());
+                let filename = args[0].clone();
                 if let Object::String(filename) = filename {
                     Some(csv_to_datatable(filename))
                 } else {
@@ -43,8 +42,8 @@ impl Interpreter {
                 }
             },
             "write" => {
-                let val = self.eval_expression(args[1].clone());
-                let file = self.eval_expression(args[0].clone());
+                let val = args[1].clone();
+                let file = args[0].clone();
                 if let Object::DataTable{names: _, data: _} = val {
                     if let Object::String(filename) = file {
                         datatable_to_csv(filename, val);

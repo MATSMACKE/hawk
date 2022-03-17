@@ -4,6 +4,7 @@ pub mod parser;
 pub mod token;
 pub mod tree;
 pub mod csv;
+pub mod error;
 
 trait RustRepr {
     fn represent(&self) -> String;

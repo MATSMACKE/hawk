@@ -112,7 +112,23 @@ impl Interpreter {
                 self.scopes.push(HashMap::new());
                 if let Object::String(readfile) = self.eval_expression(readfile) {
                     let datatable = csv_to_datatable(readfile);
+                    if let Object::DataTable{names, data} = datatable {
+                        for (index, name) in names.iter().enumerate() {
+                            self.insert_top_scope(name.clone(), data[index].clone())
+                        }
+                    } else {
+                        panic!("expected datatable")
+                    }
                 }
+                self.run_statement(*block);
+                let mut columns: Vec<String> = Vec::new();
+                let mut values: Vec<Object> = Vec::new();
+                for (key, value) in &self.scopes[self.scopes.len() - 1]  {
+                    columns.push(key.clone());
+                    values.push(value.clone());
+                };
+                let filename = self.eval_expression(writefile);
+                self.run_fn_std(String::from("write"), vec![filename, ]);
             },
             _ => {}
         }
@@ -351,42 +367,7 @@ impl Interpreter {
                 }
             },
             Expression::FunctionCall{identifier, args} => {
-                if let Object::Function{params, block} = self.get_variable(identifier.clone()) {
-                    self.scopes.push(HashMap::new());
-                    for (index, param) in params.iter().enumerate() {
-                        if self.function_flag {
-                            break
-                        }
-                        let val = self.eval_expression(args[index].clone());
-                        self.insert_top_scope(param.clone(), val)
-                    }
-                    self.run_statement(*block);
-                    let result = self.get_variable(String::from("return"));
-                    self.scopes.pop();
-                    result
-                } else {
-                    let check_std = self.run_fn_std(identifier.clone(), args.clone()); // Check if function exists in standard library
-                    if let Some(Object::Function{params, block}) = check_std.clone() {
-                        self.globals.insert(identifier.clone(), Object::Function{params: params.clone(), block: block.clone()});
-                        self.scopes.push(HashMap::new());
-                        for (index, param) in params.iter().enumerate() {
-                            if self.function_flag {
-                                break
-                            }
-                            let val = self.eval_expression(args[index].clone());
-                            self.insert_top_scope(param.clone(), val)
-                        }
-                        self.run_statement(*block);
-                        let result = self.get_variable(String::from("return"));
-                        self.scopes.pop();
-                        result
-                    } else if let Some(x) = check_std {
-                        x
-                    }
-                    else {
-                        panic!("The variable {identifier} does not appear to be a function. Did you define it? Is it in a file you haven't imported?")    
-                    }
-                }
+                self.call_function_manager(identifier, args)
             },
             Expression::Array(exprs) => {
                 let mut vals: Vec<Object> = Vec::new();
@@ -594,6 +575,110 @@ impl Interpreter {
                 }
             },
             _ => panic!("Can't exponentiate {base}")
+        }
+    }
+
+    fn call_function_manager(&mut self, identifier: String, args: Vec<Box<Expression>>) -> Object {
+        let mut uncertain_index = 0;
+        let mut has_uncertain = false;
+        let mut evaled_args: Vec<Object> = Vec::new();
+        let mut columns: Vec<usize> = Vec::new();
+        for (index, arg) in args.iter().enumerate() {
+            let arg = self.eval_expression(arg.clone());
+            if let Object::Uncertain{value, uncertainty} = arg {
+                if has_uncertain {
+                    panic!("Functions can only have one argument with an uncertainty")
+                }
+                has_uncertain = true;
+                uncertain_index = index;
+                evaled_args.push(Object::Uncertain{value, uncertainty})
+            } else if let Object::Column(vals) = arg{
+                columns.push(index);
+                evaled_args.push(Object::Column(vals))
+            } else {
+                evaled_args.push(arg)
+            }
+        }
+        if columns.len() > 0 {
+            Object::Null
+        }
+        else if has_uncertain {
+            if let Object::Uncertain{value, uncertainty} = evaled_args[uncertain_index].clone() {
+                // Change uncertain arg to `value + uncertainty` to find max
+                evaled_args[uncertain_index] = Object::Float(value + uncertainty);
+                let max;
+                match self.call_function(identifier.clone(), evaled_args.clone()) {
+                    Object::Float(x) => max = x,
+                    Object::Int(x) => max = x as f64,
+                    x => panic!("Expected Float or Int, got {x}")
+                }
+
+                // Change uncertain arg to `value - uncertainty` to find min
+                evaled_args[uncertain_index] = Object::Float(value - uncertainty);
+                let min;
+                match self.call_function(identifier.clone(), evaled_args.clone()) {
+                    Object::Float(x) => min = x,
+                    Object::Int(x) => min = x as f64,
+                    x => panic!("Expected Float or Int, got {x}")
+                }
+
+                // Change uncertain arg to `value` to find value
+                evaled_args[uncertain_index] = Object::Float(value);
+                let val;
+                match self.call_function(identifier, evaled_args) {
+                    Object::Float(x) => val = x,
+                    Object::Int(x) => val = x as f64,
+                    x => panic!("Expected Float or Int, got {x}")
+                }
+                Object::Uncertain{value: val, uncertainty: ((max - min) / 2.).abs()}
+            } else {
+                panic!("`AAAAH why in the world is this not an uncertain that's literally impossible Rust just forced me to include this panic here don't mind me")
+            }
+        } else {
+            let mut evaled_args: Vec<Object> = Vec::new();
+            for arg in args {
+                evaled_args.push(self.eval_expression(arg))
+            }
+            self.call_function(identifier, evaled_args)
+        }
+    }
+    
+    fn call_function(&mut self, identifier: String, args: Vec<Object>) -> Object {
+        if let Object::Function{params, block} = self.get_variable(identifier.clone()) {
+            self.scopes.push(HashMap::new());
+            for (index, param) in params.iter().enumerate() {
+                if self.function_flag {
+                    break
+                }
+                let arg = args[index].clone();
+                self.insert_top_scope(param.clone(), arg)
+            }
+            self.run_statement(*block);
+            let result = self.get_variable(String::from("return"));
+            self.scopes.pop();
+            result
+        } else {
+            let check_std = self.run_fn_std(identifier.clone(), args.clone()); // Check if function exists in standard library
+            if let Some(Object::Function{params, block}) = check_std.clone() {
+                self.globals.insert(identifier.clone(), Object::Function{params: params.clone(), block: block.clone()});
+                self.scopes.push(HashMap::new());
+                for (index, param) in params.iter().enumerate() {
+                    if self.function_flag {
+                        break
+                    }
+                    let val = args[index].clone();
+                    self.insert_top_scope(param.clone(), val)
+                }
+                self.run_statement(*block);
+                let result = self.get_variable(String::from("return"));
+                self.scopes.pop();
+                result
+            } else if let Some(x) = check_std {
+                x
+            }
+            else {
+                panic!("The variable {identifier} does not appear to be a function. Did you define it? Is it in a file you haven't imported?")    
+            }
         }
     }
 }
