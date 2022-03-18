@@ -112,7 +112,8 @@ impl Interpreter {
                 self.scopes.push(HashMap::new());
                 if let Object::String(readfile) = self.eval_expression(readfile) {
                     let datatable = csv_to_datatable(readfile);
-                    if let Object::DataTable{names, data} = datatable {
+                    if let Object::DataTable{names, data} = datatable.clone() {
+                        self.insert_top_scope(String::from("datatable"), datatable);
                         for (index, name) in names.iter().enumerate() {
                             self.insert_top_scope(name.clone(), data[index].clone())
                         }
@@ -124,11 +125,13 @@ impl Interpreter {
                 let mut columns: Vec<String> = Vec::new();
                 let mut values: Vec<Object> = Vec::new();
                 for (key, value) in &self.scopes[self.scopes.len() - 1]  {
-                    columns.push(key.clone());
-                    values.push(value.clone());
+                    if let Object::Column(_) = value {
+                        columns.push(key.clone());
+                        values.push(value.clone());
+                    }
                 };
                 let filename = self.eval_expression(writefile);
-                self.run_fn_std(String::from("write"), vec![filename, ]);
+                self.run_fn_std(String::from("write"), vec![filename, Object::DataTable{names: columns, data: values}]);
             },
             _ => {}
         }
@@ -448,8 +451,18 @@ impl Interpreter {
                     _ => panic!("Can't add Uncertain to {}", addend)
                 }
             },
-            Object::Column(data) => {
-                Object::Column(data)
+            Object::Column(augend_data) => {
+                let mut sums: Vec<Object> = Vec::new();
+                if let Object::Column(addend_data) = addend {
+                    for (index, augend) in augend_data.iter().enumerate() {
+                        sums.push(Interpreter::add(augend.clone(), addend_data[index].clone()))
+                    }
+                } else {
+                    for augend in augend_data {
+                        sums.push(Interpreter::add(augend, addend.clone()))
+                    }
+                }
+                Object::Column(sums)
             },
             Object::String(x) => {
                 match addend {
