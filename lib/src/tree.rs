@@ -4,22 +4,37 @@ use crate::object::Object;
 
 #[derive(Debug, Clone)]
 pub enum Statement {
+    /// Print statement
     Print(Box<Expression>),
+    /// Variable definition
     Definition{name: String, value: Box<Expression>},
+    /// Block of code (encased in `{}`)
     Block(Vec<Statement>),
+    /// Indicates code has completed
     EOF,
+    /// Expression statement (e.g. function call)
     Expression(Box<Expression>),
+    /// While loop
     While{condition: Box<Expression>, block: Box<Statement>},
+    /// Loop
     Loop(Box<Statement>),
+    /// Break loop
     Break,
+    /// If statement (no else)
     If{condition: Box<Expression>, block: Box<Statement>},
+    /// If statement with `else`
     IfElse{condition: Box<Expression>, if_block: Box<Statement>, else_block: Box<Statement>},
+    /// A statement that adds the parsed function to the top scope
     Function{identifier: String, params: Vec<String>, block: Box<Statement>},
+    /// Returns function
     Return(Box<Expression>),
+    /// Runs code from another file, importing functions and global variables
     Import(Box<Expression>),
+    /// Process block to process and analyze data
     Process{readfile: Box<Expression>, writefile: Box<Expression>, block: Box<Statement>}
 }
 
+// Implemented to print statements to Rust code for standard library compilation in `build.rs`
 impl Display for Statement {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match &self {
@@ -42,6 +57,7 @@ impl Display for Statement {
     }
 }
 
+// For printing a block of statements as Rust code
 impl Display for Statements {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let mut problem = false;
@@ -58,23 +74,32 @@ impl Display for Statements {
 
 #[derive(Debug, Clone)]
 pub enum Expression {
+    /// Literal expression
     Literal(Object),
+    /// Unary operations (not, unary negation)
     Unary{
         operand: Box<Expression>, 
         operator: TokenType
     },
+    /// Binary operations (plus, minus, times, divided by, to the power of, with an uncertainty of, and, or, equal, not equal, etc.)
     Binary{
         operand1: Box<Expression>, 
         operand2: Box<Expression>, 
         operator: TokenType
     },
+    /// Expression in parenthesis (overrides operator precedence)
     Parenthesized(Box<Expression>),
+    /// Calls function, evaluates to return value of function
     FunctionCall{identifier: String, args: Vec<Box<Expression>>},
+    /// Calls method, evaluates to return value of method
     MethodCall{object: String, method: String, args: Vec<Box<Expression>>},
+    /// Gets item from given index of array
     ArrayIndex{identifier: String, index: Box<Expression>},
+    /// Defines array
     Array(Vec<Box<Expression>>)
 }
 
+// Print statements to Rust code, intended for compiling std in `build.rs`
 impl Display for Expression {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match &self {
@@ -91,6 +116,7 @@ impl Display for Expression {
     }
 }
 
+// For displaying multiple expressions
 impl Display for Expressions {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let mut problem = false;

@@ -8,3 +8,5 @@
 .vscode
 testfile.hawk
 library.hawk
+out.csv
+test.csv
