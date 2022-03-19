@@ -1,42 +1,16 @@
 use std::collections::HashMap;
 
+use crate::eval::Interpreter;
+
 // Common types used throughout the interpreter
 use crate::object::Object;
 use crate::tree::Statement;
 
-/// Runs parsed code from the list of statements returned by the parser
-pub struct Interpreter {
-    statements: Vec<Statement>,           // Parsed code to execute
-    globals: HashMap<String, Object>,     // Stores variables in the global scope
-    scopes: Vec<HashMap<String, Object>>, // A stack variables in local scopes are stored
-    loops: usize, // Contains number of nested loops in order to handle `break`
-}
-
 impl Interpreter {
-    /// Create an `Interpreter` and run code. `global_state` is used to store the state of the REPL.
-    pub fn interpret(
-        statements: Vec<Statement>,
-        global_state: HashMap<String, Object>,
-    ) -> HashMap<String, Object> {
-        let mut interpreter = Interpreter {
-            statements,
-            globals: global_state,
-            loops: 0,
-            scopes: Vec::new(),
-        };
-
-        for index in 0..interpreter.statements.len() {
-            interpreter.run_statement(interpreter.statements[index].clone())
-        }
-
-        interpreter.globals
-    }
-
     /// Executes a given statement
     pub fn run_statement(&mut self, statement: Statement) {
         match statement {
             Statement::Print(expr) => println!("{}", self.eval_expression(expr).user_print()),
-
             // Variable definition
             Statement::Definition { name, value } => {
                 let val = self.eval_expression(value);
@@ -173,6 +147,7 @@ impl Interpreter {
         }
     }
 
+    /// Gets variable by identifier in the topmost scope where it is defined
     pub fn get_variable(&self, identifier: String) -> Object {
         let mut index = self.scopes.len() as isize - 1;
         while index >= 0 {

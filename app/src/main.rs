@@ -11,12 +11,8 @@ mod run;
 
 // Needs to execute from run.rs
 pub mod eval;
-pub mod eval_expr;
 
-// The standard library
 pub mod standard_lib;
-pub mod standard_lib_rs;
-pub mod standard_lib_hawk;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

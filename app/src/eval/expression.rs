@@ -30,6 +30,7 @@ impl Interpreter {
         }
     }
 
+    /// Match operator and call method to evaluate binary operation
     fn eval_binary(&mut self, operand1: Box<Expression>, operand2: Box<Expression>, operator: TokenType) -> Object {
         let operand1 = self.eval_expression(operand1);
         let operand2 = self.eval_expression(operand2);
@@ -83,6 +84,7 @@ impl Interpreter {
         }
     }
 
+    /// Match operator and call method to evaluate unary expression
     fn eval_unary(&mut self, operand: Box<Expression>, operator: TokenType) -> Object {
         let eval_op = self.eval_expression(operand);
         match operator {

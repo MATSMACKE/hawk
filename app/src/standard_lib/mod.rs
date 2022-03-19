@@ -1,6 +1,10 @@
 use crate::eval::Interpreter;
 use crate::Object;
-use crate::standard_lib_hawk::get_std_hawk_fn;
+
+mod standard_lib_hawk;
+mod standard_lib_rs;
+
+use standard_lib_hawk::get_std_hawk_fn;
 
 impl Interpreter {
     pub fn run_fn_std(&mut self, identifier: String, args: Vec<Object>) -> Option<Object> {
