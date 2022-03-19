@@ -54,25 +54,25 @@ impl Interpreter {
                 Self::make_uncertain(operand1, operand2)
             },
             TokenType::EqualEqual => {
-                Self::equalequal(&operand1, &operand2)
+                Self::equalequal(operand1, operand2)
             },
             TokenType::NotEqual => {
-                Self::notequal(&operand1, &operand2)
+                Self::notequal(operand1, operand2)
             },
             TokenType::Or => {
-                Self::or(&operand1, &operand2)
+                Self::or(operand1, operand2)
             },
             TokenType::And => {
-                Self::and(&operand1, &operand2)
+                Self::and(operand1, operand2)
             },
             TokenType::LessThan => {
-                Self::lessthan(&operand1, &operand2)
+                Self::lessthan(operand1, operand2)
             },
             TokenType::LessThanEqual => {
-                Self::lessthanequal(&operand1, &operand2)
+                Self::lessthanequal(operand1, operand2)
             },
             TokenType::GreaterThan => {
-                Self::greaterthan(&operand1, &operand2)
+                Self::greaterthan(operand1, operand2)
             },
             TokenType::GreaterThanEqual => {
                 Self::greaterthanequal(operand1, operand2)
@@ -87,7 +87,7 @@ impl Interpreter {
         let eval_op = self.eval_expression(operand);
         match operator {
             TokenType::Minus => {
-                Self::negate(&eval_op)
+                Self::negate(eval_op)
             },
             TokenType::Not => {
                 Self::not(eval_op)

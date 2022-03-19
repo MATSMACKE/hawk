@@ -512,7 +512,7 @@ impl Interpreter {
         }
     }
 
-    pub fn greaterthan(operand1: &Object, operand2: &Object) -> Object {
+    pub fn greaterthan(operand1: Object, operand2: Object) -> Object {
         if let Object::Int(x) = operand1 {
             if let Object::Int(y) = operand2 {
                 Object::Boolean(x > y)
@@ -534,7 +534,7 @@ impl Interpreter {
         }
     }
 
-    pub fn lessthanequal(operand1: &Object, operand2: &Object) -> Object {
+    pub fn lessthanequal(operand1: Object, operand2: Object) -> Object {
         if let Object::Int(x) = operand1 {
             if let Object::Int(y) = operand2 {
                 Object::Boolean(x <= y)
@@ -556,7 +556,7 @@ impl Interpreter {
         }
     }
 
-    pub fn lessthan(operand1: &Object, operand2: &Object) -> Object {
+    pub fn lessthan(operand1: Object, operand2: Object) -> Object {
         if let Object::Int(x) = operand1 {
             if let Object::Int(y) = operand2 {
                 Object::Boolean(x < y)
@@ -578,7 +578,7 @@ impl Interpreter {
         }
     }
 
-    pub fn and(operand1: &Object, operand2: &Object) -> Object {
+    pub fn and(operand1: Object, operand2: Object) -> Object {
         if let Object::Boolean(op1) = operand1 {
             if let Object::Boolean(op2) = operand2 {
                 Object::Boolean(op1 && op2)
@@ -590,7 +590,7 @@ impl Interpreter {
         }
     }
 
-    pub fn or(operand1: &Object, operand2: &Object) -> Object {
+    pub fn or(operand1: Object, operand2: Object) -> Object {
         if let Object::Boolean(op1) = operand1 {
             if let Object::Boolean(op2) = operand2 {
                 Object::Boolean(op1 || op2)
@@ -602,7 +602,7 @@ impl Interpreter {
         }
     }
 
-    pub fn notequal(operand1: &Object, operand2: &Object) -> Object {
+    pub fn notequal(operand1: Object, operand2: Object) -> Object {
         if let Object::Int(x) = operand1 {
             if let Object::Int(y) = operand2 {
                 Object::Boolean(x != y)
@@ -624,7 +624,7 @@ impl Interpreter {
         }
     }
 
-    pub fn equalequal(operand1: &Object, operand2: &Object) -> Object {
+    pub fn equalequal(operand1: Object, operand2: Object) -> Object {
         if let Object::Int(x) = operand1 {
             if let Object::Int(y) = operand2 {
                 Object::Boolean(x == y)
@@ -654,7 +654,7 @@ impl Interpreter {
         }
     }
 
-    pub fn negate(eval_op: &Object) -> Object {
+    pub fn negate(eval_op: Object) -> Object {
         if let Object::Int(x) = eval_op {
             Object::Int(-x)
         } else if let Object::Float(x) = eval_op {
@@ -664,7 +664,7 @@ impl Interpreter {
         }
     }
 
-    fn make_uncertain(operand1: Object, operand2: Object) -> Object {
+    pub fn make_uncertain(operand1: Object, operand2: Object) -> Object {
         match operand1 {
             Object::Int(x) => {
                 match operand2 {
