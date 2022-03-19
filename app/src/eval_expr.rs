@@ -1,242 +1,21 @@
-// Common types used throughout the interpreter
-use crate::token::{TokenType};
-use crate::tree::Expression;
-use crate::object::Object;
-
 use crate::eval::Interpreter;
+use crate::object::Object;
+// Common types used throughout the interpreter
+use crate::token::TokenType;
+use crate::tree::Expression;
 
 impl Interpreter {
     /// Traverses an expression tree to evaluate it and return an Object
     pub fn eval_expression(&mut self, expression: Box<Expression>) -> Object {
         match *expression {
             Expression::Binary{operand1, operand2, operator} => {
-                let operand1 = self.eval_expression(operand1);
-                let operand2 = self.eval_expression(operand2);
-
-                match operator {
-                    TokenType::Plus => {
-                        Interpreter::add(operand1, operand2)
-                    },
-                    TokenType::Minus => {
-                        Interpreter::subtract(operand1, operand2)
-                    },
-                    TokenType::Asterisk => {
-                        Interpreter::multiply(operand1, operand2)
-                    },
-                    TokenType::Slash => {
-                        Interpreter::divide(operand1, operand2)
-                    },
-                    TokenType::Caret => {
-                        Interpreter::exponent(operand1, operand2)
-                    },
-                    TokenType::EqualEqual => {
-                        if let Object::Int(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x == y)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean((x as f64) == y)
-                            } else {
-                                panic!("Can't compare Int to this type")
-                            }
-                        } else if let Object::Float(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x == y as f64)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean(x == y)
-                            } else {
-                                panic!("Can't compare Float to this type")
-                            }
-                        } else {
-                            panic!("Can't compare non-numbers")
-                        }
-                    },
-                    TokenType::NotEqual => {
-                        if let Object::Int(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x != y)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean((x as f64) != y)
-                            } else {
-                                panic!("Can't compare Int to this type")
-                            }
-                        } else if let Object::Float(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x != y as f64)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean(x != y)
-                            } else {
-                                panic!("Can't compare Float to this type")
-                            }
-                        } else {
-                            panic!("Can't compare non-numbers")
-                        }
-                    },
-                    TokenType::Or => {
-                        if let Object::Boolean(op1) = operand1 {
-                            if let Object::Boolean(op2) = operand2 {
-                                Object::Boolean(op1 || op2)
-                            }
-                            else {
-                                panic!("Logical operations can only be performed on booleans")
-                            }
-                        }
-                        else {
-                            panic!("Logical operations can only be performed on booleans")
-                        }
-                    },
-                    TokenType::And => {
-                        if let Object::Boolean(op1) = operand1 {
-                            if let Object::Boolean(op2) = operand2 {
-                                Object::Boolean(op1 && op2)
-                            }
-                            else {
-                                panic!("Logical operations can only be performed on booleans")
-                            }
-                        }
-                        else {
-                            panic!("Logical operations can only be performed on booleans")
-                        }
-                    },
-                    TokenType::LessThan => {
-                        if let Object::Int(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x < y)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean((x as f64) < y)
-                            } else {
-                                panic!("Can't compare Int to this type")
-                            }
-                        } else if let Object::Float(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x < y as f64)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean(x < y)
-                            } else {
-                                panic!("Can't compare Float to this type")
-                            }
-                        } else {
-                            panic!("Can't compare non-numbers")
-                        }
-                    },
-                    TokenType::LessThanEqual => {
-                        if let Object::Int(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x <= y)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean((x as f64) <= y)
-                            } else {
-                                panic!("Can't compare Int to this type")
-                            }
-                        } else if let Object::Float(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x <= y as f64)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean(x <= y)
-                            } else {
-                                panic!("Can't compare Float to this type")
-                            }
-                        } else {
-                            panic!("Can't compare non-numbers")
-                        }
-                    },
-                    TokenType::GreaterThan => {
-                        if let Object::Int(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x > y)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean((x as f64) > y)
-                            } else {
-                                panic!("Can't compare Int to this type")
-                            }
-                        } else if let Object::Float(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x > y as f64)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean(x > y)
-                            } else {
-                                panic!("Can't compare Float to this type")
-                            }
-                        } else {
-                            panic!("Can't compare non-numbers")
-                        }
-                    },
-                    TokenType::GreaterThanEqual => {
-                        if let Object::Int(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x >= y)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean((x as f64) >= y)
-                            } else {
-                                panic!("Can't compare Int to this type")
-                            }
-                        } else if let Object::Float(x) = operand1 {
-                            if let Object::Int(y) = operand2 {
-                                Object::Boolean(x >= y as f64)
-                            } else if let Object::Float(y) = operand2 {
-                                Object::Boolean(x >= y)
-                            } else {
-                                panic!("Can't compare Float to this type")
-                            }
-                        } else {
-                            panic!("Can't compare non-numbers")
-                        }
-                    },
-                    TokenType::PlusMinus => {
-                        match operand1 {
-                            Object::Int(x) => {
-                                match operand2 {
-                                    Object::Int(y) => Object::Uncertain{value: x as f64, uncertainty: y as f64},
-                                    Object::Float(y) => Object::Uncertain{value: x as f64, uncertainty: y},
-                                    _ => panic!("{operand2} can't be an uncertainty")
-                                }
-                            },
-                            Object::Float(x) => {
-                                match operand2 {
-                                    Object::Int(y) => Object::Uncertain{value: x, uncertainty: y as f64},
-                                    Object::Float(y) => Object::Uncertain{value: x, uncertainty: y},
-                                    _ => panic!("{operand2} can't be an uncertainty")
-                                }
-                            },
-                            _ => panic!("Can't add an uncertainty to {operand1}")
-                        }
-                    },
-                    _ => {
-                        panic!("Problem")
-                    }
-                }
+                self.eval_binary(operand1, operand2, operator)
             },
             Expression::Unary{operand, operator} => {
-                let eval_op = self.eval_expression(operand);
-                match operator {
-                    TokenType::Minus => {
-                        if let Object::Int(x) = eval_op {
-                            Object::Int(-x)
-                        }
-                        else if let Object::Float(x) = eval_op {
-                            Object::Float(-x)
-                        }
-                        else {
-                            panic!("Expected number, found {:?}", eval_op)
-                        }
-                    },
-                    TokenType::Not => {
-                        if let Object::Boolean(x) = eval_op {
-                            Object::Boolean(!x)
-                        } else {
-                            panic!("Expected bool, found {:?}", eval_op)
-                        }
-                    },
-                    _ => {
-                        panic!("Error: expected binary operator, instead found {:?}", operator);
-                    }
-                }
+                self.eval_unary(operand, operator)
             },
             Expression::Literal(obj) => {
-                if let Object::Identifier(identifier) = obj {
-                    self.get_variable(identifier)
-                } else {
-                    obj
-                }
+                self.eval_literal(obj)
             },
             Expression::FunctionCall{identifier, args} => {
                 self.eval_function_call(identifier, args)
@@ -248,6 +27,83 @@ impl Interpreter {
                 self.eval_arrayindex(identifier, index)
             }
             _ => Object::Null
+        }
+    }
+
+    fn eval_binary(&mut self, operand1: Box<Expression>, operand2: Box<Expression>, operator: TokenType) -> Object {
+        let operand1 = self.eval_expression(operand1);
+        let operand2 = self.eval_expression(operand2);
+
+        match operator {
+            TokenType::Plus => {
+                Self::add(operand1, operand2)
+            },
+            TokenType::Minus => {
+                Self::subtract(operand1, operand2)
+            },
+            TokenType::Asterisk => {
+                Self::multiply(operand1, operand2)
+            },
+            TokenType::Slash => {
+                Self::divide(operand1, operand2)
+            },
+            TokenType::Caret => {
+                Self::exponent(operand1, operand2)
+            },
+            TokenType::PlusMinus => {
+                Self::make_uncertain(operand1, operand2)
+            },
+            TokenType::EqualEqual => {
+                Self::equalequal(&operand1, &operand2)
+            },
+            TokenType::NotEqual => {
+                Self::notequal(&operand1, &operand2)
+            },
+            TokenType::Or => {
+                Self::or(&operand1, &operand2)
+            },
+            TokenType::And => {
+                Self::and(&operand1, &operand2)
+            },
+            TokenType::LessThan => {
+                Self::lessthan(&operand1, &operand2)
+            },
+            TokenType::LessThanEqual => {
+                Self::lessthanequal(&operand1, &operand2)
+            },
+            TokenType::GreaterThan => {
+                Self::greaterthan(&operand1, &operand2)
+            },
+            TokenType::GreaterThanEqual => {
+                Self::greaterthanequal(operand1, operand2)
+            },
+            _ => {
+                panic!("Problem")
+            }
+        }
+    }
+
+    fn eval_unary(&mut self, operand: Box<Expression>, operator: TokenType) -> Object {
+        let eval_op = self.eval_expression(operand);
+        match operator {
+            TokenType::Minus => {
+                Self::negate(&eval_op)
+            },
+            TokenType::Not => {
+                Self::not(eval_op)
+            },
+            _ => {
+                panic!("Error: expected binary operator, instead found {:?}", operator);
+            }
+        }
+    }
+
+    /// Evaluates literal expression
+    fn eval_literal(&mut self, obj: Object) -> Object {
+        if let Object::Identifier(identifier) = obj {
+            self.get_variable(identifier)   // Dereference if `obj` is an identifier
+        } else {
+            obj
         }
     }
 
@@ -288,6 +144,7 @@ impl Interpreter {
         }
     }
 
+    /// Turns array literal into array object
     fn eval_array_literal(&mut self, exprs: Vec<Box<Expression>>) -> Object {
         let mut vals: Vec<Object> = Vec::new();
         for expr in exprs {

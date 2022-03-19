@@ -1,3 +1,11 @@
+use std::{collections::HashMap, env};
+
+// Import lib crate
+pub use hawk_lib::*;
+
+// Used extremely often, so brought into scope
+use crate::object::Object;
+
 mod utils;
 mod run;
 
@@ -5,18 +13,10 @@ mod run;
 pub mod eval;
 pub mod eval_expr;
 
-// Import lib crate
-pub use hawk_lib::*;
-
-use std::{env, collections::HashMap};
-
 // The standard library
 pub mod standard_lib;
 pub mod standard_lib_rs;
 pub mod standard_lib_hawk;
-
-// Used extremely often, so brought into scope
-use crate::object::Object;
 
 fn main() {
     let args: Vec<String> = env::args().collect();

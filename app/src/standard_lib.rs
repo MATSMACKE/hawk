@@ -1,5 +1,5 @@
-use crate::Object;
 use crate::eval::Interpreter;
+use crate::Object;
 use crate::standard_lib_hawk::get_std_hawk_fn;
 
 impl Interpreter {

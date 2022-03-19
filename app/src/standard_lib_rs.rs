@@ -1,7 +1,8 @@
-use hawk_lib::csv::{csv_to_datatable, datatable_to_csv};
-use std::fs::{write, read_to_string};
+use std::fs::{read_to_string, write};
 
-use crate::{Object, eval::Interpreter};
+use hawk_lib::csv::{csv_to_datatable, datatable_to_csv};
+
+use crate::{eval::Interpreter, Object};
 
 impl Interpreter {
     pub fn get_std_rs_fn(&mut self, identifier: String, args: Vec<Object>) -> Option<Object> {

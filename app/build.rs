@@ -2,8 +2,8 @@ use std::fs::{self, DirEntry};
 use std::path::Path;
 
 use hawk_lib::*;
-use hawk_lib::tree::{Statement};
 use hawk_lib::object::Object;
+use hawk_lib::tree::Statement;
 
 fn main() {
     let dest_path = Path::new("./src/").join("standard_lib_hawk.rs");

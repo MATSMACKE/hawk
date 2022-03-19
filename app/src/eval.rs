@@ -490,6 +490,200 @@ impl Interpreter {
         }
     }
 
+    pub fn greaterthanequal(operand1: Object, operand2: Object) -> Object {
+        if let Object::Int(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x >= y)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean((x as f64) >= y)
+            } else {
+                panic!("Can't compare Int to this type")
+            }
+        } else if let Object::Float(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x >= y as f64)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean(x >= y)
+            } else {
+                panic!("Can't compare Float to this type")
+            }
+        } else {
+            panic!("Can't compare non-numbers")
+        }
+    }
+
+    pub fn greaterthan(operand1: &Object, operand2: &Object) -> Object {
+        if let Object::Int(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x > y)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean((x as f64) > y)
+            } else {
+                panic!("Can't compare Int to this type")
+            }
+        } else if let Object::Float(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x > y as f64)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean(x > y)
+            } else {
+                panic!("Can't compare Float to this type")
+            }
+        } else {
+            panic!("Can't compare non-numbers")
+        }
+    }
+
+    pub fn lessthanequal(operand1: &Object, operand2: &Object) -> Object {
+        if let Object::Int(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x <= y)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean((x as f64) <= y)
+            } else {
+                panic!("Can't compare Int to this type")
+            }
+        } else if let Object::Float(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x <= y as f64)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean(x <= y)
+            } else {
+                panic!("Can't compare Float to this type")
+            }
+        } else {
+            panic!("Can't compare non-numbers")
+        }
+    }
+
+    pub fn lessthan(operand1: &Object, operand2: &Object) -> Object {
+        if let Object::Int(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x < y)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean((x as f64) < y)
+            } else {
+                panic!("Can't compare Int to this type")
+            }
+        } else if let Object::Float(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x < y as f64)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean(x < y)
+            } else {
+                panic!("Can't compare Float to this type")
+            }
+        } else {
+            panic!("Can't compare non-numbers")
+        }
+    }
+
+    pub fn and(operand1: &Object, operand2: &Object) -> Object {
+        if let Object::Boolean(op1) = operand1 {
+            if let Object::Boolean(op2) = operand2 {
+                Object::Boolean(op1 && op2)
+            } else {
+                panic!("Logical operations can only be performed on booleans")
+            }
+        } else {
+            panic!("Logical operations can only be performed on booleans")
+        }
+    }
+
+    pub fn or(operand1: &Object, operand2: &Object) -> Object {
+        if let Object::Boolean(op1) = operand1 {
+            if let Object::Boolean(op2) = operand2 {
+                Object::Boolean(op1 || op2)
+            } else {
+                panic!("Logical operations can only be performed on booleans")
+            }
+        } else {
+            panic!("Logical operations can only be performed on booleans")
+        }
+    }
+
+    pub fn notequal(operand1: &Object, operand2: &Object) -> Object {
+        if let Object::Int(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x != y)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean((x as f64) != y)
+            } else {
+                panic!("Can't compare Int to this type")
+            }
+        } else if let Object::Float(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x != y as f64)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean(x != y)
+            } else {
+                panic!("Can't compare Float to this type")
+            }
+        } else {
+            panic!("Can't compare non-numbers")
+        }
+    }
+
+    pub fn equalequal(operand1: &Object, operand2: &Object) -> Object {
+        if let Object::Int(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x == y)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean((x as f64) == y)
+            } else {
+                panic!("Can't compare Int to this type")
+            }
+        } else if let Object::Float(x) = operand1 {
+            if let Object::Int(y) = operand2 {
+                Object::Boolean(x == y as f64)
+            } else if let Object::Float(y) = operand2 {
+                Object::Boolean(x == y)
+            } else {
+                panic!("Can't compare Float to this type")
+            }
+        } else {
+            panic!("Can't compare non-numbers")
+        }
+    }
+
+    pub fn not(eval_op: Object) -> Object {
+        if let Object::Boolean(x) = eval_op {
+            Object::Boolean(!x)
+        } else {
+            panic!("Expected bool, found {:?}", eval_op)
+        }
+    }
+
+    pub fn negate(eval_op: &Object) -> Object {
+        if let Object::Int(x) = eval_op {
+            Object::Int(-x)
+        } else if let Object::Float(x) = eval_op {
+            Object::Float(-x)
+        } else {
+            panic!("Expected number, found {:?}", eval_op)
+        }
+    }
+
+    fn make_uncertain(operand1: Object, operand2: Object) -> Object {
+        match operand1 {
+            Object::Int(x) => {
+                match operand2 {
+                    Object::Int(y) => Object::Uncertain { value: x as f64, uncertainty: y as f64 },
+                    Object::Float(y) => Object::Uncertain { value: x as f64, uncertainty: y },
+                    _ => panic!("{operand2} can't be an uncertainty")
+                }
+            },
+            Object::Float(x) => {
+                match operand2 {
+                    Object::Int(y) => Object::Uncertain { value: x, uncertainty: y as f64 },
+                    Object::Float(y) => Object::Uncertain { value: x, uncertainty: y },
+                    _ => panic!("{operand2} can't be an uncertainty")
+                }
+            },
+            _ => panic!("Can't add an uncertainty to {operand1}")
+        }
+    }
+
     pub fn call_function(&mut self, identifier: String, args: Vec<Object>) -> Object {
         if let Object::Function { params, block } = self.get_variable(identifier.clone()) {
             self.scopes.push(HashMap::new());
