@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+
 use crate::eval::Interpreter;
 use crate::object::Object;
+
 // Common types used throughout the interpreter
 use crate::token::TokenType;
 use crate::tree::Expression;
@@ -208,6 +211,44 @@ impl Interpreter {
             Object::Uncertain{value: val, uncertainty: ((max - min) / 2.).abs()}
         } else {
             panic!("`AAAAH why in the world is this not an uncertain that's literally impossible Rust just forced me to include this panic here don't mind me")
+        }
+    }
+
+    pub fn call_function(&mut self, identifier: String, args: Vec<Object>) -> Object {
+        if let Object::Function { params, block } = self.get_variable(identifier.clone()) {
+            self.scopes.push(HashMap::new());
+            for (index, param) in params.iter().enumerate() {
+                let arg = args[index].clone();
+                self.insert_top_scope(param.clone(), arg)
+            }
+            self.run_statement(*block);
+            let result = self.get_variable(String::from("return"));
+            self.scopes.pop();
+            result
+        } else {
+            let check_std = self.run_fn_std(identifier.clone(), args.clone()); // Check if function exists in standard library
+            if let Some(Object::Function { params, block }) = check_std.clone() {
+                self.globals.insert(
+                    identifier.clone(),
+                    Object::Function {
+                        params: params.clone(),
+                        block: block.clone(),
+                    },
+                );
+                self.scopes.push(HashMap::new());
+                for (index, param) in params.iter().enumerate() {
+                    let val = args[index].clone();
+                    self.insert_top_scope(param.clone(), val)
+                }
+                self.run_statement(*block);
+                let result = self.get_variable(String::from("return"));
+                self.scopes.pop();
+                result
+            } else if let Some(x) = check_std {
+                x
+            } else {
+                panic!("The variable {identifier} does not appear to be a function. Did you define it? Is it in a file you haven't imported?")
+            }
         }
     }
 }
