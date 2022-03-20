@@ -10,4 +10,4 @@ Download the `hawk-lang` binary for your platform, or compile from source by run
 
 Create a `.hawk` file to write your code in and run it with `hawk-lang filename.hawk`, or use the shell by running `hawk-lang`. 
 
-The syntax of the Hawk language can be found in [spec.md](docs/spec.md), and documentation of the standard library in [std.md](docs/std.md). 
+The syntax of the Hawk language can be found in [spec.md](docs/spec.md), and documentation of the standard library in [std.md](docs/std.md).

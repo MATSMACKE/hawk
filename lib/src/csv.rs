@@ -183,36 +183,49 @@ impl Object {
             Self::String(x) => format!("{x}"),
             Self::Uncertain{value, uncertainty: _} => format!("{value}"),
             Self::DataTable{names, data} => {
-                let mut str = String::from("");
-                for (idx, name) in names.iter().enumerate() {
-                    if idx < names.len() - 1 {
-                        str = format!("{str}{name}, ");
-                    } else {
-                        str = format!("{str}{name}");
-                    }
-                    
-                }
-                let len: usize;
-                if let Object::Column(vals) = data[0].clone() {
-                    len = vals.len()
-                } else {
-                    panic!("Expected Column, instead got {}", data[0].user_print())
-                }
-                for i in 0..len {
-                    str = format!("{str}\n");
-                    for (idx, column) in data.iter().enumerate() {
-                        if let Object::Column(vals) = column {
-                            if idx < data.len() - 1 {
-                                str = format!("{str}{}, ", vals[i].format_for_csv());
-                            } else {
-                                str = format!("{str}{}", vals[i].format_for_csv());
-                            }
-                        }
-                    }
-                }
-                str
+                Self::format_datatable_csv(names, data)
             },
             _ => panic!("Can't write {self} to csv")
         }
+    }
+
+    fn format_datatable_csv(names: Vec<String>, data: Vec<Object>) -> String {
+        let mut str = String::from("");
+        str = Self::format_datatable_csv_column_names(names, str);
+        let len: usize;
+        if let Object::Column(vals) = data[0].clone() {
+            len = vals.len()
+        } else {
+            panic!("Expected Column, instead got {}", data[0].user_print())
+        }
+        str = Self::format_datatable_csv_data(data, str, len);
+        str
+    }
+
+    fn format_datatable_csv_data(data: Vec<Object>, mut str: String, len: usize) -> String {
+        for i in 0..len {
+            str = format!("{str}\n");
+            for (idx, column) in data.iter().enumerate() {
+                if let Object::Column(vals) = column {
+                    if idx < data.len() - 1 {
+                        str = format!("{str}{}, ", vals[i].format_for_csv());
+                    } else {
+                        str = format!("{str}{}", vals[i].format_for_csv());
+                    }
+                }
+            }
+        }
+        str
+    }
+
+    fn format_datatable_csv_column_names(names: Vec<String>, mut str: String) -> String {
+        for (idx, name) in names.iter().enumerate() {
+            if idx < names.len() - 1 {
+                str = format!("{str}{name}, ");
+            } else {
+                str = format!("{str}{name}");
+            }
+        }
+        str
     }
 }

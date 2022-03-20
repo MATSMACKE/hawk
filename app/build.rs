@@ -6,7 +6,7 @@ use hawk_lib::object::Object;
 use hawk_lib::tree::Statement;
 
 fn main() {
-    let dest_path = Path::new("./src/std/").join("standard_lib_hawk.rs");
+    let dest_path = Path::new("./src/standard_lib/").join("standard_lib_hawk.rs");
     let contents = String::from("use crate::{Object, token::TokenType, tree::{Expression, Statement}};
 
 pub fn get_std_hawk_fn(identifier: String) -> Option<Object> {

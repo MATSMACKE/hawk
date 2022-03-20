@@ -5,21 +5,35 @@ use term_table::{
 };
 use term_table::{Table, TableStyle};
 
+/// The structure that stores literals through all stages of the interpreter (from lexing to evaluating)
 #[derive(Debug, Clone)]
 pub enum Object {
+    /// Null object
     Null,
+    /// Number stored as 128 bit integer
     Int(i128),
+    /// Number stored as 64 bit float
     Float(f64),
+    /// A string literal
     String(String),
+    /// A boolean (given by comparison operators or the keywords `true` and `false`)
     Boolean(bool),
+    /// A number stored as 64 bit float with an uncertainty (also stored as 64 bit float)
     Uncertain{value: f64, uncertainty: f64},
-    Function{params: Vec<String>, block: Box<Statement>},   
+    /// A function object that is stored in the scope where the function is defined, with parameter
+    /// names as a vector of strings and the code of the actual function as a Statement
+    Function{params: Vec<String>, block: Box<Statement>},
+    /// An array of any other kind of object (types can be mixed)
     Array(Vec<Object>),
+    /// An identifier, such as the name of a function or variable
     Identifier(String),
+    /// A column of data in a datatable
     Column(Vec<Object>),
+    /// A datatable, created by processing a CSV file
     DataTable{names: Vec<String>, data:Vec<Object>}
 }
 
+// Display object to Rust source code, used to build the standard library
 impl Display for Object {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match &self {
@@ -40,6 +54,7 @@ impl Display for Object {
     }
 }
 
+// For outputting a list of objects to Rust source code
 impl Display for Objects {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let mut problem = false;
@@ -55,6 +70,7 @@ impl Display for Objects {
 }
 
 impl Object {
+    /// Nicely formatted output for displaying objects with `print`
     pub fn user_print(&self) -> String {
         match self.clone() {
             Self::Boolean(x) =>format!("{x}"),
@@ -64,53 +80,65 @@ impl Object {
             Self::Identifier(x) => format!("{x}"),
             Self::Function{params, block} => format!("Function: params: {:?}, block: {block}", params),
             Self::Array(x) => {
-                let mut str = String::from("[");
-                for (idx, obj) in x.iter().enumerate() {
-                    if idx < x.len() - 1 {
-                        str = format!("{str}{}, ", obj.user_print());
-                    } else {
-                        str = format!("{str}{}", obj.user_print());
-                    }
-                }
-                format!("{str}]")
+                Self::user_print_array(x)
             },
             Self::Null => String::from("Null"),
             Self::Uncertain{value, uncertainty} => format!("{value} ± {uncertainty}"),
             Self::Column(x) => {
-                let mut str = String::from("[");
-                for (idx, obj) in x.iter().enumerate() {
-                    if idx < x.len() - 1 {
-                        str = format!("{str}{}, ", obj.user_print());
-                    } else {
-                        str = format!("{str}{}", obj.user_print());
-                    }
-                }
-                format!("{str}]")
+                Self::user_print_column(x)
             },
             Self::DataTable{names, data} => {
-                let mut table = Table::new();
-                table.style = TableStyle::extended();
-                if let Object::Column(_) = data[0].clone() {
-                    let mut title_row = Vec::new();
-                    for name in names {
-                        title_row.push(name)
-                    }
-                    table.add_row(Row::new(title_row));
-                    for i in 0..data.len() {
-                        let mut row = Vec::new();
-                        for column in data.clone() {
-                            if let Object::Column(objs) = column {
-                                row.push(objs[i].user_print())
-                            } else {
-                                panic!("Expected Column")
-                            }
-                        }
-                        table.add_row(Row::new(row))
-                    }
-                }
-                table.render()
+                Self::user_print_datatable(names, data)
             }
         }
+    }
+
+    fn user_print_datatable(names: Vec<String>, data: Vec<Object>) -> String {
+        let mut table = Table::new();
+        table.style = TableStyle::extended();
+        if let Object::Column(_) = data[0].clone() {
+            let mut title_row = Vec::new();
+            for name in names {
+                title_row.push(name)
+            }
+            table.add_row(Row::new(title_row));
+            for i in 0..data.len() {
+                let mut row = Vec::new();
+                for column in data.clone() {
+                    if let Object::Column(objs) = column {
+                        row.push(objs[i].user_print())
+                    } else {
+                        panic!("Expected Column")
+                    }
+                }
+                table.add_row(Row::new(row))
+            }
+        }
+        table.render()
+    }
+
+    fn user_print_column(x: Vec<Object>) -> String {
+        let mut str = String::from("[");
+        for (idx, obj) in x.iter().enumerate() {
+            if idx < x.len() - 1 {
+                str = format!("{str}{}, ", obj.user_print());
+            } else {
+                str = format!("{str}{}", obj.user_print());
+            }
+        }
+        format!("{str}]")
+    }
+
+    fn user_print_array(x: Vec<Object>) -> String {
+        let mut str = String::from("[");
+        for (idx, obj) in x.iter().enumerate() {
+            if idx < x.len() - 1 {
+                str = format!("{str}{}, ", obj.user_print());
+            } else {
+                str = format!("{str}{}", obj.user_print());
+            }
+        }
+        format!("{str}]")
     }
 }
 

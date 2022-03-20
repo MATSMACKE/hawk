@@ -6,8 +6,9 @@
 /cas/Cargo.lock
 .DS_Store
 .vscode
+.VSCodeCounter
 .idea
 testfile.hawk
 library.hawk
-out.csv
 test.csv
+app/out.csv
