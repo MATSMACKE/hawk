@@ -4,6 +4,8 @@ use hawk_lib::csv::{csv_to_datatable, datatable_to_csv};
 
 use crate::{eval::Interpreter, Object};
 
+use std::f64::consts::{E, LN_10, PI, TAU};
+
 impl Interpreter {
     pub fn get_std_rs_fn(&mut self, identifier: String, args: Vec<Object>) -> Option<Object> {
         match identifier.as_str() {
@@ -53,8 +55,90 @@ impl Interpreter {
                     }
                 }
                 Some(Object::Null)
+            },
+            "pi" => {
+                Some(Object::Float(PI))
+            },
+            "ln10" => {
+                Some(Object::Float(LN_10))
+            },
+            "ln" => {
+                let x;
+                if let Object::Float(val) = args[0] {
+                    x = val
+                } else if let Object::Int(val) = args[0] {
+                    x = val as f64
+                } else {
+                    return None
+                }
+
+                Some(Object::Float(ln(x)))
+            },
+            "e" => {
+                Some(Object::Float(E))
+            },
+            "sin" => {
+                let x;
+                if let Object::Float(val) = args[0] {
+                    x = val
+                } else if let Object::Int(val) = args[0] {
+                    x = val as f64
+                } else {
+                    return None
+                }
+
+                
+                Some(Object::Float(sin(x)))
             }
             _ => None
         }
     }
+}
+
+fn ln(mut x: f64) -> f64 {
+    let mut decimal = 0.;
+    while x > 1. {
+        x = x / 10.;
+        decimal = decimal + 1.
+    }
+    let mut sum = 0.;
+    let mut i = 1.;
+    while i < 100. {
+        sum = sum + ((((x - 1.) as f64).powf(i)) * ((-1_f64).powf(i - 1.))) / i;
+        i = i + 1.;
+    }
+    sum + decimal * LN_10
+}
+
+fn factorial(x: i128) -> i128 {
+    let mut x = x;
+    let mut result: i128 = 1;
+    while x > 0 {
+        result *= x;
+        x -= 1;
+    }
+    result
+}
+
+fn sin(x: f64) -> f64 {
+    let mut x = x;
+    let mut sum = 0.;
+    let mut i = 1.;
+
+    if x > 0. {
+        while x > (TAU) {
+            x = x - TAU;
+        }
+    } else {
+        while x < -(TAU) {
+            x = x + TAU
+        }
+    }
+
+    while i < 20. {
+        sum = sum + ((x.powf(i)) * ((-1_f64).powf((i - 1.) / 2.))) / (factorial(i as i128) as f64);
+        i = i + 2.;
+    }
+
+    sum
 }

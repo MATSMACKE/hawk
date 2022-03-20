@@ -52,7 +52,6 @@ impl<'a> Lexer<'a> {
                 "?" => self.add_token(TokenType::QuestionMark, None),
                 ";" => self.add_token(TokenType::Semicolon, None),
 
-                // Plus or PlusMinus
                 "+" => {
                     self.plus()
                 },
@@ -65,17 +64,14 @@ impl<'a> Lexer<'a> {
                     self.exclamation()
                 },
 
-                // Greater than and greater than or equal
                 ">" => {
                     self.greater()
                 },
 
-                // Less than and less than or equal
                 "<" => {
                     self.less()
                 },
 
-                // Comments or slashes
                 "/" => {
                     self.slash()
                 },

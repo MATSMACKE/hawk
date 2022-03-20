@@ -40,16 +40,16 @@ impl Display for Object {
             Self::Null => write!(f, "Object::Null"),
             Self::Int(x) => write!(f, "Object::Int({})", x),
             Self::Float(x) => write!(f, "Object::Float({})", x),
-            Self::String(x) => write!(f, "Object::String(\"{}\".to_string())", x),
+            Self::String(x) => write!(f, "Object::String(\"{}\".to_owned())", x),
             Self::Boolean(x) => write!(f, "Object::Boolean({})", x),
             Self::Uncertain{value, uncertainty} => write!(f, "Object::Uncertain{{value: {}, uncertainty: {}}}", value, uncertainty),
             Self::Function{params, block} => {
-                if params.len() != 0 {write!(f, "Object::Function{{params: vec!{:?}.iter().map(|x| x.to_string()).collect(), block: Box::new({})}}", params, block)}
+                if params.len() != 0 {write!(f, "Object::Function{{params: vec!{:?}.iter().map(std::string::ToString::to_string).collect(), block: Box::new({})}}", params, block)}
                 else {write!(f, "Object::Function{{params: Vec::new(), block: Box::new({})}}", block)}},
             Self::Array(x) => write!(f, "Object::Array({})", Objects(x.clone())),
-            Self::Identifier(x) => write!(f, "Object::Identifier(\"{}\".to_string())", x),
+            Self::Identifier(x) => write!(f, "Object::Identifier(\"{}\".to_owned())", x),
             Self::Column(data) => write!(f, "Object::Column({})", Objects(data.clone())),
-            Self::DataTable{names, data} => write!(f, "Object::DataTable{{ names: vec!{:?}.iter().map(|x| x.to_string()).collect(), data: {} }}", names, Objects(data.clone()))
+            Self::DataTable{names, data} => write!(f, "Object::DataTable{{ names: vec!{:?}.iter().map(|x| x.to_owned()).collect(), data: {} }}", names, Objects(data.clone()))
         }
     }
 }

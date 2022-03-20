@@ -41,8 +41,8 @@ impl Display for Statement {
             Self::Block(x) => write!(f, "Statement::Block(vec![{}])", Statements(x.clone())),
             Self::Break => write!(f, "Statement::Break"),
             Self::EOF => write!(f, "Statement::EOF"),
-            Self::Definition{name, value} => write!(f, "Statement::Definition{{name: \"{}\".to_string(), value: Box::new({})}}", name, value),
-            Self::Function{identifier, params, block} => write!(f, "Statement::Function{{identifier: \"{}\".to_string(), params: vec!{:?}.iter().map(|x| x.to_string()).collect(), block: Box::new({})}}", identifier, params, block),
+            Self::Definition{name, value} => write!(f, "Statement::Definition{{name: \"{}\".to_owned(), value: Box::new({})}}", name, value),
+            Self::Function{identifier, params, block} => write!(f, "Statement::Function{{identifier: \"{}\".to_owned(), params: vec!{:?}.iter().map(|x| x.to_owned()).collect(), block: Box::new({})}}", identifier, params, block),
             Self::Import(x) => write!(f, "Statement::Import(Box::new({}))", x),
             Self::Process{readfile, writefile, block} => write!(f, "Statement::Process{{readfile: Box::new({readfile}), readfile: Box::new({writefile}), Box::new({block})}}"),
             Self::If{condition, block} => write!(f, "Statement::If{{condition: Box::new({}), block: Box::new({})}}", condition, block),
@@ -108,9 +108,9 @@ impl Display for Expression {
             Self::Array(x) => write!(f, "Expression::Array({})", Expressions(x.clone())),
             Self::Unary{operand, operator} => write!(f, "Expression::Unary{{operand: Box::new({}), operator: {}}}", operand, operator),
             Self::Binary{operand1, operand2, operator} => write!(f, "Expression::Binary{{operand1: Box::new({}), operand2: Box::new({}), operator: {}}}", operand1, operand2, operator),
-            Self::FunctionCall{identifier, args} => write!(f, "Expression::FunctionCall{{identifier: \"{}\".to_string(), args: vec![{}]}}", identifier, Expressions(args.clone())),
-            Self::MethodCall{object, method, args} => write!(f, "Expression::FunctionCall{{object: \"{}\".to_string(), method: \"{}\".to_string(), args: vec![{}]}}", object, method, Expressions(args.clone())),
-            Self::ArrayIndex{identifier, index} => write!(f, "Expression::ArrayIndex{{identifier: \"{}\".to_string(), index: {}", identifier, index)
+            Self::FunctionCall{identifier, args} => write!(f, "Expression::FunctionCall{{identifier: \"{}\".to_owned(), args: vec![{}]}}", identifier, Expressions(args.clone())),
+            Self::MethodCall{object, method, args} => write!(f, "Expression::FunctionCall{{object: \"{}\".to_owned(), method: \"{}\".to_owned(), args: vec![{}]}}", object, method, Expressions(args.clone())),
+            Self::ArrayIndex{identifier, index} => write!(f, "Expression::ArrayIndex{{identifier: \"{}\".to_owned(), index: {}", identifier, index)
         }.unwrap();
         Ok(())
     }
