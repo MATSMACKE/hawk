@@ -1,6 +1,7 @@
-use std::fmt::{Display, Formatter, Result, Error};
-use crate::token::{TokenType};
+use std::fmt::{Display, Error, Formatter, Result};
+
 use crate::object::Object;
+use crate::token::TokenType;
 
 #[derive(Debug, Clone)]
 pub enum Statement {

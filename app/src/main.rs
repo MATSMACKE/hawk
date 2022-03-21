@@ -28,7 +28,7 @@ fn main() {
     }
 }
 
-/// Runs Hawk code from a file given by `filename`
+/// Runs Hawk code from a file given by `filename`, returning the global scope after execution
 fn run_script(filename: String, global_state: HashMap<String, Object>) -> HashMap<String, Object> {
     let source = std::fs::read_to_string(filename);
     match source {
@@ -52,7 +52,6 @@ fn repl() {
     }
     print!("\nWelcome to Hawk REPL. Exit the REPL by running 'exit' or pressing ctrl + C.");
 
-    // Main REPL loop
     loop {
         // Output '>>' to indicate input needed
         print!("\n>> ");
@@ -64,11 +63,9 @@ fn repl() {
             .read_line(&mut line)
             .expect("failed to read line");
 
-        // Check if need to exit REPL
         if line == "exit\n" {break}
 
         else {
-            // Run the given code
             state = run::run(line, state)
         }
     }
@@ -80,7 +77,6 @@ fn repl() {
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {

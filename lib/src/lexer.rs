@@ -1,6 +1,7 @@
-use crate::token::{Token, TokenType};
-use crate::object::Object;
 use unicode_segmentation::UnicodeSegmentation;
+
+use crate::object::Object;
+use crate::token::{Token, TokenType};
 
 pub struct Lexer<'a> {
     characters: Vec<&'a str>,
@@ -30,62 +31,66 @@ impl<'a> Lexer<'a> {
         while self.index < self.num_chars {
             let c = self.characters[self.index];    // Get character to match on
             self.consume_char();
-            match c {
-                " " | "\r" | "\t" => {},    // Ignore whitespace
-                "\n" => {
-                    self.line = self.line + 1;  // Keep track of line number
-                },
-                "(" => self.add_token(TokenType::ParenthesisLeft, None),
-                ")" => self.add_token(TokenType::ParenthesisRight, None),
-                "{" => self.add_token(TokenType::BraceLeft, None),
-                "}" => self.add_token(TokenType::BraceRight, None),
-                "[" => self.add_token(TokenType::BracketLeft, None),
-                "]" => self.add_token(TokenType::BracketRight, None),
-                "|" => self.add_token(TokenType::Abs, None),
-                "*" => self.add_token(TokenType::Asterisk, None),
-                "^" => self.add_token(TokenType::Caret, None),
-                ":" => self.add_token(TokenType::Colon, None),
-                "," => self.add_token(TokenType::Comma, None),
-                "." => self.add_token(TokenType::Dot, None),
-                "-" => self.add_token(TokenType::Minus, None),
-                "±" => self.add_token(TokenType::PlusMinus, None),
-                "?" => self.add_token(TokenType::QuestionMark, None),
-                ";" => self.add_token(TokenType::Semicolon, None),
-
-                "+" => {
-                    self.plus()
-                },
-
-                "=" => {
-                    self.equal()
-                },
-
-                "!" => {
-                    self.exclamation()
-                },
-
-                ">" => {
-                    self.greater()
-                },
-
-                "<" => {
-                    self.less()
-                },
-
-                "/" => {
-                    self.slash()
-                },
-
-                "\"" => {
-                    self.quote()
-                },
-                _   => {
-                    self.number_keyword_identifier(c)
-                }
-            }
+            self.match_character(c);
         }
 
         self.add_token(TokenType::EOF, None);   // Add an EOF after lexing all code
+    }
+
+    fn match_character(&mut self, c: &str) {
+        match c {
+            " " | "\r" | "\t" => {},    // Ignore whitespace
+            "\n" => {
+                self.line = self.line + 1;  // Keep track of line number
+            },
+            "(" => self.add_token(TokenType::ParenthesisLeft, None),
+            ")" => self.add_token(TokenType::ParenthesisRight, None),
+            "{" => self.add_token(TokenType::BraceLeft, None),
+            "}" => self.add_token(TokenType::BraceRight, None),
+            "[" => self.add_token(TokenType::BracketLeft, None),
+            "]" => self.add_token(TokenType::BracketRight, None),
+            "|" => self.add_token(TokenType::Abs, None),
+            "*" => self.add_token(TokenType::Asterisk, None),
+            "^" => self.add_token(TokenType::Caret, None),
+            ":" => self.add_token(TokenType::Colon, None),
+            "," => self.add_token(TokenType::Comma, None),
+            "." => self.add_token(TokenType::Dot, None),
+            "-" => self.add_token(TokenType::Minus, None),
+            "±" => self.add_token(TokenType::PlusMinus, None),
+            "?" => self.add_token(TokenType::QuestionMark, None),
+            ";" => self.add_token(TokenType::Semicolon, None),
+
+            "+" => {
+                self.plus()
+            },
+
+            "=" => {
+                self.equal()
+            },
+
+            "!" => {
+                self.exclamation()
+            },
+
+            ">" => {
+                self.greater()
+            },
+
+            "<" => {
+                self.less()
+            },
+
+            "/" => {
+                self.slash()
+            },
+
+            "\"" => {
+                self.quote()
+            },
+            _ => {
+                self.number_keyword_identifier(c)
+            }
+        }
     }
 
     /// Handles number literals, keywords, and identifiers

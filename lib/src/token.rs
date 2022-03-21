@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter, Result, Error};
+use std::fmt::{Display, Error, Formatter, Result};
 
 use crate::object::Object;
 

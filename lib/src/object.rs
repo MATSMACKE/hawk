@@ -1,9 +1,9 @@
-use std::{fmt::{Display, Formatter, Result, Error}, i128};
-use crate::tree::Statement;
-use term_table::{
-    row::Row
-};
+use std::{fmt::{Display, Error, Formatter, Result}, i128};
+
+use term_table::row::Row;
 use term_table::{Table, TableStyle};
+
+use crate::tree::Statement;
 
 /// The structure that stores literals through all stages of the interpreter (from lexing to evaluating)
 #[derive(Debug, Clone)]
