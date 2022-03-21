@@ -1,6 +1,6 @@
 mod expression;
 pub mod interpreter;
-mod statement;
 mod operations;
+mod statement;
 
 pub use interpreter::Interpreter;

@@ -11,13 +11,13 @@ pub fn exit<'a>(message: &'a str, line: usize) -> Object {
     execute!(
         stdout(),
         SetColors(Colors{ foreground: Some(Red), background: None}),
-        Print(format!("
-Error: {message}
-On line: {line}")),
+        Print(format!("Error on line {line}: {message}")),
     ).unwrap();
     eprintln!(
 "");
     std::process::exit(1);
 
+    // Satisfy return to shut up the comp
+    #[allow(unreachable_code)]
     Object::Null
 }

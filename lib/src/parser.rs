@@ -2,6 +2,8 @@ use crate::object::Object;
 use crate::token::{Token, TokenType};
 use crate::tree::{Expression, Statement};
 
+use crate::error::exit;
+
 pub struct Parser {
     tokens: Vec<Token>,
     index: usize
@@ -62,7 +64,8 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.previous().literal {
             name = x
         } else {
-            panic!("Expected variable name to be String")
+            exit(&format!("Expected identifier, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
+            name = String::new();
         }
         self.consume();
         let value = self.expression();
@@ -79,7 +82,8 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.current().literal {
             name = x
         } else {
-            panic!("Expected variable name to be String");
+            exit(&format!("Expected identifier, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
+            name = String::new();
         }
         self.consume();
         let value: Box<Expression>;
@@ -148,7 +152,7 @@ impl Parser {
                         if let Some(Object::Identifier(identifier)) = self.current().literal {
                             params.push(identifier)
                         } else {
-                            panic!("Expected identifier as function parameter")
+                            exit(&format!("Expected identifier as function parameter, found {}", self.current().literal.unwrap().user_print(self.current().line)), self.current().line);
                         }
                         self.consume();
                         self.consume()
@@ -157,10 +161,12 @@ impl Parser {
                 let block = Box::new(self.statement());
                 Statement::Function { identifier, params, block }
             } else {
-                panic!("Expected parenthesis after function identifier")
+                exit(&format!("Expected parentheses after function identifier"), self.current().line);
+                Statement::EOF
             }
         } else {
-            panic!("Functions need identifiers")
+            exit(&format!("Function needs identifier"), self.current().line);
+            Statement::EOF
         }
     }
 
@@ -357,7 +363,7 @@ impl Parser {
         if let TokenType::ParenthesisRight = self.current().token_type {
             self.consume();
         } else {
-            panic!("Expected closing parenthesis, instead found {}", self.current())
+            exit(&format!("Expected closing parenthesis, instead found {}", self.current().token_type), self.current().line);
         }
 
         expression
@@ -368,7 +374,8 @@ impl Parser {
             self.consume();
             Box::new(Expression::Literal(x))
         } else {
-            panic!("Couldn't parse literal on line {}", self.current().line)
+            exit(&format!("Couldn't parse literal"), self.current().line);
+            Box::new(Expression::Literal(Object::Null))
         }
     }
 
@@ -387,10 +394,12 @@ impl Parser {
                 }
                 Box::new(Expression::MethodCall { object: identifier, method: methodname, args })
             } else {
-                panic!("Method call needs method name")
+                exit(&format!("Expected method name method name"), self.current().line);
+                Box::new(Expression::Literal(Object::Null))
             }
         } else {
-            panic!("Couldn't get function parameters")
+            exit(&format!("Expected object identifier, found {}", self.current()), self.current().line);
+            Box::new(Expression::Literal(Object::Null))
         }
     }
 
@@ -402,7 +411,8 @@ impl Parser {
             self.consume();
             Box::new(Expression::ArrayIndex { identifier, index })
         } else {
-            panic!("Couldn't get array index")
+            exit(&format!("Couldn't get array index"), self.current().line);
+                Box::new(Expression::Literal(Object::Null))
         }
     }
 
@@ -419,7 +429,8 @@ impl Parser {
             }
             Box::new(Expression::FunctionCall { identifier, args })
         } else {
-            panic!("Couldn't get function parameters")
+            exit(&format!("Couldn't get function parameters"), self.current().line);
+            Box::new(Expression::Literal(Object::Null))
         }
     }
 

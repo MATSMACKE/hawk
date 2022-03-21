@@ -13,79 +13,51 @@ impl Interpreter {
     /// Traverses an expression tree to evaluate it and return an Object
     pub fn eval_expression(&mut self, expression: Box<Expression>) -> Object {
         match *expression {
-            Expression::Binary{operand1, operand2, operator} => {
-                self.eval_binary(operand1, operand2, operator)
-            },
-            Expression::Unary{operand, operator} => {
-                self.eval_unary(operand, operator)
-            },
-            Expression::Literal(obj) => {
-                self.eval_literal(obj)
-            },
-            Expression::FunctionCall{identifier, args} => {
+            Expression::Binary {
+                operand1,
+                operand2,
+                operator,
+            } => self.eval_binary(operand1, operand2, operator),
+            Expression::Unary { operand, operator } => self.eval_unary(operand, operator),
+            Expression::Literal(obj) => self.eval_literal(obj),
+            Expression::FunctionCall { identifier, args } => {
                 self.eval_function_call(identifier, args)
-            },
-            Expression::Array(exprs) => {
-                self.eval_array_literal(exprs)
-            },
-            Expression::ArrayIndex{identifier, index} => {
-                self.eval_arrayindex(identifier, index)
             }
-            _ => Object::Null
+            Expression::Array(exprs) => self.eval_array_literal(exprs),
+            Expression::ArrayIndex { identifier, index } => self.eval_arrayindex(identifier, index),
+            _ => Object::Null,
         }
     }
 
     /// Match operator and call method to evaluate binary operation
-    fn eval_binary(&mut self, operand1: Box<Expression>, operand2: Box<Expression>, operator: TokenType) -> Object {
+    fn eval_binary(
+        &mut self,
+        operand1: Box<Expression>,
+        operand2: Box<Expression>,
+        operator: TokenType,
+    ) -> Object {
         let operand1 = self.eval_expression(operand1);
         let operand2 = self.eval_expression(operand2);
 
         match operator {
-            TokenType::Plus => {
-                Self::add(operand1, operand2)
-            },
-            TokenType::Minus => {
-                Self::subtract(operand1, operand2)
-            },
-            TokenType::Asterisk => {
-                Self::multiply(operand1, operand2)
-            },
-            TokenType::Slash => {
-                Self::divide(operand1, operand2)
-            },
-            TokenType::Caret => {
-                Self::exponent(operand1, operand2)
-            },
-            TokenType::PlusMinus => {
-                Self::make_uncertain(operand1, operand2)
-            },
-            TokenType::EqualEqual => {
-                Self::equalequal(operand1, operand2)
-            },
-            TokenType::NotEqual => {
-                Self::notequal(operand1, operand2)
-            },
-            TokenType::Or => {
-                Self::or(operand1, operand2)
-            },
-            TokenType::And => {
-                Self::and(operand1, operand2)
-            },
-            TokenType::LessThan => {
-                Self::lessthan(operand1, operand2)
-            },
-            TokenType::LessThanEqual => {
-                Self::lessthanequal(operand1, operand2)
-            },
-            TokenType::GreaterThan => {
-                Self::greaterthan(operand1, operand2)
-            },
-            TokenType::GreaterThanEqual => {
-                Self::greaterthanequal(operand1, operand2)
-            },
-            _ => {
-                exit("Couldn't evaluate binary expression: operator does not match any binary operator", self.line)
-            }
+            TokenType::Plus => Self::add(operand1, operand2, self.line),
+            TokenType::Minus => Self::subtract(operand1, operand2, self.line),
+            TokenType::Asterisk => Self::multiply(operand1, operand2, self.line),
+            TokenType::Slash => Self::divide(operand1, operand2, self.line),
+            TokenType::Caret => Self::exponent(operand1, operand2, self.line),
+            TokenType::PlusMinus => Self::make_uncertain(operand1, operand2, self.line),
+            TokenType::EqualEqual => Self::equalequal(operand1, operand2, self.line),
+            TokenType::NotEqual => Self::notequal(operand1, operand2, self.line),
+            TokenType::Or => Self::or(operand1, operand2, self.line),
+            TokenType::And => Self::and(operand1, operand2, self.line),
+            TokenType::LessThan => Self::lessthan(operand1, operand2, self.line),
+            TokenType::LessThanEqual => Self::lessthanequal(operand1, operand2, self.line),
+            TokenType::GreaterThan => Self::greaterthan(operand1, operand2, self.line),
+            TokenType::GreaterThanEqual => Self::greaterthanequal(operand1, operand2, self.line),
+            _ => exit(
+                "Couldn't evaluate binary expression: operator does not match any binary operator",
+                self.line,
+            ),
         }
     }
 
@@ -93,28 +65,28 @@ impl Interpreter {
     fn eval_unary(&mut self, operand: Box<Expression>, operator: TokenType) -> Object {
         let eval_op = self.eval_expression(operand);
         match operator {
-            TokenType::Minus => {
-                Self::negate(eval_op)
-            },
-            TokenType::Not => {
-                Self::not(eval_op)
-            },
-            _ => {
-                exit(&format!("Error: expected binary operator, instead found {:?}", operator), self.line)
-            }
+            TokenType::Minus => Self::negate(eval_op, self.line),
+            TokenType::Not => Self::not(eval_op, self.line),
+            _ => exit(
+                &format!(
+                    "Error: expected binary operator, instead found {:?}",
+                    operator
+                ),
+                self.line,
+            ),
         }
     }
 
     /// Evaluates literal expression
     fn eval_literal(&mut self, obj: Object) -> Object {
         if let Object::Identifier(identifier) = obj {
-            self.get_variable(identifier)   // Dereference if `obj` is an identifier
+            self.get_variable(identifier) // Dereference if `obj` is an identifier
         } else {
             obj
         }
     }
 
-    /// Calls function, taking into account uncertainties and columns in order to 
+    /// Calls function, taking into account uncertainties and columns in order to
     fn eval_function_call(&mut self, identifier: String, args: Vec<Box<Expression>>) -> Object {
         let mut uncertain_index = 0;
         let mut has_uncertain = false;
@@ -123,14 +95,17 @@ impl Interpreter {
 
         for (index, arg) in args.iter().enumerate() {
             let arg = self.eval_expression(arg.clone());
-            if let Object::Uncertain{value, uncertainty} = arg {
+            if let Object::Uncertain { value, uncertainty } = arg {
                 if has_uncertain {
-                    exit("Functions can only have one argument with an uncertainty", self.line);
+                    exit(
+                        "Functions can only have one argument with an uncertainty",
+                        self.line,
+                    );
                 }
                 has_uncertain = true;
                 uncertain_index = index;
-                evaled_args.push(Object::Uncertain{value, uncertainty})
-            } else if let Object::Column(vals) = arg{
+                evaled_args.push(Object::Uncertain { value, uncertainty })
+            } else if let Object::Column(vals) = arg {
                 columns.push(index);
                 evaled_args.push(Object::Column(vals))
             } else {
@@ -139,8 +114,7 @@ impl Interpreter {
         }
         if columns.len() > 0 {
             Object::Null
-        }
-        else if has_uncertain {
+        } else if has_uncertain {
             self.call_function_with_uncertainty(identifier, evaled_args, uncertain_index)
         } else {
             let mut evaled_args: Vec<Object> = Vec::new();
@@ -162,7 +136,7 @@ impl Interpreter {
 
     /// Gets index of array
     fn eval_arrayindex(&mut self, identifier: String, index: Box<Expression>) -> Object {
-        let index = self.eval_expression(index);    // Evaluate the array index
+        let index = self.eval_expression(index); // Evaluate the array index
 
         if let Object::Int(index) = index {
             if index >= 0 {
@@ -172,8 +146,7 @@ impl Interpreter {
                 } else {
                     exit("Can only index an array", self.line)
                 }
-            }
-            else {
+            } else {
                 exit("Index must be 0 or above", self.line)
             }
         } else {
@@ -182,15 +155,23 @@ impl Interpreter {
     }
 
     /// Calls a function where one argument is an `Uncertain`, using a maximum and minimum value to find the uncertainty
-    fn call_function_with_uncertainty(&mut self, identifier: String, mut evaled_args: Vec<Object>, uncertain_index: usize) -> Object {
-        if let Object::Uncertain{value, uncertainty} = evaled_args[uncertain_index].clone() {
+    fn call_function_with_uncertainty(
+        &mut self,
+        identifier: String,
+        mut evaled_args: Vec<Object>,
+        uncertain_index: usize,
+    ) -> Object {
+        if let Object::Uncertain { value, uncertainty } = evaled_args[uncertain_index].clone() {
             // Change uncertain arg to `value + uncertainty` to find max
             evaled_args[uncertain_index] = Object::Float(value + uncertainty);
             let max;
             match self.call_function(identifier.clone(), evaled_args.clone()) {
                 Object::Float(x) => max = x,
                 Object::Int(x) => max = x as f64,
-                x => panic!("Expected Float or Int, got {x}")
+                x => {
+                    exit(&format!("Expected Float or Int, got {x}"), self.line);
+                    max = 0.
+                }
             }
 
             // Change uncertain arg to `value - uncertainty` to find min
@@ -199,7 +180,10 @@ impl Interpreter {
             match self.call_function(identifier.clone(), evaled_args.clone()) {
                 Object::Float(x) => min = x,
                 Object::Int(x) => min = x as f64,
-                x => panic!("Expected Float or Int, got {x}")
+                x => {
+                    exit(&format!("Expected Float or Int, got {x}"), self.line);
+                    min = 0.
+                }
             }
 
             // Change uncertain arg to `value` to find value
@@ -208,9 +192,15 @@ impl Interpreter {
             match self.call_function(identifier, evaled_args) {
                 Object::Float(x) => val = x,
                 Object::Int(x) => val = x as f64,
-                x => panic!("Expected Float or Int, got {x}")
+                x => {
+                    exit(&format!("Expected Float or Int, got {x}"), self.line);
+                    val = 0.
+                }
             }
-            Object::Uncertain{value: val, uncertainty: ((max - min) / 2.).abs()}
+            Object::Uncertain {
+                value: val,
+                uncertainty: ((max - min) / 2.).abs(),
+            }
         } else {
             panic!("`AAAAH why in the world is this not an uncertain that's literally impossible Rust just forced me to include this panic here don't mind me")
         }
@@ -249,7 +239,7 @@ impl Interpreter {
             } else if let Some(x) = check_std {
                 x
             } else {
-                panic!("The variable {identifier} does not appear to be a function. Did you define it? Is it in a file you haven't imported?")
+                exit(&format!("The variable {identifier} does not appear to be a function. Did you define it? Is it in a file you haven't imported?"), self.line)
             }
         }
     }

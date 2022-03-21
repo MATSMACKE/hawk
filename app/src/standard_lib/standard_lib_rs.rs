@@ -1,5 +1,7 @@
 use std::fs::{read_to_string, write};
 
+use crate::error::exit;
+
 use hawk_lib::csv::{csv_to_datatable, datatable_to_csv};
 
 use crate::{eval::Interpreter, Object};
@@ -11,10 +13,10 @@ impl Interpreter {
         match identifier.as_str() {
             "readfilestr" => {
                 if let Object::String(file) = args[0].clone() {
-                    if let Ok(str) = read_to_string(file) {
+                    if let Ok(str) = read_to_string(&file) {
                         Some(Object::String(str))
                     } else {
-                        Some(Object::Null)
+                        Some(exit(&format!("Expected string as filename, found {}", file), self.line))
                     }
                 } else {
                     Some(Object::Null)
@@ -25,13 +27,13 @@ impl Interpreter {
                 let file = args[0].clone();
                 if let Object::String(str) = val {
                     if let Object::String(filename) = file {
-                        if let Ok(()) = write(filename, str) {
+                        if let Ok(()) = write(&filename, str) {
                             
                         } else {
-                            panic!("Couldn't write file");
+                            exit(&format!("Couldn't write file: {}", filename), self.line);
                         }
                     } else {
-                        panic!("Incorrect filename");
+                        exit(&format!("Expected string as filename, found {}", file), self.line);
                     }
                 }
                 Some(Object::Null)
@@ -39,9 +41,9 @@ impl Interpreter {
             "read" => {
                 let filename = args[0].clone();
                 if let Object::String(filename) = filename {
-                    Some(csv_to_datatable(filename))
+                    Some(csv_to_datatable(filename, self.line))
                 } else {
-                    panic!("Expected string, found {}", filename)
+                    Some(exit(&format!("Expected string as filename, found {}", filename), self.line))
                 }
             },
             "write" => {
@@ -49,9 +51,9 @@ impl Interpreter {
                 let file = args[0].clone();
                 if let Object::DataTable{names: _, data: _} = val {
                     if let Object::String(filename) = file {
-                        datatable_to_csv(filename, val);
+                        datatable_to_csv(filename, val, self.line);
                     } else {
-                        panic!("Incorrect filename");
+                        exit(&format!("Expected string as filename, found {}", file), self.line);
                     }
                 }
                 Some(Object::Null)
@@ -84,7 +86,8 @@ impl Interpreter {
                 } else if let Object::Int(val) = args[0] {
                     x = val as f64
                 } else {
-                    return None
+                    exit(&format!("Expected number as argument to sin, found {}", args[0]), self.line);
+                    x = 0.
                 }
 
                 
