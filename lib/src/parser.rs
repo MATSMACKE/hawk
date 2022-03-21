@@ -14,7 +14,15 @@ impl Parser {
         let mut statements: Vec<Statement> = Vec::new();
 
         while !parser.at_end() {
-            statements.push(parser.statement())
+            let start_line = parser.current().line;
+
+            statements.push(parser.statement());
+
+            let mut end_line = parser.current().line;
+            while end_line > start_line {
+                statements.push(Statement::Line);
+                end_line -= 1;
+            }
         }
         
         statements
@@ -285,7 +293,7 @@ impl Parser {
 
     fn unary(&mut self) -> Box<Expression> {
         if let 
-                  TokenType::ExclamationMark 
+                  TokenType::Not 
                 | TokenType::Minus = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();

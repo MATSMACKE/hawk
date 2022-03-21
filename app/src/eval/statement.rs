@@ -99,7 +99,7 @@ impl Interpreter {
                 if let Object::String(filename) = self.eval_expression(expr) {
                     self.globals = crate::run_script(filename, self.globals.clone());
                 } else {
-                    panic!("Expected filename to be a string")
+                    panic!("Expected filename to be a string on line {}", self.line)
                 }
             }
             Statement::Expression(expr) => {
@@ -119,7 +119,7 @@ impl Interpreter {
                             self.insert_top_scope(name.clone(), data[index].clone())
                         }
                     } else {
-                        panic!("expected datatable")
+                        panic!("expected datatable on line {}", self.line)
                     }
                 }
                 self.run_statement(*block);
@@ -142,7 +142,8 @@ impl Interpreter {
                         },
                     ],
                 );
-            }
+            },
+            Statement::Line => {self.line += 1}
             _ => {}
         }
     }

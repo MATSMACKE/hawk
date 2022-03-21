@@ -24,18 +24,28 @@ fn main() {
         2 => {run_script(args[1].clone(), HashMap::new());},
 
         // Expect either 1 argument for REPL or 2 for executing a file
-        _ => panic!("incorrect args")
+        _ => {
+            println!(
+"Incorrect args: expected either:
+No arguments (open REPL) or
+1 Argument (run a .hawk file)"
+);
+        std::process::exit(1)
+        }
     }
 }
 
 /// Runs Hawk code from a file given by `filename`, returning the global scope after execution
 fn run_script(filename: String, global_state: HashMap<String, Object>) -> HashMap<String, Object> {
-    let source = std::fs::read_to_string(filename);
+    let source = std::fs::read_to_string(filename.clone());
     match source {
         Result::Ok(source) => {
             run::run(source, global_state)
         }
-        Result::Err(_) => panic!("couldn't read file")
+        Result::Err(_) => {
+            println!("Couldn't read file {filename}");
+            std::process::exit(1)
+        }
     }
 }
 
@@ -57,11 +67,7 @@ fn repl() {
         print!("\n>> ");
         std::io::Write::flush(&mut std::io::stdout()).expect("flush failed!"); // Force output
 
-        // Read code from terminal
-        let mut line = String::new();
-        std::io::stdin()
-            .read_line(&mut line)
-            .expect("failed to read line");
+        let line = read_input();
 
         if line == "exit\n" {break}
 
@@ -78,10 +84,14 @@ fn repl() {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_lex_and_parse_expr() {
-
-    }
+fn read_input() -> String {
+// Read code from terminal
+    let mut line = String::new();
+    std::io::stdin()
+        .read_line(&mut line)
+        .expect("failed to read line");
+    line
 }
+
+#[cfg(test)]
+mod test;

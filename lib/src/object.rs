@@ -6,7 +6,7 @@ use term_table::{Table, TableStyle};
 use crate::tree::Statement;
 
 /// The structure that stores literals through all stages of the interpreter (from lexing to evaluating)
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Object {
     /// Null object
     Null,

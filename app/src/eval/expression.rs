@@ -1,3 +1,5 @@
+use crate::error::exit;
+
 use std::collections::HashMap;
 
 use crate::eval::Interpreter;
@@ -82,7 +84,7 @@ impl Interpreter {
                 Self::greaterthanequal(operand1, operand2)
             },
             _ => {
-                panic!("Problem")
+                exit("Couldn't evaluate binary expression: operator does not match any binary operator", self.line)
             }
         }
     }
@@ -98,7 +100,7 @@ impl Interpreter {
                 Self::not(eval_op)
             },
             _ => {
-                panic!("Error: expected binary operator, instead found {:?}", operator);
+                exit(&format!("Error: expected binary operator, instead found {:?}", operator), self.line)
             }
         }
     }
@@ -123,7 +125,7 @@ impl Interpreter {
             let arg = self.eval_expression(arg.clone());
             if let Object::Uncertain{value, uncertainty} = arg {
                 if has_uncertain {
-                    panic!("Functions can only have one argument with an uncertainty")
+                    exit("Functions can only have one argument with an uncertainty", self.line);
                 }
                 has_uncertain = true;
                 uncertain_index = index;
@@ -168,14 +170,14 @@ impl Interpreter {
                 if let Object::Array(array) = array {
                     array[index as usize].clone()
                 } else {
-                    panic!("Can only index an array")
+                    exit("Can only index an array", self.line)
                 }
             }
             else {
-                panic!("Index must be 0 or above")
+                exit("Index must be 0 or above", self.line)
             }
         } else {
-            panic!("Index must be an int")
+            exit("Index must be an int", self.line)
         }
     }
 

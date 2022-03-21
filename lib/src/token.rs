@@ -2,7 +2,7 @@ use std::fmt::{Display, Error, Formatter, Result};
 
 use crate::object::Object;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 /// Differentiate between types of tokens
 pub enum TokenType {
     // Keywords
@@ -51,7 +51,6 @@ pub enum TokenType {
     Abs,
     PlusMinus,
     QuestionMark,
-    ExclamationMark,
     Assign,
     EqualEqual,
     GreaterThan,

@@ -13,7 +13,9 @@ pub struct Interpreter {
     /// A stack variables in local scopes are stored
     pub scopes: Vec<HashMap<String, Object>>,   
     /// Contains number of nested loops in order to handle `break`
-    pub loops: usize,                           
+    pub loops: usize,
+    /// Current line number (updated by `Line` statement)
+    pub line: usize
 }
 
 impl Interpreter {
@@ -27,6 +29,7 @@ impl Interpreter {
             globals: global_state,
             loops: 0,
             scopes: Vec::new(),
+            line: 0
         };
 
         for index in 0..interpreter.statements.len() {

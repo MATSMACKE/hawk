@@ -3,7 +3,7 @@ use std::fmt::{Display, Error, Formatter, Result};
 use crate::object::Object;
 use crate::token::TokenType;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Statement {
     /// Print statement
     Print(Box<Expression>),
@@ -32,7 +32,9 @@ pub enum Statement {
     /// Runs code from another file, importing functions and global variables
     Import(Box<Expression>),
     /// Process block to process and analyze data
-    Process{readfile: Box<Expression>, writefile: Box<Expression>, block: Box<Statement>}
+    Process{readfile: Box<Expression>, writefile: Box<Expression>, block: Box<Statement>},
+    /// Indicates new line
+    Line
 }
 
 // Implemented to print statements to Rust code for standard library compilation in `build.rs`
@@ -52,7 +54,8 @@ impl Display for Statement {
             Self::Print(x) => write!(f, "Statement::Print(Box::new({}))", x),
             Self::While{condition, block} => write!(f, "Statement::While{{condition: Box::new({}), block: Box::new({})}}", condition, block),
             Self::Loop(x) => write!(f, "Statement::Loop(Box::new({}))", x),
-            Self::Expression(x) => write!(f, "Statement::Expression(Box::new({}))", x)
+            Self::Expression(x) => write!(f, "Statement::Expression(Box::new({}))", x),
+            Self::Line => write!(f, "Statement::Line")
         }.unwrap();
         Ok(())
     }
@@ -73,7 +76,7 @@ impl Display for Statements {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Expression {
     /// Literal expression
     Literal(Object),

@@ -507,3 +507,14 @@ impl Interpreter {
         }
     }
 }
+
+#[test]
+fn addition() {
+    assert_eq!(Interpreter::add(Object::Int(4), Object::Float(5.1)), Object::Float(9.1));
+    assert_eq!(Interpreter::add(Object::Float(4.2), Object::Int(5)), Object::Float(9.2));
+    assert_eq!(Interpreter::add(Object::Float(4.3), Object::Float(5.2)), Object::Float(9.5));
+    assert_eq!(Interpreter::add(Object::Uncertain{value: 1.0, uncertainty: 0.1}, Object::Int(3)), Object::Uncertain{value: 4.0, uncertainty: 0.1});
+    assert_eq!(Interpreter::add(Object::Int(4), Object::Int(5)), Object::Int(9));
+    assert_eq!(Interpreter::add(Object::Int(4), Object::Int(5)), Object::Int(9));
+    assert_eq!(Interpreter::add(Object::Int(4), Object::Int(5)), Object::Int(9))
+}
