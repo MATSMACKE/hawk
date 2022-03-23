@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
+use hawk_common::object::Object;
 use crate::{eval, lexer, parser};
-use crate::object::Object;
 
 //use crate::token::Tokens;
 

@@ -1,8 +1,9 @@
-use crate::object::Object;
-use crate::token::{Token, TokenType};
-use crate::tree::{Expression, Statement};
+use hawk_common::object::Object;
+use hawk_common::token::{Token, TokenType};
+use hawk_common::tree::{Expression, Statement};
 
-use crate::error::exit;
+use hawk_cli_io::error::exit;
+use hawk_cli_io::object::UserPrint;
 
 pub struct Parser {
     tokens: Vec<Token>,

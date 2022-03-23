@@ -1,7 +1,7 @@
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::object::Object;
-use crate::token::{Token, TokenType};
+use hawk_common::object::Object;
+use hawk_common::token::{Token, TokenType};
 
 pub struct Lexer<'a> {
     characters: Vec<&'a str>,

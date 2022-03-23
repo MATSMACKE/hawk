@@ -1,14 +1,11 @@
 use std::{fmt::{Display, Error, Formatter, Result}, i128};
 
-use crate::error::exit;
-
-use term_table::row::Row;
-use term_table::{Table, TableStyle};
+use float_cmp::approx_eq;
 
 use crate::tree::Statement;
 
 /// The structure that stores literals through all stages of the interpreter (from lexing to evaluating)
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialOrd)]
 pub enum Object {
     /// Null object
     Null,
@@ -71,77 +68,37 @@ impl Display for Objects {
     }
 }
 
-impl Object {
-    /// Nicely formatted output for displaying objects with `print`
-    pub fn user_print(&self, line: usize) -> String {
-        match self.clone() {
-            Self::Boolean(x) =>format!("{x}"),
-            Self::Float(x) => format!("{x}"),
-            Self::Int(x) => format!("{x}"),
-            Self::String(x) => format!("{x}"),
-            Self::Identifier(x) => format!("{x}"),
-            Self::Function{params, block} => format!("Function: params: {:?}, block: {block}", params),
-            Self::Array(x) => {
-                Self::user_print_array(x, line)
+impl PartialEq for Object {
+    fn eq(&self, other: &Self) -> bool {
+        use Object::*;
+        match (self, other) {
+            (Int(a), Int(b)) => a == b,
+            (Float(a), Float(b)) => a == b,
+            (Int(a), Float(b)) | (Float(b), Int(a)) => approx_eq!(f64, *a as f64, *b, ulps = 3),
+            (Uncertain { value, uncertainty }, Int(i)) 
+            | (Int(i), Uncertain { value, uncertainty }) => (value + uncertainty) > (*i as f64) && (value - uncertainty) < (*i as f64),
+            (String(a), String(b)) => a == b,
+            (Uncertain { value: v1, uncertainty: u1 }, Uncertain { value: v2, uncertainty: u2 }) => v1 + u1 > v2 - u2 && v2 + u2 > v1 - u1,
+            (Array(a), Array(b)) => {
+                compare_vec_obj(a, b)
             },
-            Self::Null => String::from("Null"),
-            Self::Uncertain{value, uncertainty} => format!("{value} ± {uncertainty}"),
-            Self::Column(x) => {
-                Self::user_print_column(x, line)
+            (Column(a), Column(b)) => {
+                compare_vec_obj(a, b)
             },
-            Self::DataTable{names, data} => {
-                Self::user_print_datatable(names, data, line)
-            }
+            (Null, Null) => true,
+            _ => false
         }
     }
+}
 
-    fn user_print_datatable(names: Vec<String>, data: Vec<Object>, line: usize) -> String {
-        let mut table = Table::new();
-        table.style = TableStyle::extended();
-        if let Object::Column(_) = data[0].clone() {
-            let mut title_row = Vec::new();
-            for name in names {
-                title_row.push(name)
-            }
-            table.add_row(Row::new(title_row));
-            for i in 0..data.len() {
-                let mut row = Vec::new();
-                for column in data.clone() {
-                    if let Object::Column(objs) = column {
-                        row.push(objs[i].user_print(line))
-                    } else {
-                        exit(&format!("Expected column found {}", column), line);
-                    }
-                }
-                table.add_row(Row::new(row))
-            }
+fn compare_vec_obj(a: &Vec<Object>, b: &Vec<Object>) -> bool {
+    let mut x = true;
+    for (a, b) in a.iter().zip(b) {
+        if a != b {
+            x = false
         }
-        table.render()
     }
-
-    fn user_print_column(x: Vec<Object>, line: usize) -> String {
-        let mut str = String::from("[");
-        for (idx, obj) in x.iter().enumerate() {
-            if idx < x.len() - 1 {
-                str = format!("{str}{}, ", obj.user_print(line));
-            } else {
-                str = format!("{str}{}", obj.user_print(line));
-            }
-        }
-        format!("{str}]")
-    }
-
-    fn user_print_array(x: Vec<Object>, line: usize) -> String {
-        let mut str = String::from("[");
-        for (idx, obj) in x.iter().enumerate() {
-            if idx < x.len() - 1 {
-                str = format!("{str}{}, ", obj.user_print(line));
-            } else {
-                str = format!("{str}{}", obj.user_print(line));
-            }
-        }
-        format!("{str}]")
-    }
+    x
 }
 
 /// A utility struct to work around inability to `impl Display for Vec<Object>`

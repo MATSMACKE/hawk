@@ -5,5 +5,6 @@ edition = "2021"
 
 [dependencies]
 unicode-segmentation = "1.9.0"
-term-table = "1.3.2"
-crossterm = "0.23.1"
+float-cmp = "0.9.0"
+hawk_cli_io = {path = "../io"}
+hawk_common = {path = "../common"}

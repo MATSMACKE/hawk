@@ -4,8 +4,10 @@ use crate::error::exit;
 
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::object::Object;
-use crate::token::{Token, TokenType};
+use crate::object::UserPrint;
+
+use hawk_common::object::Object;
+use hawk_common::token::{Token, TokenType};
 
 pub fn csv_to_datatable(filename: String, line: usize) -> Object {
     if let Ok(csvfile) = read_to_string(&filename) {
@@ -223,9 +225,16 @@ pub fn datatable_to_csv(filename: String, datatable: Object, line: usize) {
     }
 }
 
-impl Object {
+pub trait CSV {
+    fn format_for_csv(&self, line: usize) -> String;
+    fn format_datatable_csv(names: Vec<String>, data: Vec<Object>, line: usize) -> String;
+    fn format_datatable_csv_data(data: Vec<Object>, str: String, len: usize, line: usize) -> String;
+    fn format_datatable_csv_column_names(names: Vec<String>, str: String) -> String;
+}
+
+impl CSV for Object {
     /// Generates a string representation of the Object that is suitable for a `.csv` file
-    pub fn format_for_csv(&self, line: usize) -> String {
+    fn format_for_csv(&self, line: usize) -> String {
         match self.clone() {
             Self::Boolean(x) =>format!("{x}"),
             Self::Float(x) => format!("{x}"),

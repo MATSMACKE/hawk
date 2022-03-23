@@ -1,31 +1,40 @@
 use crate::error::exit;
 
-use hawk_lib::tree::Expression;
+use hawk_common::tree::Expression;
 use std::collections::HashMap;
 
 use crate::eval::Interpreter;
 
 // Common types used throughout the interpreter
-use crate::object::Object;
+use hawk_common::object::Object;
+use hawk_cli_io::object::UserPrint;
 use crate::tree::Statement;
 
 impl Interpreter {
     /// Executes a given statement
     pub fn run_statement(&mut self, statement: Statement) {
         match statement {
-            Statement::Print(expr) => println!("{}", self.eval_expression(expr).user_print(self.line)),
-            // Variable definition
+            Statement::Print(expr) => {
+                println!("{}", self.eval_expression(expr).user_print(self.line))
+            }
+
             Statement::Definition { name, value } => self.run_definition(name, value),
+
             Statement::While { condition, block } => self.run_while(condition, block),
+
             Statement::Loop(block) => self.run_loop(block),
             Statement::Break => self.loops -= 1,
+
             Statement::If { condition, block } => self.run_if(condition, block),
+
             Statement::IfElse {
                 condition,
                 if_block,
                 else_block,
             } => self.run_if_else(condition, if_block, else_block),
+
             Statement::Block(block) => self.run_block(block),
+
             Statement::Function {
                 identifier,
                 params,
@@ -34,15 +43,19 @@ impl Interpreter {
                 // Define function in top scope
                 self.insert_top_scope(identifier, Object::Function { params, block });
             }
+
             Statement::Return(expr) => {
                 self.run_return(expr);
             }
+
             Statement::Import(expr) => {
                 self.run_import(expr);
             }
+
             Statement::Expression(expr) => {
                 self.eval_expression(expr);
             }
+
             Statement::Process {
                 readfile,
                 writefile,
@@ -50,16 +63,14 @@ impl Interpreter {
             } => {
                 self.run_process(readfile, writefile, block);
             }
+
             Statement::Line => self.line += 1,
             _ => {}
         }
     }
 
     fn run_process(
-        &mut self,
-        readfile: Box<Expression>,
-        writefile: Box<Expression>,
-        block: Box<Statement>,
+        &mut self, readfile: Box<Expression>, writefile: Box<Expression>, block: Box<Statement>,
     ) {
         self.scopes.push(HashMap::new());
         if let Object::String(readfile) = self.eval_expression(readfile) {
@@ -88,7 +99,7 @@ impl Interpreter {
     }
 
     fn open_datatable(&mut self, readfile: String) {
-        let datatable = hawk_lib::csv::csv_to_datatable(readfile, self.line);
+        let datatable = hawk_cli_io::csv::csv_to_datatable(readfile, self.line);
 
         if let Object::DataTable { names, data } = datatable.clone() {
             self.insert_top_scope(String::from("datatable"), datatable);
@@ -106,7 +117,10 @@ impl Interpreter {
         if let Object::String(filename) = evaled_filename {
             self.globals = crate::run_script(filename, self.globals.clone());
         } else {
-            exit(&format!("Expected filename to be a string, found {}", evaled_filename), self.line);
+            exit(
+                &format!("Expected filename to be a string, found {}", evaled_filename),
+                self.line,
+            );
         }
     }
 
@@ -124,10 +138,7 @@ impl Interpreter {
     }
 
     fn run_if_else(
-        &mut self,
-        condition: Box<Expression>,
-        if_block: Box<Statement>,
-        else_block: Box<Statement>,
+        &mut self, condition: Box<Expression>, if_block: Box<Statement>, else_block: Box<Statement>,
     ) {
         let evaled_condition = self.eval_expression(condition);
 
@@ -135,7 +146,13 @@ impl Interpreter {
         if let Object::Boolean(condition) = evaled_condition {
             self.run_statement(if condition { *if_block } else { *else_block })
         } else {
-            exit(&format!("Expected boolean as condition for if else statement, found {}", evaled_condition), self.line);
+            exit(
+                &format!(
+                    "Expected boolean as condition for if else statement, found {}",
+                    evaled_condition
+                ),
+                self.line,
+            );
         }
     }
 
@@ -146,7 +163,13 @@ impl Interpreter {
                 self.run_statement(*block)
             }
         } else {
-            exit(&format!("Expected boolean as condition for if statement, found {}", evaled_condition), self.line);
+            exit(
+                &format!(
+                    "Expected boolean as condition for if statement, found {}",
+                    evaled_condition
+                ),
+                self.line,
+            );
         }
     }
 
@@ -180,7 +203,13 @@ impl Interpreter {
                     }
                 }
             } else {
-                exit(&format!("Expected boolean as condition for while loop, found {}", evaled_condition), self.line);
+                exit(
+                    &format!(
+                        "Expected boolean as condition for while loop, found {}",
+                        evaled_condition
+                    ),
+                    self.line,
+                );
             }
         }
     }

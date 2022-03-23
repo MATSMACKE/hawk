@@ -3,7 +3,7 @@ use crate::error::exit;
 use crate::eval::Interpreter;
 
 // Common types used throughout the interpreter
-use crate::object::Object;
+use hawk_common::object::Object;
 
 impl Interpreter {
     /// Adds two numbers or strings
@@ -455,10 +455,19 @@ impl Interpreter {
             if let Object::Boolean(op2) = operand2 {
                 Object::Boolean(op1 && op2)
             } else {
-                exit(&format!("Logical operations can only be performed on booleans, not {}", operand2), line)
+                exit(
+                    &format!(
+                        "Logical operations can only be performed on booleans, not {}",
+                        operand2
+                    ),
+                    line,
+                )
             }
         } else {
-            exit(&format!("Logical operations can only be performed on booleans, not {}", operand1), line)
+            exit(
+                &format!("Logical operations can only be performed on booleans, not {}", operand1),
+                line,
+            )
         }
     }
 
@@ -468,10 +477,19 @@ impl Interpreter {
             if let Object::Boolean(op2) = operand2 {
                 Object::Boolean(op1 || op2)
             } else {
-                exit(&format!("Logical operations can only be performed on booleans, not {}", operand2), line)
+                exit(
+                    &format!(
+                        "Logical operations can only be performed on booleans, not {}",
+                        operand2
+                    ),
+                    line,
+                )
             }
         } else {
-            exit(&format!("Logical operations can only be performed on booleans, not {}", operand1), line)
+            exit(
+                &format!("Logical operations can only be performed on booleans, not {}", operand1),
+                line,
+            )
         }
     }
 
@@ -480,7 +498,10 @@ impl Interpreter {
         if let Object::Boolean(x) = eval_op {
             Object::Boolean(!x)
         } else {
-            exit(&format!("Logical operations can only be performed on booleans, not {}", eval_op), line)
+            exit(
+                &format!("Logical operations can only be performed on booleans, not {}", eval_op),
+                line,
+            )
         }
     }
 
@@ -527,42 +548,29 @@ impl Interpreter {
 
 #[test]
 fn addition() {
-    assert_eq!(
-        Interpreter::add(Object::Int(4), Object::Float(5.1), 0),
-        Object::Float(9.1)
-    );
-    assert_eq!(
-        Interpreter::add(Object::Float(4.2), Object::Int(5), 0),
-        Object::Float(9.2)
-    );
-    assert_eq!(
-        Interpreter::add(Object::Float(4.3), Object::Float(5.2), 0),
-        Object::Float(9.5)
-    );
-    assert_eq!(
-        Interpreter::add(
-            Object::Uncertain {
-                value: 1.0,
-                uncertainty: 0.1
-            },
-            Object::Int(3),
-            0
-        ),
-        Object::Uncertain {
-            value: 4.0,
-            uncertainty: 0.1
-        }
-    );
-    assert_eq!(
-        Interpreter::add(Object::Int(4), Object::Int(5), 0),
-        Object::Int(9)
-    );
-    assert_eq!(
-        Interpreter::add(Object::Int(4), Object::Int(5), 0),
-        Object::Int(9)
-    );
-    assert_eq!(
-        Interpreter::add(Object::Int(4), Object::Int(5), 0),
-        Object::Int(9)
-    )
+    use float_cmp::approx_eq;
+
+    assert_eq!(Interpreter::add(Object::Int(4), Object::Int(5), 0), Object::Int(9));
+    assert_eq!(Interpreter::add(Object::Int(4), Object::Float(5.1), 0), Object::Float(9.1));
+    assert_eq!(Interpreter::add(Object::Float(4.2), Object::Int(5), 0), Object::Float(9.2));
+    assert_eq!(Interpreter::add(Object::Float(4.3), Object::Float(5.2), 0), Object::Float(9.5));
+    if let Object::Uncertain{value, uncertainty} = Interpreter::add(Object::Uncertain{value: 1.0, uncertainty: 0.1},  Object::Int(3), 1) {
+        assert!(approx_eq!(f64, value, 4.0, ulps = 3));
+        assert!(approx_eq!(f64, uncertainty, 0.1, ulps = 3))
+    }
+    assert_eq!(Interpreter::add(Object::String(String::from("Hello ")), Object::String(String::from("World")), 0), Object::String(String::from("Hello World")));
+}
+
+#[test]
+fn multiply() {
+    use float_cmp::approx_eq;
+
+    assert_eq!(Interpreter::multiply(Object::Int(4), Object::Int(5), 0), Object::Int(20));
+    assert_eq!(Interpreter::multiply(Object::Int(4), Object::Float(5.1), 0), Object::Float(20.4));
+    assert_eq!(Interpreter::multiply(Object::Float(1.5), Object::Int(2), 0), Object::Float(3.0));
+    assert_eq!(Interpreter::multiply(Object::Float(1.5), Object::Float(1.5), 0), Object::Float(2.25));
+    if let Object::Uncertain{value, uncertainty} = Interpreter::multiply(Object::Uncertain{value: 6.8, uncertainty: 0.2},  Object::Uncertain{value: 3.75, uncertainty: 0.05}, 1) {
+        assert!(approx_eq!(f64, value, 25.5, ulps = 3));
+        assert!(approx_eq!(f64, uncertainty, 1.09, ulps = 3))
+    }
 }

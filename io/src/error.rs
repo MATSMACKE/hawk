@@ -3,7 +3,7 @@ use std::io::{stdout};
 use crossterm::execute;
 use crossterm::style::{Color::Red, Colors, Print, SetColors};
 
-use crate::object::Object;
+use hawk_common::object::Object;
 
 /// Exit the program with an error message. Returns Null just to appease Rust
 pub fn exit<'a>(message: &'a str, line: usize) -> Object {

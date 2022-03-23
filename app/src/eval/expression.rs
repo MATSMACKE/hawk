@@ -3,7 +3,7 @@ use crate::error::exit;
 use std::collections::HashMap;
 
 use crate::eval::Interpreter;
-use crate::object::Object;
+use hawk_common::object::Object;
 
 // Common types used throughout the interpreter
 use crate::token::TokenType;
@@ -31,10 +31,7 @@ impl Interpreter {
 
     /// Match operator and call method to evaluate binary operation
     fn eval_binary(
-        &mut self,
-        operand1: Box<Expression>,
-        operand2: Box<Expression>,
-        operator: TokenType,
+        &mut self, operand1: Box<Expression>, operand2: Box<Expression>, operator: TokenType,
     ) -> Object {
         let operand1 = self.eval_expression(operand1);
         let operand2 = self.eval_expression(operand2);
@@ -68,10 +65,7 @@ impl Interpreter {
             TokenType::Minus => Self::negate(eval_op, self.line),
             TokenType::Not => Self::not(eval_op, self.line),
             _ => exit(
-                &format!(
-                    "Error: expected binary operator, instead found {:?}",
-                    operator
-                ),
+                &format!("Error: expected binary operator, instead found {:?}", operator),
                 self.line,
             ),
         }
@@ -97,10 +91,7 @@ impl Interpreter {
             let arg = self.eval_expression(arg.clone());
             if let Object::Uncertain { value, uncertainty } = arg {
                 if has_uncertain {
-                    exit(
-                        "Functions can only have one argument with an uncertainty",
-                        self.line,
-                    );
+                    exit("Functions can only have one argument with an uncertainty", self.line);
                 }
                 has_uncertain = true;
                 uncertain_index = index;
@@ -156,10 +147,7 @@ impl Interpreter {
 
     /// Calls a function where one argument is an `Uncertain`, using a maximum and minimum value to find the uncertainty
     fn call_function_with_uncertainty(
-        &mut self,
-        identifier: String,
-        mut evaled_args: Vec<Object>,
-        uncertain_index: usize,
+        &mut self, identifier: String, mut evaled_args: Vec<Object>, uncertain_index: usize,
     ) -> Object {
         if let Object::Uncertain { value, uncertainty } = evaled_args[uncertain_index].clone() {
             // Change uncertain arg to `value + uncertainty` to find max

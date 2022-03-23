@@ -4,6 +4,10 @@
 /lib/Cargo.lock
 /cas/target
 /cas/Cargo.lock
+/io/target
+/io/Cargo.lock
+/common/target
+/common/Cargo.lock
 .DS_Store
 .vscode
 .VSCodeCounter

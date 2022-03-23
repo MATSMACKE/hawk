@@ -12,10 +12,14 @@ build = "build.rs"
 
 [dependencies]
 hawk_lib = {path = "../lib"}
+hawk_common = {path = "../common"}
+hawk_cli_io = {path = "../io"}
 termsize = "0.1.6"
+float-cmp = "0.9.0"
 
 [build-dependencies]
 hawk_lib = {path = "../lib"}
+hawk_common = {path = "../common"}
 
 [profile.release]
 strip = "debuginfo"
