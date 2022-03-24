@@ -67,66 +67,23 @@ Hawk will accept an infinite loop (without `break`), but this is not recommended
 while condition statement
 ```
 
-##### C-style for loop
-```
-for (let i = 0; i < num_loops; i++) statement
-```
-
-##### Loop through iterables or iterators
-```
-for val in iterable statement
-
-for (index, val) in iterable statement
-```
-
-#### Classes
-
-##### Create class
-```
-class ClassName {
-    property
-    other_property = default_val
-
-    constructor()
-}
-```
-
-#### Iterators
-
-```
-iter IteratorName {
-    get start(seed) {
-        // initialize initial_value
-        return // initial_value
-    }
-
-    get next() {
-        // calculate next_value
-        return // next_value
-    }
-}
-```
-
 #### Finders
 
-##### Finders with cases
+##### Finders
+To define a finder:
+
 ```
-finder suvat(s, u, v, a ,t) {
-    find s given (u, v, t) = t * (u + v) / 2
+finder force {
+    equation f = m * a
 }
 ```
 
-##### Finders with equations
+Then to use it:
 ```
-finder suvat(s, u, v, a, t) {
-    equation v = u + a * t
-    equation v ** 2 = u ** 2 + 2 * a * s
-    equation s = u * t + (1/2) * a * t ** 2
-    equation s = t * (u + v) / 2
-}
+>> print find force (f: 3, m?, a: 1.5) // Finds m if f = 3 and a = 1.5
+2
 ```
 
-Please note the two kinds of finders can be mixed and matched. If they are combined, cases will be preferred and general solutions will be a fallback. 
 
 
 #### Building projects

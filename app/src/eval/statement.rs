@@ -44,6 +44,14 @@ impl Interpreter {
                 self.insert_top_scope(identifier, Object::Function { params, block });
             }
 
+            Statement::Finder {
+                identifier,
+                equations
+            } => {
+                // Define function in top scope
+                self.insert_top_scope(identifier, Object::Finder(equations));
+            }
+
             Statement::Return(expr) => {
                 self.run_return(expr);
             }

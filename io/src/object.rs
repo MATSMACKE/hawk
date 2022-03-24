@@ -32,7 +32,8 @@ impl UserPrint for Object {
             },
             Self::DataTable{names, data} => {
                 Self::user_print_datatable(names, data, line)
-            }
+            },
+            Self::Finder(_) => format!("finder function")
         }
     }
 

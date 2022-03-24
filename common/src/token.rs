@@ -22,6 +22,9 @@ pub enum TokenType {
     Print,
     Import,
     Process,
+    Finder,
+    Find,
+    Equation,
 
     // Literals
     Identifier,

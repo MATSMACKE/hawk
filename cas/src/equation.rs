@@ -16,10 +16,6 @@ impl Equation {
     pub fn solve_for(&mut self, var: String) -> Expression {
         self.lhs.simplify();
 
-        if self.lhs.contains(var.to_owned()) && !self.rhs.contains(var.to_owned()) {
-
-        }
-
         while !self.is_solved(var.to_owned()) {
             self.do_rearrange_step(var.to_owned())
         }
@@ -32,15 +28,17 @@ impl Equation {
     }
 
     fn do_rearrange_step(&mut self, var: String) {
-        match &self.lhs {
-            Expression::Literal(x) => {
+        if !self.lhs.contains(var.to_owned()) {
 
-            },
-            Expression::Term(x) => {
-
-            },
-            Expression::Terms(x) => {
-
+        } else if !self.rhs.contains(var.to_owned()) {
+            match &self.lhs {
+                Expression::Term(x) => {
+    
+                },
+                Expression::Terms(x) => {
+    
+                },
+                _ => {}
             }
         }
     }

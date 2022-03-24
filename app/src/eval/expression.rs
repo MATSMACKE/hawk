@@ -3,6 +3,7 @@ use crate::error::exit;
 use std::collections::HashMap;
 
 use crate::eval::Interpreter;
+use crate::eval::placeholder_cas::GetVars;
 use hawk_common::object::Object;
 
 // Common types used throughout the interpreter
@@ -22,7 +23,10 @@ impl Interpreter {
             Expression::Literal(obj) => self.eval_literal(obj),
             Expression::FunctionCall { identifier, args } => {
                 self.eval_function_call(identifier, args)
-            }
+            },
+            Expression::FinderCall{identifier, given, to_find} => {
+                self.eval_finder_call(identifier, given, to_find)
+            },
             Expression::Array(exprs) => self.eval_array_literal(exprs),
             Expression::ArrayIndex { identifier, index } => self.eval_arrayindex(identifier, index),
             _ => Object::Null,
@@ -114,6 +118,53 @@ impl Interpreter {
             }
             self.call_function(identifier, evaled_args)
         }
+    }
+
+    /// Calls function, taking into account uncertainties and columns in order to
+    fn eval_finder_call(&mut self, identifier: String, given: HashMap<String, Expression>, to_find: String) -> Object {
+        let finder = self.get_variable(identifier);
+
+        if let Object::Finder(equations) = finder {
+            self.scopes.push(HashMap::new());
+            let mut viable_eq = (Expression::Literal(Object::Null), Expression::Literal(Object::Null));
+            let mut found_eq = false;
+
+            for equation in equations {
+                let mut lhs_contains = equation.0.get_variables();
+                let mut rhs_contains = equation.1.get_variables();
+
+                lhs_contains.append(&mut rhs_contains);
+
+                for var in lhs_contains {
+                    if !(given.contains_key(&var) || var == to_find) {
+                        continue;
+                    } else {
+                        viable_eq = equation;
+                        found_eq = true;
+                        break
+                    }
+                }
+            }
+
+            if !found_eq {
+                exit("No viable equation found", self.line);
+            }
+
+            for (key, value) in given {
+                let value = self.eval_expression(Box::new(value));
+                self.insert_top_scope(key, value)
+            }
+
+            let result = self.eval_expression(Box::new(crate::eval::placeholder_cas::Equation::solve_for(viable_eq.0, viable_eq.1, to_find)));
+
+            self.scopes.pop();
+
+            return result
+        } else {
+            exit(&format!("Expected finder, instead got {finder}"), self.line);
+        }
+
+        Object::Null
     }
 
     /// Turns array literal into array object

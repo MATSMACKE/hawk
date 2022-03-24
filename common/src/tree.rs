@@ -1,9 +1,10 @@
+use std::collections::HashMap;
 use std::fmt::{Display, Error, Formatter, Result};
 
 use crate::object::Object;
 use crate::token::TokenType;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement {
     /// Print statement
     Print(Box<Expression>),
@@ -27,6 +28,7 @@ pub enum Statement {
     IfElse{condition: Box<Expression>, if_block: Box<Statement>, else_block: Box<Statement>},
     /// A statement that adds the parsed function to the top scope
     Function{identifier: String, params: Vec<String>, block: Box<Statement>},
+    Finder{identifier: String, equations: Vec<(Expression, Expression)>},
     /// Returns function
     Return(Box<Expression>),
     /// Runs code from another file, importing functions and global variables
@@ -34,7 +36,7 @@ pub enum Statement {
     /// Process block to process and analyze data
     Process{readfile: Box<Expression>, writefile: Box<Expression>, block: Box<Statement>},
     /// Indicates new line
-    Line
+    Line,
 }
 
 // Implemented to print statements to Rust code for standard library compilation in `build.rs`
@@ -55,7 +57,8 @@ impl Display for Statement {
             Self::While{condition, block} => write!(f, "Statement::While{{condition: Box::new({}), block: Box::new({})}}", condition, block),
             Self::Loop(x) => write!(f, "Statement::Loop(Box::new({}))", x),
             Self::Expression(x) => write!(f, "Statement::Expression(Box::new({}))", x),
-            Self::Line => write!(f, "Statement::Line")
+            Self::Line => write!(f, "Statement::Line"),
+            _ => write!(f, "")
         }.unwrap();
         Ok(())
     }
@@ -76,7 +79,7 @@ impl Display for Statements {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     /// Literal expression
     Literal(Object),
@@ -95,6 +98,7 @@ pub enum Expression {
     Parenthesized(Box<Expression>),
     /// Calls function, evaluates to return value of function
     FunctionCall{identifier: String, args: Vec<Box<Expression>>},
+    FinderCall{identifier: String, given: HashMap<String, Expression>, to_find: String},
     /// Calls method, evaluates to return value of method
     MethodCall{object: String, method: String, args: Vec<Box<Expression>>},
     /// Gets item from given index of array
@@ -114,7 +118,8 @@ impl Display for Expression {
             Self::Binary{operand1, operand2, operator} => write!(f, "Expression::Binary{{operand1: Box::new({}), operand2: Box::new({}), operator: {}}}", operand1, operand2, operator),
             Self::FunctionCall{identifier, args} => write!(f, "Expression::FunctionCall{{identifier: \"{}\".to_owned(), args: vec![{}]}}", identifier, Expressions(args.clone())),
             Self::MethodCall{object, method, args} => write!(f, "Expression::FunctionCall{{object: \"{}\".to_owned(), method: \"{}\".to_owned(), args: vec![{}]}}", object, method, Expressions(args.clone())),
-            Self::ArrayIndex{identifier, index} => write!(f, "Expression::ArrayIndex{{identifier: \"{}\".to_owned(), index: {}", identifier, index)
+            Self::ArrayIndex{identifier, index} => write!(f, "Expression::ArrayIndex{{identifier: \"{}\".to_owned(), index: {}", identifier, index),
+            _ => write!(f, "CAN'T USE FINDERS IN STD YET")
         }.unwrap();
         Ok(())
     }

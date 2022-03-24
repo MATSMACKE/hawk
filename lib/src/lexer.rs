@@ -195,6 +195,9 @@ impl<'a> Lexer<'a> {
             "not" => self.add_token(TokenType::Not, None),
             "import" => self.add_token(TokenType::Import, None),
             "process" => self.add_token(TokenType::Process, None),
+            "finder" => self.add_token(TokenType::Finder, None),
+            "find" => self.add_token(TokenType::Find, None),
+            "equation" => self.add_token(TokenType::Equation, None),
             _ => self.add_token(TokenType::Identifier, Some(Object::Identifier(current_token)))
         }
     }

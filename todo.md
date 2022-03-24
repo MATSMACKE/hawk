@@ -5,6 +5,10 @@
 - [ ] methods
 - [x] data table type
 - [ ] data table methods
-- [ ] reading CSV
+- [x] reading CSV
 - [x] writing CSV
+- [ ] very basic CAS
+- [ ] column uncertainty handling
 - [ ] error handling
+- [ ] stdlib finders
+- [ ] scientific notation

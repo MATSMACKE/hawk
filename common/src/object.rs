@@ -2,10 +2,10 @@ use std::{fmt::{Display, Error, Formatter, Result}, i128};
 
 use float_cmp::approx_eq;
 
-use crate::tree::Statement;
+use crate::tree::{Statement, Expression};
 
 /// The structure that stores literals through all stages of the interpreter (from lexing to evaluating)
-#[derive(Debug, Clone, PartialOrd)]
+#[derive(Debug, Clone)]
 pub enum Object {
     /// Null object
     Null,
@@ -22,6 +22,7 @@ pub enum Object {
     /// A function object that is stored in the scope where the function is defined, with parameter
     /// names as a vector of strings and the code of the actual function as a Statement
     Function{params: Vec<String>, block: Box<Statement>},
+    Finder(Vec<(Expression, Expression)>),
     /// An array of any other kind of object (types can be mixed)
     Array(Vec<Object>),
     /// An identifier, such as the name of a function or variable
@@ -48,7 +49,8 @@ impl Display for Object {
             Self::Array(x) => write!(f, "Object::Array({})", Objects(x.clone())),
             Self::Identifier(x) => write!(f, "Object::Identifier(\"{}\".to_owned())", x),
             Self::Column(data) => write!(f, "Object::Column({})", Objects(data.clone())),
-            Self::DataTable{names, data} => write!(f, "Object::DataTable{{ names: vec!{:?}.iter().map(|x| x.to_owned()).collect(), data: {} }}", names, Objects(data.clone()))
+            Self::DataTable{names, data} => write!(f, "Object::DataTable{{ names: vec!{:?}.iter().map(|x| x.to_owned()).collect(), data: {} }}", names, Objects(data.clone())),
+            _ => write!(f, "DON'T USE FINDERS IN STD YET")
         }
     }
 }

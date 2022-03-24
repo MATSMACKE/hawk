@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
 use hawk_common::tree::{Expression, Statement};
@@ -27,7 +29,6 @@ impl Parser {
                 end_line -= 1;
             }
         }
-        
         statements
     }
 
@@ -46,6 +47,7 @@ impl Parser {
             TokenType::Return => Statement::Return(self.expression()),
             TokenType::Import => Statement::Import(self.expression()),
             TokenType::Process => self.parse_process_block(),
+            TokenType::Finder => self.parse_finder(),
             _ => self.parse_other()
         }
     }
@@ -57,6 +59,35 @@ impl Parser {
                 self.index -= 1;
                 Statement::Expression(self.expression())
             }
+        }
+    }
+
+    fn parse_finder(&mut self) -> Statement {
+        if let Some(Object::Identifier(identifier)) = self.current().literal {
+            self.consume();
+            let mut equations: Vec<(Expression, Expression)> = Vec::new();
+
+            if let TokenType::BraceLeft = self.current().token_type {
+                self.consume();
+                while !(self.current().token_type == TokenType::BraceRight) {
+                    if !self.expect(TokenType::Equation) {
+                        exit("Expected 'equation'", self.current().line);
+                    }
+                    let lhs = self.expression();
+                    if !self.expect(TokenType::Assign) {
+                        exit("Expected '='", self.current().line);
+                    }
+                    let rhs = self.expression();
+                    equations.push((*lhs, *rhs));
+                }
+                self.consume();
+            } else {
+                exit("Expected curly brace after ", self.current().line);
+            }
+            Statement::Finder { identifier, equations }
+        } else {
+            exit(&format!("Finder needs identifier"), self.current().line);
+            Statement::EOF
         }
     }
 
@@ -339,6 +370,8 @@ impl Parser {
         }
         else if let TokenType::BracketLeft = self.current().token_type {
             self.parse_array_literal()
+        } else if let TokenType::Find = self.current().token_type {
+            self.parse_finder_call()
         }
         else {
             Box::new(Expression::Literal(Object::Null))
@@ -417,6 +450,39 @@ impl Parser {
         }
     }
 
+    fn parse_finder_call(&mut self) -> Box<Expression> {
+        self.consume();
+        if let Some(Object::Identifier(identifier)) = self.current().literal {
+            self.consume();
+            self.consume();
+            
+            let mut given: HashMap<String, Expression> = HashMap::new();
+            let mut to_find = String::new();
+
+            while self.previous().token_type != TokenType::ParenthesisRight {
+                if let Some(Object::Identifier(var)) = self.current().literal {
+                    if self.next().token_type == TokenType::QuestionMark {
+                        to_find = var;
+                        self.consume();
+                        self.consume();
+                    } else {
+                        self.consume();
+                        self.consume();
+                        let expr = self.expression();
+                        given.insert(var, *expr);
+                    }
+                }
+
+                self.consume();
+            }
+
+            Box::new(Expression::FinderCall { identifier, given, to_find })
+        } else {
+            exit(&format!("Couldn't get finder parameters"), self.current().line);
+            Box::new(Expression::Literal(Object::Null))
+        }
+    }
+
     fn parse_functioncall(&mut self) -> Box<Expression> {
         if let Some(Object::Identifier(identifier)) = self.current().literal {
             self.consume();
@@ -453,5 +519,15 @@ impl Parser {
     
     fn consume(&mut self) {
         self.index += 1;
+    }
+
+    fn expect(&mut self, ttype: TokenType) -> bool {
+        if ttype == self.current().token_type {
+            self.consume();
+            true
+        } else {
+            self.consume();
+            false
+        }
     }
 }
