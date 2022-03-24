@@ -15,7 +15,7 @@ impl Interpreter {
     pub fn run_statement(&mut self, statement: Statement) {
         match statement {
             Statement::Print(expr) => {
-                println!("{}", self.eval_expression(expr).user_print(self.line))
+                hawk_cli_io::output::output(self.eval_expression(expr).user_print(self.line))
             }
 
             Statement::Definition { name, value } => self.run_definition(name, value),

@@ -56,43 +56,26 @@ fn repl() {
     // Global state that will be kept throughout the REPL session
     let mut state: HashMap<String, Object> = HashMap::new();
 
-    // Print line of equal signs and welcome message
-    if let Some(size) = termsize::get() {
-        for _ in 0..size.cols {
-            print!("=")
-        }
-    }
-    print!("\nWelcome to Hawk REPL. Exit the REPL by running 'exit' or pressing ctrl + C.");
+    hawk_cli_io::shell::print_welcome_message();
+
+    let mut history: Vec<String> = Vec::new();
 
     loop {
-        // Output '>>' to indicate input needed
-        print!("\n>> ");
-        std::io::Write::flush(&mut std::io::stdout()).expect("flush failed!"); // Force output
+        let line = hawk_cli_io::shell::Input::get_input(history.clone());
+        history.insert(0, line.to_owned());
 
-        let line = read_input();
+        println!();
 
-        if line == "exit\n" {
+        if line == "exit" {
             break;
         } else {
             state = run::run(line, state)
         }
+
+        println!();
     }
 
-    // Print another line of equal signs to close off the session
-    if let Some(size) = termsize::get() {
-        for _ in 0..size.cols {
-            print!("=")
-        }
-    }
-}
-
-fn read_input() -> String {
-    // Read code from terminal
-    let mut line = String::new();
-    std::io::stdin()
-        .read_line(&mut line)
-        .expect("failed to read line");
-    line
+    hawk_cli_io::shell::print_exit_message();
 }
 
 #[cfg(test)]
