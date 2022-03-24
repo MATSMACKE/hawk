@@ -19,6 +19,7 @@ impl Interpreter {
             }
 
             Statement::Definition { name, value } => self.run_definition(name, value),
+            Statement::ArrayAssign { name, idx, value } => self.run_array_assign(name, idx, value),
 
             Statement::While { condition, block } => self.run_while(condition, block),
 
@@ -74,6 +75,38 @@ impl Interpreter {
 
             Statement::Line => self.line += 1,
             _ => {}
+        }
+    }
+
+    fn run_array_assign(&mut self, name: String, idx: Box<Expression>, value: Box<Expression>) {
+        if let Object::Array(mut data) = self.get_variable(name.clone()) {
+            let idx = self.eval_expression(idx);
+            let val = self.eval_expression(value);
+            
+            if let Object::Int(x) = idx {
+                if x as usize >= data.len() {
+                    for _ in 0..=(x as usize - data.len()) {
+                        data.push(Object::Null)
+                    }
+                }
+
+                data[x as usize] = val;
+
+                let mut got_variable = false;
+
+                if !(self.scopes.len() == 0) {
+                    for i in self.scopes.len() - 1..=0 {
+                        if self.scopes[i].contains_key(&name.clone()) {
+                            got_variable = true;
+                            self.scopes[i].insert(name.clone(), Object::Array(data.clone()));
+                        }
+                    }
+                }
+
+                if !got_variable {
+                    self.globals.insert(name.clone(), Object::Array(data.clone()));
+                }
+            }
         }
     }
 

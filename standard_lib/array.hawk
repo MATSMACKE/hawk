@@ -1,0 +1,25 @@
+function sort(arr) {
+    let i = 0
+    while i < len(arr) {
+        let min = arr[i]
+        let minidx = i
+        let j = i
+
+        while j < len(arr) {
+            let val = arr[j]
+            if val < min {
+                min = val
+                minidx = j
+            }
+            j = j + 1
+        }
+
+        let temp = arr[i]
+        arr[i] = min
+        arr[minidx] = temp
+
+        i = i + 1
+    }
+
+    return arr
+}

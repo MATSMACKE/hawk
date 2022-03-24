@@ -10,6 +10,7 @@ pub enum Statement {
     Print(Box<Expression>),
     /// Variable definition
     Definition{name: String, value: Box<Expression>},
+    ArrayAssign{name: String, idx: Box<Expression>, value: Box<Expression>},
     /// Block of code (encased in `{}`)
     Block(Vec<Statement>),
     /// Indicates code has completed
@@ -43,22 +44,23 @@ pub enum Statement {
 impl Display for Statement {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match &self {
-            Self::Block(x) => write!(f, "Statement::Block(vec![{}])", Statements(x.clone())),
-            Self::Break => write!(f, "Statement::Break"),
-            Self::EOF => write!(f, "Statement::EOF"),
-            Self::Definition{name, value} => write!(f, "Statement::Definition{{name: \"{}\".to_owned(), value: Box::new({})}}", name, value),
-            Self::Function{identifier, params, block} => write!(f, "Statement::Function{{identifier: \"{}\".to_owned(), params: vec!{:?}.iter().map(|x| x.to_owned()).collect(), block: Box::new({})}}", identifier, params, block),
-            Self::Import(x) => write!(f, "Statement::Import(Box::new({}))", x),
-            Self::Process{readfile, writefile, block} => write!(f, "Statement::Process{{readfile: Box::new({readfile}), readfile: Box::new({writefile}), Box::new({block})}}"),
-            Self::If{condition, block} => write!(f, "Statement::If{{condition: Box::new({}), block: Box::new({})}}", condition, block),
-            Self::IfElse{condition, if_block, else_block} => write!(f, "Statement::IfElse{{condition: Box::new({}), if_block: Box::new({}), else_block: Box::new({})}}", condition, if_block, else_block),
-            Self::Return(x) => write!(f, "Statement::Return(Box::new({}))", x),
-            Self::Print(x) => write!(f, "Statement::Print(Box::new({}))", x),
-            Self::While{condition, block} => write!(f, "Statement::While{{condition: Box::new({}), block: Box::new({})}}", condition, block),
-            Self::Loop(x) => write!(f, "Statement::Loop(Box::new({}))", x),
-            Self::Expression(x) => write!(f, "Statement::Expression(Box::new({}))", x),
-            Self::Line => write!(f, "Statement::Line"),
-            _ => write!(f, "")
+            Self::Block(x) => writeln!(f, "Statement::Block(vec![{}])", Statements(x.clone())),
+            Self::Break => writeln!(f, "Statement::Break"),
+            Self::EOF => writeln!(f, "Statement::EOF"),
+            Self::Definition{name, value} => writeln!(f, "Statement::Definition{{name: \"{}\".to_owned(), value: Box::new({})}}", name, value),
+            Self::ArrayAssign{name, idx, value} => writeln!(f, "Statement::ArrayAssign{{name: \"{}\".to_owned(), idx: Box::new({}), value: Box::new({})}}", name, idx, value),
+            Self::Function{identifier, params, block} => writeln!(f, "Statement::Function{{identifier: \"{}\".to_owned(), params: vec!{:?}.iter().map(|x| x.to_owned()).collect(), block: Box::new({})}}", identifier, params, block),
+            Self::Import(x) => writeln!(f, "Statement::Import(Box::new({}))", x),
+            Self::Process{readfile, writefile, block} => writeln!(f, "Statement::Process{{readfile: Box::new({readfile}), readfile: Box::new({writefile}), Box::new({block})}}"),
+            Self::If{condition, block} => writeln!(f, "Statement::If{{condition: Box::new({}), block: Box::new({})}}", condition, block),
+            Self::IfElse{condition, if_block, else_block} => writeln!(f, "Statement::IfElse{{condition: Box::new({}), if_block: Box::new({}), else_block: Box::new({})}}", condition, if_block, else_block),
+            Self::Return(x) => writeln!(f, "Statement::Return(Box::new({}))", x),
+            Self::Print(x) => writeln!(f, "Statement::Print(Box::new({}))", x),
+            Self::While{condition, block} => writeln!(f, "Statement::While{{condition: Box::new({}), block: Box::new({})}}", condition, block),
+            Self::Loop(x) => writeln!(f, "Statement::Loop(Box::new({}))", x),
+            Self::Expression(x) => writeln!(f, "Statement::Expression(Box::new({}))", x),
+            Self::Line => writeln!(f, "Statement::Line"),
+            _ => writeln!(f, "")
         }.unwrap();
         Ok(())
     }
@@ -118,7 +120,7 @@ impl Display for Expression {
             Self::Binary{operand1, operand2, operator} => write!(f, "Expression::Binary{{operand1: Box::new({}), operand2: Box::new({}), operator: {}}}", operand1, operand2, operator),
             Self::FunctionCall{identifier, args} => write!(f, "Expression::FunctionCall{{identifier: \"{}\".to_owned(), args: vec![{}]}}", identifier, Expressions(args.clone())),
             Self::MethodCall{object, method, args} => write!(f, "Expression::FunctionCall{{object: \"{}\".to_owned(), method: \"{}\".to_owned(), args: vec![{}]}}", object, method, Expressions(args.clone())),
-            Self::ArrayIndex{identifier, index} => write!(f, "Expression::ArrayIndex{{identifier: \"{}\".to_owned(), index: {}", identifier, index),
+            Self::ArrayIndex{identifier, index} => write!(f, "Expression::ArrayIndex{{identifier: \"{}\".to_owned(), index: Box::new({})}}", identifier, index),
             _ => write!(f, "CAN'T USE FINDERS IN STD YET")
         }.unwrap();
         Ok(())

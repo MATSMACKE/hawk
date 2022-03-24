@@ -55,6 +55,7 @@ impl Parser {
     fn parse_other(&mut self) -> Statement {
         match self.current().token_type {
             TokenType::Assign => self.parse_assignment(),
+            TokenType::BracketLeft => self.parse_array_assign(),
             _ => {
                 self.index -= 1;
                 Statement::Expression(self.expression())
@@ -102,6 +103,23 @@ impl Parser {
         self.consume();
         let value = self.expression();
         Statement::Definition { name, value }
+    }
+
+    fn parse_array_assign(&mut self) -> Statement {
+        let name: String;
+        if let Some(Object::Identifier(x)) = self.previous().literal {
+            name = x
+        }else {
+            exit(&format!("Expected identifier, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
+            name = String::new();
+        }
+        self.consume();
+        let idx = self.expression();
+        self.consume();
+        self.consume();
+        let value = self.expression();
+
+        Statement::ArrayAssign{name, idx, value}
     }
 
     fn parse_loop(&mut self) -> Statement {
