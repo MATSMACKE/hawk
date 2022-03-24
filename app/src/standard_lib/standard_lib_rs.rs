@@ -93,6 +93,17 @@ impl Interpreter {
                 }
 
                 Some(Object::Float(sin(x)))
+            },
+            "len" => {
+                if let Object::Array(data) = args[0].to_owned() {
+                    Some(Object::Int(data.len() as i128))
+                } else {
+                    exit(
+                        &format!("Expected array as argument to len, found {}", args[0]),
+                        self.line,
+                    );
+                    None
+                }
             }
             _ => None,
         }
