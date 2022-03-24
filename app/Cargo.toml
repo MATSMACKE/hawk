@@ -1,5 +1,5 @@
 [package]
-name = "hawk-lang"
+name = "hawk"
 version = "0.1.0"
 rust-version = "1.59"
 edition = "2021"
