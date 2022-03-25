@@ -393,8 +393,8 @@ impl Parser {
             self.parse_finder_call()
         }
         else {
-            self.consume();
             warn(&format!("Unexpected token '{}'", self.current().token_type.user_print()), self.current().line);
+            self.consume();
             Box::new(Expression::Literal(Object::Null))
         }
     }
@@ -510,9 +510,13 @@ impl Parser {
             self.consume();
             let mut args: Vec<Box<Expression>> = Vec::new();
 
-            while self.previous().token_type != TokenType::ParenthesisRight {
-                args.push(self.expression());
-
+            if !(self.current().token_type == TokenType::ParenthesisRight) {
+                while self.previous().token_type != TokenType::ParenthesisRight {
+                    args.push(self.expression());
+    
+                    self.consume()
+                }
+            } else {
                 self.consume()
             }
             Box::new(Expression::FunctionCall { identifier, args })

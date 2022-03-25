@@ -1,5 +1,5 @@
 function cos(x) {
-    return sin(x + pi()/2)
+    return sin(x + pi() / 2)
 }
 
 function tan(x) {

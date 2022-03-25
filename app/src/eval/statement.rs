@@ -7,7 +7,7 @@ use crate::eval::Interpreter;
 
 // Common types used throughout the interpreter
 use hawk_common::object::Object;
-use hawk_cli_io::object::UserPrint;
+use hawk_cli_io::object::UserPrintObject;
 use crate::tree::Statement;
 
 impl Interpreter {

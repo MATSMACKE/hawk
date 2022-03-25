@@ -91,35 +91,40 @@ Box::new(Expression::Literal(Object::Identifier("y".to_owned()))),
 )}),
 
 
-"cos" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "sin".to_owned(), args: vec![Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operand2: Box::new(Expression::FunctionCall{identifier: "pi".to_owned(), args: vec![Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Null)), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Slash}),
-]}), operator: TokenType::Plus}),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operand2: Box::new(Expression::FunctionCall{identifier: "cos".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-]}), operator: TokenType::Slash}),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-Box::new(Expression::Literal(Object::Null)),
-Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "e".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
+"cos" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::FunctionCall{identifier: "sin".to_owned(), args: vec![Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operand2: Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "pi".to_owned(), args: vec![]}), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Slash}), operator: TokenType::Plus}),
+]}))
+,
+])
+)}),
+
+"tan" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "sin".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
+]}), operand2: Box::new(Expression::FunctionCall{identifier: "cos".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
+]}), operator: TokenType::Slash}))
+,
+])
+)}),
+
+"csc" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Int(1))), operand2: Box::new(Expression::FunctionCall{identifier: "sin".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
+]}), operator: TokenType::Slash}))
+,
+])
+)}),
+
+"sec" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Int(1))), operand2: Box::new(Expression::FunctionCall{identifier: "cos".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
+]}), operator: TokenType::Slash}))
+,
+])
+)}),
+
+"cot" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Int(1))), operand2: Box::new(Expression::FunctionCall{identifier: "tan".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
+]}), operator: TokenType::Slash}))
+,
+])
+)}),
+
+"sinh" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "e".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
 ]}), operand2: Box::new(Expression::FunctionCall{identifier: "e".to_owned(), args: vec![Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operator: TokenType::Minus}),
-]}), operator: TokenType::Minus}),
-]}), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Slash}))
+]}), operator: TokenType::Minus}), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Slash}))
 ,
 ])
 )}),
