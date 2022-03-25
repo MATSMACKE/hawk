@@ -110,7 +110,7 @@ impl Parser {
         let name: String;
         if let Some(Object::Identifier(x)) = self.previous().literal {
             name = x
-        }else {
+        } else {
             exit(&format!("Expected identifier for array assignment, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
             name = String::new();
         }

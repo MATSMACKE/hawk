@@ -9,6 +9,7 @@
 - [x] writing CSV
 - [x] very basic CAS
 - [ ] column uncertainty handling
-- [ ] error handling
+- [x] error handling
 - [ ] stdlib finders
 - [ ] scientific notation
+- [ ] don't quit on error in REPL
