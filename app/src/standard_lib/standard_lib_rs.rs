@@ -2,7 +2,7 @@ use std::fs::{read_to_string, write};
 
 use crate::error::exit;
 
-use hawk_cli_io::{csv::{csv_to_datatable, datatable_to_csv}, object::UserPrint};
+use hawk_cli_io::{csv::{csv_to_datatable, datatable_to_csv}, object::UserPrintObject};
 
 use crate::{eval::Interpreter, Object};
 
