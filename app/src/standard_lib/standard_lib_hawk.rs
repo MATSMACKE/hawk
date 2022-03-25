@@ -122,15 +122,15 @@ Box::new(Expression::Literal(Object::Identifier("y".to_owned()))),
 ])
 )}),
 
-"sinh" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "eNum".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-]}), operand2: Box::new(Expression::FunctionCall{identifier: "eNum".to_owned(), args: vec![Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operator: TokenType::Minus}),
+"sinh" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "e".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
+]}), operand2: Box::new(Expression::FunctionCall{identifier: "e".to_owned(), args: vec![Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operator: TokenType::Minus}),
 ]}), operator: TokenType::Minus}), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Slash}))
 ,
 ])
 )}),
 
-"cosh" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "eNum".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
-]}), operand2: Box::new(Expression::FunctionCall{identifier: "eNum".to_owned(), args: vec![Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operator: TokenType::Minus}),
+"cosh" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::FunctionCall{identifier: "e".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
+]}), operand2: Box::new(Expression::FunctionCall{identifier: "e".to_owned(), args: vec![Box::new(Expression::Unary{operand: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operator: TokenType::Minus}),
 ]}), operator: TokenType::Plus}), operand2: Box::new(Expression::Literal(Object::Int(2))), operator: TokenType::Slash}))
 ,
 ])

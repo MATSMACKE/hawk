@@ -11,7 +11,7 @@ use std::f64::consts::{E, LN_10, PI, TAU};
 impl Interpreter {
     pub fn get_std_rs_fn(&mut self, identifier: String, args: Vec<Object>) -> Option<Object> {
         match identifier.as_str() {
-            "readfilestr" => {
+            "readfile" => {
                 if let Object::String(file) = args[0].clone() {
                     if let Ok(str) = read_to_string(&file) {
                         Some(Object::String(str))
