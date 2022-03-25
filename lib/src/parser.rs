@@ -5,7 +5,8 @@ use hawk_common::token::{Token, TokenType};
 use hawk_common::tree::{Expression, Statement};
 
 use hawk_cli_io::error::{exit, warn};
-use hawk_cli_io::object::UserPrint;
+use hawk_cli_io::object::UserPrintObject;
+use hawk_cli_io::tokentype::UserPrint;
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -97,7 +98,7 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.previous().literal {
             name = x
         } else {
-            exit(&format!("Expected identifier, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
+            exit(&format!("Expected identifier as left hand side of assignment, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
             name = String::new();
         }
         self.consume();
@@ -110,7 +111,7 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.previous().literal {
             name = x
         }else {
-            exit(&format!("Expected identifier, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
+            exit(&format!("Expected identifier for array assignment, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
             name = String::new();
         }
         self.consume();
@@ -132,7 +133,7 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.current().literal {
             name = x
         } else {
-            exit(&format!("Expected identifier, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
+            exit(&format!("Expected identifier after 'let', found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
             name = String::new();
         }
         self.consume();
@@ -393,7 +394,7 @@ impl Parser {
         }
         else {
             self.consume();
-            warn("Unexpected token", self.current().line);
+            warn(&format!("Unexpected token '{}'", self.current().token_type.user_print()), self.current().line);
             Box::new(Expression::Literal(Object::Null))
         }
     }

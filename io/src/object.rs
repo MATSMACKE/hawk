@@ -5,14 +5,14 @@ use hawk_common::object::Object;
 
 use crate::error::exit;
 
-pub trait UserPrint {
+pub trait UserPrintObject {
     fn user_print(&self, line: usize) -> String;
     fn user_print_datatable(names: Vec<String>, data: Vec<Object>, line: usize) -> String;
     fn user_print_column(x: Vec<Object>, line: usize) -> String;
     fn user_print_array(x: Vec<Object>, line: usize) -> String;
 }
 
-impl UserPrint for Object {
+impl UserPrintObject for Object {
     /// Nicely formatted output for displaying objects with `print`
     fn user_print(&self, line: usize) -> String {
         match self.clone() {

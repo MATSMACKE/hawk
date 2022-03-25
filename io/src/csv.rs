@@ -4,7 +4,7 @@ use crate::error::exit;
 
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::object::UserPrint;
+use crate::object::UserPrintObject;
 
 use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
@@ -73,7 +73,7 @@ fn parse_titles(tokens: &Vec<Token>, line: usize) -> (usize, Vec<String>) {
         } else if tokens[i].token_type == TokenType::Comma {
             
         } else if let Some(x) = tokens[i].literal.clone() {
-            exit(&format!("Expected identifier, found {}", x), line);
+            exit(&format!("Expected identifier as title of CSV column, found {}", x), line);
         } else {
             exit("Expected a literal, found None (there's probably 2 commas without a value in between in your CSV)", line);
         }
