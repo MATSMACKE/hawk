@@ -50,7 +50,7 @@ impl Display for Object {
             Self::Identifier(x) => write!(f, "Object::Identifier(\"{}\".to_owned())", x),
             Self::Column(data) => write!(f, "Object::Column({})", Objects(data.clone())),
             Self::DataTable{names, data} => write!(f, "Object::DataTable{{ names: vec!{:?}.iter().map(|x| x.to_owned()).collect(), data: {} }}", names, Objects(data.clone())),
-            _ => write!(f, "DON'T USE FINDERS IN STD YET")
+            Self::Finder(equations) => write!(f, "Object::Finder(vec![{}])", Equations(equations.to_owned())),
         }
     }
 }
@@ -69,6 +69,22 @@ impl Display for Objects {
         if problem {Err(Error)} else {Ok(())}
     }
 }
+
+// For outputting a list of objects to Rust source code
+impl Display for Equations {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        let mut problem = false;
+        for eqn in self.0.iter() {
+            if let Ok(_) = writeln!(f, "({}, {}),", eqn.0, eqn.1) {
+                ()
+            } else {
+                problem = true
+            }
+        }
+        if problem {Err(Error)} else {Ok(())}
+    }
+}
+
 
 impl PartialEq for Object {
     fn eq(&self, other: &Self) -> bool {
@@ -105,3 +121,6 @@ fn compare_vec_obj(a: &Vec<Object>, b: &Vec<Object>) -> bool {
 
 /// A utility struct to work around inability to `impl Display for Vec<Object>`
 pub struct Objects(Vec<Object>);
+
+/// A utility struct to work around inability to `impl Display for Vec<(Expression, Expression)>`
+pub struct Equations(Vec<(Expression, Expression)>);

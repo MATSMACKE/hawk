@@ -8,6 +8,7 @@ match identifier.as_str() {
 
 
 
+
 "sort" => Some(Object::Function{params: vec!["arr"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Definition{name: "i".to_owned(), value: Box::new(Expression::Literal(Object::Int(0)))}
 ,
 Statement::While{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_owned()))), operand2: Box::new(Expression::FunctionCall{identifier: "len".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("arr".to_owned()))),
@@ -144,6 +145,7 @@ Box::new(Expression::Literal(Object::Identifier("y".to_owned()))),
 )}),
 
 
+
 "factorial" => Some(Object::Function{params: vec!["x"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::IfElse{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operand2: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::LessThanEqual}), if_block: Box::new(Statement::Return(Box::new(Expression::Literal(Object::Int(1))))
 ), else_block: Box::new(Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operand2: Box::new(Expression::FunctionCall{identifier: "factorial".to_owned(), args: vec![Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operand2: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::Minus}),
 ]}), operator: TokenType::Asterisk}))
@@ -173,3 +175,28 @@ Box::new(Expression::Literal(Object::Identifier("y".to_owned()))),
 _ => None
 }
 }
+    pub fn get_std_finder(identifier: String) -> Option<Object> {
+        match identifier.as_str() {
+            
+
+
+
+
+
+
+
+
+
+
+"force" => Some(Object::Finder(vec![(Expression::Literal(Object::Identifier("f".to_owned())), Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("m".to_owned()))), operand2: Box::new(Expression::Literal(Object::Identifier("a".to_owned()))), operator: TokenType::Asterisk}),
+])),
+
+"singleslit" => Some(Object::Finder(vec![(Expression::Literal(Object::Identifier("theta".to_owned())), Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("lambda".to_owned()))), operand2: Box::new(Expression::Literal(Object::Identifier("b".to_owned()))), operator: TokenType::Slash}),
+])),
+
+"waves" => Some(Object::Finder(vec![(Expression::Literal(Object::Identifier("v".to_owned())), Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("f".to_owned()))), operand2: Box::new(Expression::Literal(Object::Identifier("lambda".to_owned()))), operator: TokenType::Asterisk}),
+])),
+
+            _ => None
+        }
+    }

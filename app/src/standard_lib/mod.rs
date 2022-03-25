@@ -1,7 +1,7 @@
 use crate::eval::Interpreter;
 use crate::Object;
 
-mod standard_lib_hawk;
+pub mod standard_lib_hawk;
 mod standard_lib_rs;
 
 use standard_lib_hawk::get_std_hawk_fn;

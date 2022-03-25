@@ -1,0 +1,11 @@
+finder force {
+    equation f = m * a
+}
+
+finder singleslit {
+    equation theta = lambda / b
+}
+
+finder waves {
+    equation v = f * lambda
+}

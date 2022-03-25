@@ -122,7 +122,12 @@ impl Interpreter {
 
     /// Calls function, taking into account uncertainties and columns in order to
     fn eval_finder_call(&mut self, identifier: String, given: HashMap<String, Expression>, to_find: String) -> Object {
-        let finder = self.get_variable(identifier);
+        let finder;
+        if let Some(x) = crate::standard_lib::standard_lib_hawk::get_std_finder(identifier.clone()) {
+            finder = x
+        } else {
+            finder = self.get_variable(identifier);
+        }
 
         if let Object::Finder(equations) = finder {
             self.scopes.push(HashMap::new());
