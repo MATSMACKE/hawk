@@ -62,7 +62,11 @@ impl Interpreter {
             }
 
             Statement::Expression(expr) => {
-                self.eval_expression(expr);
+                if self.in_repl {
+                    hawk_cli_io::output::output(self.eval_expression(expr).user_print(self.line))
+                } else {
+                    self.eval_expression(expr);
+                }
             }
 
             Statement::Process {

@@ -43,7 +43,7 @@ No arguments (open REPL) or
 fn run_script(filename: String, global_state: HashMap<String, Object>) -> HashMap<String, Object> {
     let source = std::fs::read_to_string(filename.clone());
     match source {
-        Result::Ok(source) => run::run(source, global_state),
+        Result::Ok(source) => run::run(source, global_state, false),
         Result::Err(_) => {
             println!("Couldn't read file {filename}");
             std::process::exit(1)
@@ -69,7 +69,7 @@ fn repl() {
         if line == "exit" {
             break;
         } else {
-            state = run::run(line, state)
+            state = run::run(line, state, true)
         }
 
         println!();

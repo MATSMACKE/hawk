@@ -162,7 +162,7 @@ impl Interpreter {
             },
             "isuncertain" | "is_uncertain" | "isUncertain" | "hasuncertainty" | "has_uncertainty" | "hasUncertainty" => {
                 if args.len() == 1 {
-                    if let Object::String(_) = args[0] {
+                    if let Object::Uncertain{value: _, uncertainty: _} = args[0] {
                         Some(Object::Boolean(true))
                     } else {
                         Some(Object::Boolean(false))

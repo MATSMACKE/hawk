@@ -7,7 +7,7 @@
 - [ ] data table methods
 - [x] reading CSV
 - [x] writing CSV
-- [ ] very basic CAS
+- [x] very basic CAS
 - [ ] column uncertainty handling
 - [ ] error handling
 - [ ] stdlib finders

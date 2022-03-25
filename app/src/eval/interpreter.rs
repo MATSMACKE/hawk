@@ -16,12 +16,13 @@ pub struct Interpreter {
     pub loops: usize,
     /// Current line number (updated by `Line` statement)
     pub line: usize,
+    pub in_repl: bool
 }
 
 impl Interpreter {
     /// Create an `Interpreter` and run code. `global_state` is used to store the state of the REPL.
     pub fn interpret(
-        statements: Vec<Statement>, global_state: HashMap<String, Object>,
+        statements: Vec<Statement>, global_state: HashMap<String, Object>, in_repl: bool
     ) -> HashMap<String, Object> {
         let mut interpreter = Interpreter {
             statements,
@@ -29,6 +30,7 @@ impl Interpreter {
             loops: 0,
             scopes: Vec::new(),
             line: 1,
+            in_repl
         };
 
         for index in 0..interpreter.statements.len() {

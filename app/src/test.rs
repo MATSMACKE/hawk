@@ -6,7 +6,7 @@ use crate::run;
 
 #[test]
 fn end_to_end_let_int() {
-    let result = run::run(String::from("let var = 5"), HashMap::new());
+    let result = run::run(String::from("let var = 5"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     if let Some(&Object::Int(x)) = expected_var {
@@ -18,7 +18,7 @@ fn end_to_end_let_int() {
 
 #[test]
 fn end_to_end_let_float() {
-    let result = run::run(String::from("let var = 5.3"), HashMap::new());
+    let result = run::run(String::from("let var = 5.3"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     if let Some(&Object::Float(x)) = expected_var {
@@ -30,7 +30,7 @@ fn end_to_end_let_float() {
 
 #[test]
 fn end_to_end_let_string() {
-    let result = run::run(String::from("let var = \"3 + 5.3\""), HashMap::new());
+    let result = run::run(String::from("let var = \"3 + 5.3\""), HashMap::new(), false);
     let expected_var = result.get("var");
 
     if let Some(Object::String(x)) = expected_var {
@@ -42,7 +42,7 @@ fn end_to_end_let_string() {
 
 #[test]
 fn end_to_end_let_array() {
-    let result = run::run(String::from("let var = [4, 6, 87, ,2]"), HashMap::new());
+    let result = run::run(String::from("let var = [4, 6, 87, ,2]"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     use Object::{Array, Int, Null};
@@ -56,7 +56,7 @@ fn end_to_end_let_array() {
 
 #[test]
 fn end_to_end_let_boolean() {
-    let result = run::run(String::from("let var = true"), HashMap::new());
+    let result = run::run(String::from("let var = true"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     use Object::Boolean;
@@ -70,7 +70,7 @@ fn end_to_end_let_boolean() {
 
 #[test]
 fn end_to_end_let_uncertain() {
-    let result = run::run(String::from("let var = 1 ± 0.1"), HashMap::new());
+    let result = run::run(String::from("let var = 1 ± 0.1"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     use Object::Uncertain;
@@ -85,7 +85,7 @@ fn end_to_end_let_uncertain() {
 
 #[test]
 fn end_to_end_ops_int() {
-    let result = run::run(String::from("let var = 3 * (1 + 2) + 4 / 2 ^ 2"), HashMap::new());
+    let result = run::run(String::from("let var = 3 * (1 + 2) + 4 / 2 ^ 2"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     if let Some(&Object::Int(x)) = expected_var {
@@ -97,7 +97,7 @@ fn end_to_end_ops_int() {
 
 #[test]
 fn end_to_end_ops_float() {
-    let result = run::run(String::from("let var = 5.3 * 2.1 / (5.7 - 0.9) ^ 0.2"), HashMap::new());
+    let result = run::run(String::from("let var = 5.3 * 2.1 / (5.7 - 0.9) ^ 0.2"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     if let Some(&Object::Float(x)) = expected_var {
@@ -109,7 +109,7 @@ fn end_to_end_ops_float() {
 
 #[test]
 fn end_to_end_ops_string() {
-    let result = run::run(String::from("let var = \"3 + 5.3\" + \"45\""), HashMap::new());
+    let result = run::run(String::from("let var = \"3 + 5.3\" + \"45\""), HashMap::new(), false);
     let expected_var = result.get("var");
 
     if let Some(Object::String(x)) = expected_var {
@@ -121,7 +121,7 @@ fn end_to_end_ops_string() {
 
 #[test]
 fn end_to_end_ops_uncertain() {
-    let result = run::run(String::from("let var = (1 ± 0.1 + 2 ± 0.4) * 2 ± 0.3"), HashMap::new());
+    let result = run::run(String::from("let var = (1 ± 0.1 + 2 ± 0.4) * 2 ± 0.3"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     use Object::Uncertain;
@@ -136,7 +136,7 @@ fn end_to_end_ops_uncertain() {
 
 #[test]
 fn end_to_end_ops_boolean() {
-    let result = run::run(String::from("let var = true or false and not false"), HashMap::new());
+    let result = run::run(String::from("let var = true or false and not false"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     use Object::Boolean;
@@ -150,7 +150,7 @@ fn end_to_end_ops_boolean() {
 
 #[test]
 fn end_to_end_std_mod() {
-    let result = run::run(String::from("let var = mod(45, 25)"), HashMap::new());
+    let result = run::run(String::from("let var = mod(45, 25)"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     if let Some(&Object::Int(x)) = expected_var {
@@ -162,7 +162,7 @@ fn end_to_end_std_mod() {
 
 #[test]
 fn end_to_end_std_sin_0() {
-    let result = run::run(String::from("let var = sin(0)"), HashMap::new());
+    let result = run::run(String::from("let var = sin(0)"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     if let Some(&Object::Float(x)) = expected_var {
@@ -174,7 +174,7 @@ fn end_to_end_std_sin_0() {
 
 #[test]
 fn end_to_end_std_sin_pi() {
-    let result = run::run(String::from("let var = sin(pi() / 2)"), HashMap::new());
+    let result = run::run(String::from("let var = sin(pi() / 2)"), HashMap::new(), false);
     let expected_var = result.get("var");
 
     if let Some(&Object::Float(x)) = expected_var {
@@ -196,7 +196,7 @@ fn end_to_end_fn() {
             let var = test(3)
         ",
         ),
-        HashMap::new(),
+        HashMap::new(), false
     );
     let expected_var = result.get("var");
 
