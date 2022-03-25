@@ -4,7 +4,7 @@ use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
 use hawk_common::tree::{Expression, Statement};
 
-use hawk_cli_io::error::exit;
+use hawk_cli_io::error::{exit, warn};
 use hawk_cli_io::object::UserPrint;
 
 pub struct Parser {
@@ -392,6 +392,8 @@ impl Parser {
             self.parse_finder_call()
         }
         else {
+            self.consume();
+            warn("Unexpected token", self.current().line);
             Box::new(Expression::Literal(Object::Null))
         }
     }

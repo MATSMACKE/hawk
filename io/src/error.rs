@@ -1,7 +1,7 @@
 use std::io::{stdout};
 
 use crossterm::execute;
-use crossterm::style::{Color::Red, Colors, Print, SetColors};
+use crossterm::style::{Color::{Red, Yellow}, Colors, Print, SetColors};
 
 use hawk_common::object::Object;
 
@@ -17,7 +17,20 @@ pub fn exit<'a>(message: &'a str, line: usize) -> Object {
 "");
     std::process::exit(1);
 
-    // Satisfy return to shut up the comp
+    // Satisfy return to shut up the compiler
     #[allow(unreachable_code)]
+    Object::Null
+}
+
+/// Exit the program with an error message. Returns Null just to appease Rust
+pub fn warn<'a>(message: &'a str, line: usize) -> Object {
+
+    execute!(
+        stdout(),
+        SetColors(Colors{ foreground: Some(Yellow), background: None}),
+        Print(format!("Warning on line {line}: {message}")),
+    ).unwrap();
+    eprintln!(
+"");
     Object::Null
 }
