@@ -95,8 +95,8 @@ impl Interpreter {
                 let mut got_variable = false;
 
                 if !(self.scopes.len() == 0) {
-                    for i in self.scopes.len() - 1..=0 {
-                        if self.scopes[i].contains_key(&name.clone()) {
+                    for i in (0..self.scopes.len()).rev() {
+                        if !got_variable && self.scopes[i].contains_key(&name.clone()) {
                             got_variable = true;
                             self.scopes[i].insert(name.clone(), Object::Array(data.clone()));
                         }
@@ -257,7 +257,7 @@ impl Interpreter {
 
     fn run_definition(&mut self, name: String, value: Box<Expression>) {
         let val = self.eval_expression(value);
-        self.insert_top_scope(name, val)
+        self.insert_top_scope(name, val);
     }
 
     /// Gets variable by identifier in the topmost scope where it is defined

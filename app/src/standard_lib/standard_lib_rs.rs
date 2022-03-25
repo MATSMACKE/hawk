@@ -2,7 +2,7 @@ use std::fs::{read_to_string, write};
 
 use crate::error::exit;
 
-use hawk_cli_io::csv::{csv_to_datatable, datatable_to_csv};
+use hawk_cli_io::{csv::{csv_to_datatable, datatable_to_csv}, object::UserPrint};
 
 use crate::{eval::Interpreter, Object};
 
@@ -104,7 +104,95 @@ impl Interpreter {
                     );
                     None
                 }
-            }
+            },
+            "str" | "string" => {
+                if args.len() == 1 {
+                    Some(Object::String(args[0].user_print(self.line)))
+                } else {
+                    exit(
+                        &format!("Expected exactly 1 input to str, got {:?}", args),
+                        self.line,
+                    );
+                    None
+                }
+            },
+            "isfloat" | "is_float" | "isFloat" => {
+                if args.len() == 1 {
+                    if let Object::Float(_) = args[0] {
+                        Some(Object::Boolean(true))
+                    } else {
+                        Some(Object::Boolean(false))
+                    }
+                } else {
+                    Some(Object::Boolean(false))
+                }
+            },
+            "isint" | "is_int" | "isInt" => {
+                if args.len() == 1 {
+                    if let Object::Int(_) = args[0] {
+                        Some(Object::Boolean(true))
+                    } else {
+                        Some(Object::Boolean(false))
+                    }
+                } else {
+                    Some(Object::Boolean(false))
+                }
+            },
+            "isbool" | "is_bool" | "isBool" => {
+                if args.len() == 1 {
+                    if let Object::Boolean(_) = args[0] {
+                        Some(Object::Boolean(true))
+                    } else {
+                        Some(Object::Boolean(false))
+                    }
+                } else {
+                    Some(Object::Boolean(false))
+                }
+            },
+            "isstring" | "is_str" | "isStr" | "isstr" | "is_string" | "isString" => {
+                if args.len() == 1 {
+                    if let Object::String(_) = args[0] {
+                        Some(Object::Boolean(true))
+                    } else {
+                        Some(Object::Boolean(false))
+                    }
+                } else {
+                    Some(Object::Boolean(false))
+                }
+            },
+            "isuncertain" | "is_uncertain" | "isUncertain" | "hasuncertainty" | "has_uncertainty" | "hasUncertainty" => {
+                if args.len() == 1 {
+                    if let Object::String(_) = args[0] {
+                        Some(Object::Boolean(true))
+                    } else {
+                        Some(Object::Boolean(false))
+                    }
+                } else {
+                    Some(Object::Boolean(false))
+                }
+            },
+            "isarray" | "is_arr" | "isArr" | "isarr" | "is_array" | "isArray" => {
+                if args.len() == 1 {
+                    if let Object::Array(_) = args[0] {
+                        Some(Object::Boolean(true))
+                    } else {
+                        Some(Object::Boolean(false))
+                    }
+                } else {
+                    Some(Object::Boolean(false))
+                }
+            },
+            "isnull" | "is_null" | "isNull" => {
+                if args.len() == 1 {
+                    if let Object::Null = args[0] {
+                        Some(Object::Boolean(true))
+                    } else {
+                        Some(Object::Boolean(false))
+                    }
+                } else {
+                    Some(Object::Boolean(false))
+                }
+            },
             _ => None,
         }
     }

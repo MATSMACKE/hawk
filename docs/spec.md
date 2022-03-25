@@ -38,7 +38,7 @@ else statement
 ```
 As with other languages, `else` is optional. `else if` is not hardcoded into the language itself but will work as a byproduct of the way `if` and `else` work.
 
-##### Unless
+##### Unless (not implemented)
 
 ```
 unless condition statement
@@ -80,7 +80,7 @@ finder force {
 
 Then to use it:
 ```
->> print find force (f: 3, m?, a: 1.5) // Finds m if f = 3 and a = 1.5
+>> print find force (f: 3, m?, a: 1.5)
 2
 ```
 
@@ -112,7 +112,7 @@ To use uncertain without a ± key:
 
 When doing calculations with uncertains, the value will be calculated as expected and the uncertainty will also be updated to be correct as per the calculations that have been performed.
 
-#### Finding unknowns with built in finders
+#### Finding unknowns with built in finders (not implemented)
 
 ##### suvat
 ```
