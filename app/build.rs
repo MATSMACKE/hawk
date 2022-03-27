@@ -52,7 +52,7 @@ fn create_match_arms_fn(path: DirEntry) -> String {
 
     let mut matcharms = String::new();
 
-    for statement in parsed {
+    for statement in parsed.unwrap() {
         if let Statement::Function {
             identifier,
             params,
@@ -88,7 +88,7 @@ fn create_match_arms_find(path: DirEntry) -> String {
 
     let mut matcharms = String::new();
 
-    for statement in parsed {
+    for statement in parsed.unwrap() {
         if let Statement::Finder {
             identifier,
             equations,

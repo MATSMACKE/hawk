@@ -10,7 +10,7 @@ pub fn run(source: String, global_state: HashMap<String, Object>, in_repl: bool)
 
     //println!("{}", Tokens(tokens.clone()));
 
-    let statements = parser::Parser::parse(&tokens);
+    let statements = parser::Parser::parse(&tokens)?;
 
     //println!("{:?}\n", statements);
 

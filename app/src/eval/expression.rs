@@ -239,7 +239,7 @@ impl Interpreter {
                 uncertainty: ((max - min) / 2.).abs(),
             })
         } else {
-            panic!("`AAAAH why in the world is this not an uncertain that's literally impossible Rust just forced me to include this panic here don't mind me")
+            panic!("`AAAAH why in the world is this not an uncertain that's literally impossible Rust just forced me to include this panic here don't mind me. Most likely explanation is that your computer was struck by lightning or particles from outer space. ")
         }
     }
 
