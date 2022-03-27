@@ -1,5 +1,6 @@
 use crate::eval::Interpreter;
 
+use hawk_cli_io::object::UserPrintObject;
 // Common types used throughout the interpreter
 use hawk_common::object::Object;
 
@@ -17,7 +18,7 @@ impl Interpreter {
                     value: (x as f64) + y,
                     uncertainty: u,
                 }),
-                _ => Err((format!("Can't add Int to {}", operand2), line)),
+                _ => Err((format!("Can't add Int to {}", operand2.user_print(line)), line)),
             },
             Object::Float(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Float(x + (y as f64))),
@@ -29,7 +30,7 @@ impl Interpreter {
                     value: x + y,
                     uncertainty: u,
                 }),
-                _ => Err((format!("Can't add Float to {}", operand2), line)),
+                _ => Err((format!("Can't add Float to {}", operand2.user_print(line)), line)),
             },
             Object::Uncertain {
                 value: x,
@@ -50,7 +51,7 @@ impl Interpreter {
                     value: x + y,
                     uncertainty: u1 + u2,
                 }),
-                _ => Err((format!("Can't add Uncertain to {}", operand2), line)),
+                _ => Err((format!("Can't add Uncertain to {}", operand2.user_print(line)), line)),
             },
             Object::Column(operand1_data) => {
                 let mut results: Vec<Object> = Vec::new();
@@ -71,9 +72,9 @@ impl Interpreter {
             }
             Object::String(x) => match operand2 {
                 Object::String(y) => Ok(Object::String(format!("{x}{y}"))),
-                _ => Err((format!("Can't add String to {}", operand2), line)),
+                _ => Err((format!("Can't add String to {}", operand2.user_print(line)), line)),
             },
-            _ => Err((format!("Can't add {}", operand1), line)),
+            _ => Err((format!("Can't add {}", operand1.user_print(line)), line)),
         }
     }
 
@@ -90,7 +91,7 @@ impl Interpreter {
                     value: (x as f64) - y,
                     uncertainty: u,
                 }),
-                _ => Err((format!("Can't subtract {} from Int", operand2), line)),
+                _ => Err((format!("Can't subtract {} from Int", operand2.user_print(line)), line)),
             },
             Object::Float(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Float(x - (y as f64))),
@@ -102,7 +103,7 @@ impl Interpreter {
                     value: x - y,
                     uncertainty: u,
                 }),
-                _ => Err((format!("Can't subtract {} from Float", operand2), line)),
+                _ => Err((format!("Can't subtract {} from Float", operand2.user_print(line)), line)),
             },
             Object::Uncertain {
                 value: x,
@@ -123,7 +124,7 @@ impl Interpreter {
                     value: x - y,
                     uncertainty: u1 + u2,
                 }),
-                _ => Err((format!("Can't subtract {} from Uncertain", operand2), line)),
+                _ => Err((format!("Can't subtract {} from Uncertain", operand2.user_print(line)), line)),
             },
             Object::Column(operand1_data) => {
                 let mut results: Vec<Object> = Vec::new();
@@ -142,7 +143,7 @@ impl Interpreter {
                 }
                 Ok(Object::Column(results))
             }
-            _ => Err((format!("Can't subtract {}", operand1), line)),
+            _ => Err((format!("Can't subtract {}", operand1.user_print(line)), line)),
         }
     }
 
@@ -156,7 +157,7 @@ impl Interpreter {
                     value: value * (x as f64),
                     uncertainty: uncertainty * (x as f64),
                 }),
-                _ => Err((format!("Can't multiply Int by {}", operand2), line)),
+                _ => Err((format!("Can't multiply Int by {}", operand2.user_print(line)), line)),
             },
             Object::Float(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Float(x * (y as f64))),
@@ -165,7 +166,7 @@ impl Interpreter {
                     value: value * x,
                     uncertainty: uncertainty * x,
                 }),
-                _ => Err((format!("Can't multiply Float by {}", operand2), line)),
+                _ => Err((format!("Can't multiply Float by {}", operand2.user_print(line)), line)),
             },
             Object::Uncertain {
                 value: x,
@@ -186,7 +187,7 @@ impl Interpreter {
                     value: x * y,
                     uncertainty: x * y * ((u1 / x) + (u2 / y)),
                 }),
-                _ => Err((format!("Can't multiply Uncertain by {}", operand2), line)),
+                _ => Err((format!("Can't multiply Uncertain by {}", operand2.user_print(line)), line)),
             },
             Object::Column(operand1_data) => {
                 let mut products: Vec<Object> = Vec::new();
@@ -205,7 +206,7 @@ impl Interpreter {
                 }
                 Ok(Object::Column(products))
             }
-            _ => Err((format!("Can't multiply {}", operand1), line)),
+            _ => Err((format!("Can't multiply {}", operand1.user_print(line)), line)),
         }
     }
 
@@ -222,7 +223,7 @@ impl Interpreter {
                     value: (x as f64) / y,
                     uncertainty: (x as f64) * u / (y * y),
                 }),
-                _ => Err((format!("Can't divide Int by {}", operand2), line)),
+                _ => Err((format!("Can't divide Int by {}", operand2.user_print(line)), line)),
             },
             Object::Float(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Float(x / (y as f64))),
@@ -234,7 +235,7 @@ impl Interpreter {
                     value: x / y,
                     uncertainty: x * u / (y * y),
                 }),
-                _ => Err((format!("Can't divide Float by {}", operand2), line)),
+                _ => Err((format!("Can't divide Float by {}", operand2.user_print(line)), line)),
             },
             Object::Uncertain {
                 value: x,
@@ -255,7 +256,7 @@ impl Interpreter {
                     value: x / y,
                     uncertainty: (x / y) * ((u1 / x) + (u2 / y)),
                 }),
-                _ => Err((format!("Can't divide Uncertain by {}", operand2), line)),
+                _ => Err((format!("Can't divide Uncertain by {}", operand2.user_print(line)), line)),
             },
             Object::Column(operand1_data) => {
                 let mut quotients: Vec<Object> = Vec::new();
@@ -274,7 +275,7 @@ impl Interpreter {
                 }
                 Ok(Object::Column(quotients))
             }
-            _ => Err((format!("Can't divide {}", operand1), line)),
+            _ => Err((format!("Can't divide {}", operand1.user_print(line)), line)),
         }
     }
 
@@ -284,12 +285,12 @@ impl Interpreter {
             Object::Int(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Int(x.pow(y as u32))),
                 Object::Float(y) => Ok(Object::Float((x as f64).powf(y))),
-                _ => Err((format!("Can't raise Int to {}", operand2), line)),
+                _ => Err((format!("Can't raise Int to {}", operand2.user_print(line)), line)),
             },
             Object::Float(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Float(x.powf(y as f64))),
                 Object::Float(y) => Ok(Object::Float(x.powf(y))),
-                _ => Err((format!("Can't raise Float to {}", operand2), line)),
+                _ => Err((format!("Can't raise Float to {}", operand2.user_print(line)), line)),
             },
             Object::Uncertain {
                 value: x,
@@ -303,9 +304,9 @@ impl Interpreter {
                     value: x.powf(y),
                     uncertainty: x.powf(y) * y * (u1 / x),
                 }),
-                _ => Err((format!("Can't raise Uncertain to {}", operand2), line)),
+                _ => Err((format!("Can't raise Uncertain to {}", operand2.user_print(line)), line)),
             },
-            _ => Err((format!("Can't exponentiate {}", operand1), line)),
+            _ => Err((format!("Can't exponentiate {}", operand1.user_print(line)), line)),
         }
     }
 
@@ -317,7 +318,7 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean((x as f64) >= y))
             } else {
-                Err((format!("Can't compare Int to {}", operand2), line))
+                Err((format!("Can't compare Int to {}", operand2.user_print(line)), line))
             }
         } else if let Object::Float(x) = operand1 {
             if let Object::Int(y) = operand2 {
@@ -325,10 +326,10 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean(x >= y))
             } else {
-                Err((format!("Can't compare Float to {}", operand2), line))
+                Err((format!("Can't compare Float to {}", operand2.user_print(line)), line))
             }
         } else {
-            Err((format!("Can't compare {}", operand1), line))
+            Err((format!("Can't compare {}", operand1.user_print(line)), line))
         }
     }
 
@@ -340,7 +341,7 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean((x as f64) > y))
             } else {
-                Err((format!("Can't compare Int to {}", operand2), line))
+                Err((format!("Can't compare Int to {}", operand2.user_print(line)), line))
             }
         } else if let Object::Float(x) = operand1 {
             if let Object::Int(y) = operand2 {
@@ -348,10 +349,10 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean(x > y))
             } else {
-                Err((format!("Can't compare Float to {}", operand2), line))
+                Err((format!("Can't compare Float to {}", operand2.user_print(line)), line))
             }
         } else {
-            Err((format!("Can't compare {}", operand1), line))
+            Err((format!("Can't compare {}", operand1.user_print(line)), line))
         }
     }
 
@@ -363,7 +364,7 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean((x as f64) <= y))
             } else {
-                Err((format!("Can't compare Int to {}", operand2), line))
+                Err((format!("Can't compare Int to {}", operand2.user_print(line)), line))
             }
         } else if let Object::Float(x) = operand1 {
             if let Object::Int(y) = operand2 {
@@ -371,10 +372,10 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean(x <= y))
             } else {
-                Err((format!("Can't compare Float to {}", operand2), line))
+                Err((format!("Can't compare Float to {}", operand2.user_print(line)), line))
             }
         } else {
-            Err((format!("Can't compare {}", operand1), line))
+            Err((format!("Can't compare {}", operand1.user_print(line)), line))
         }
     }
 
@@ -386,7 +387,7 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean((x as f64) < y))
             } else {
-                Err((format!("Can't compare Int to {}", operand2), line))
+                Err((format!("Can't compare Int to {}", operand2.user_print(line)), line))
             }
         } else if let Object::Float(x) = operand1 {
             if let Object::Int(y) = operand2 {
@@ -394,10 +395,10 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean(x < y))
             } else {
-                Err((format!("Can't compare Float to {}", operand2), line))
+                Err((format!("Can't compare Float to {}", operand2.user_print(line)), line))
             }
         } else {
-            Err((format!("Can't compare {}", operand1), line))
+            Err((format!("Can't compare {}", operand1.user_print(line)), line))
         }
     }
 
@@ -409,7 +410,7 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean((x as f64) != y))
             } else {
-                Err((format!("Can't compare Int to {}", operand2), line))
+                Err((format!("Can't compare Int to {}", operand2.user_print(line)), line))
             }
         } else if let Object::Float(x) = operand1 {
             if let Object::Int(y) = operand2 {
@@ -417,10 +418,10 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean(x != y))
             } else {
-                Err((format!("Can't compare Float to {}", operand2), line))
+                Err((format!("Can't compare Float to {}", operand2.user_print(line)), line))
             }
         } else {
-            Err((format!("Can't compare {}", operand1), line))
+            Err((format!("Can't compare {}", operand1.user_print(line)), line))
         }
     }
 
@@ -432,7 +433,7 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean((x as f64) == y))
             } else {
-                Err((format!("Can't compare Int to {}", operand2), line))
+                Err((format!("Can't compare Int to {}", operand2.user_print(line)), line))
             }
         } else if let Object::Float(x) = operand1 {
             if let Object::Int(y) = operand2 {
@@ -440,10 +441,10 @@ impl Interpreter {
             } else if let Object::Float(y) = operand2 {
                 Ok(Object::Boolean(x == y))
             } else {
-                Err((format!("Can't compare Float to {}", operand2), line))
+                Err((format!("Can't compare Float to {}", operand2.user_print(line)), line))
             }
         } else {
-            Err((format!("Can't compare {}", operand1), line))
+            Err((format!("Can't compare {}", operand1.user_print(line)), line))
         }
     }
 
@@ -456,14 +457,14 @@ impl Interpreter {
                 Err((
                     format!(
                         "Logical operations can only be performed on booleans, not {}",
-                        operand2
+                        operand2.user_print(line)
                     ),
                     line,
                 ))
             }
         } else {
             Err((
-                format!("Logical operations can only be performed on booleans, not {}", operand1),
+                format!("Logical operations can only be performed on booleans, not {}", operand1.user_print(line)),
                 line,
             ))
         }
@@ -478,14 +479,14 @@ impl Interpreter {
                 Err((
                     format!(
                         "Logical operations can only be performed on booleans, not {}",
-                        operand2
+                        operand2.user_print(line)
                     ),
                     line,
                 ))
             }
         } else {
             Err((
-                format!("Logical operations can only be performed on booleans, not {}", operand1),
+                format!("Logical operations can only be performed on booleans, not {}", operand1.user_print(line)),
                 line,
             ))
         }
@@ -497,7 +498,7 @@ impl Interpreter {
             Ok(Object::Boolean(!x))
         } else {
             Err((
-                format!("Logical operations can only be performed on booleans, not {}", eval_op),
+                format!("Logical operations can only be performed on booleans, not {}", eval_op.user_print(line)),
                 line,
             ))
         }
@@ -515,7 +516,7 @@ impl Interpreter {
                 }
                 Ok(Object::Column(results))
             }
-            _ => Err((format!("Expected number, found {}", eval_op), line)),
+            _ => Err((format!("Expected number, found {}", eval_op.user_print(line)), line)),
         }
     }
 
@@ -531,7 +532,7 @@ impl Interpreter {
                     value: x as f64,
                     uncertainty: y,
                 }),
-                _ => Err((format!("Can't add {} as uncertainty", operand2), line)),
+                _ => Err((format!("Can't add {} as uncertainty", operand2.user_print(line)), line)),
             },
             Object::Float(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Uncertain {
@@ -542,7 +543,7 @@ impl Interpreter {
                     value: x,
                     uncertainty: y,
                 }),
-                _ => Err((format!("Can't add {} as uncertainty", operand2), line)),
+                _ => Err((format!("Can't add {} as uncertainty", operand2.user_print(line)), line)),
             },
             Object::Column(operand1_data) => {
                 let mut results: Vec<Object> = Vec::new();
@@ -561,7 +562,7 @@ impl Interpreter {
                 }
                 Ok(Object::Column(results))
             }
-            _ => Err((format!("Can't add uncertainty to {}", operand1), line)),
+            _ => Err((format!("Can't add uncertainty to {}", operand1.user_print(line)), line)),
         }
     }
 }

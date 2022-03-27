@@ -31,7 +31,7 @@ fn main() {
         // Expect either 1 argument for REPL or 2 for executing a file
         _ => {
             error(
-                "Incorrect args: expected either:
+"Incorrect args: expected either:
 No arguments (open REPL) or
 1 Argument (run a .hawk file)", 0
             );
@@ -54,7 +54,7 @@ fn run_script(filename: String, global_state: HashMap<String, Object>) -> HashMa
             }
         },
         Result::Err(_) => {
-            error("Couldn't read file {filename}", 0);
+            error(&format!("Couldn't read file {filename}"), 0);
             std::process::exit(1)
         }
     }
