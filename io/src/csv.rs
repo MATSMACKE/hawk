@@ -35,7 +35,7 @@ fn values_to_columns(titles: &Vec<String>, values: Vec<Vec<Object>>) -> Vec<Obje
     for j in 0..num_cols {
         let mut vals = Vec::new();
         for k in 0..num_rows {
-            vals.push(values[j][k].clone());
+            vals.push(values[k][j].clone());
         }
         columns.push(Object::Column(vals));
     }
@@ -251,9 +251,11 @@ impl CSV for Object {
         }
     }
 
-    fn format_datatable_csv(names: Vec<String>, data: Vec<Object>, line: usize) -> String {
+    fn format_datatable_csv(mut names: Vec<String>, data: Vec<Object>, line: usize) -> String {
         let mut str = String::from("");
-        str = Self::format_datatable_csv_column_names(names, str);
+
+        let mut new_data = data.clone();
+
         let len: usize;
         if let Object::Column(vals) = data[0].clone() {
             len = vals.len()
@@ -261,7 +263,34 @@ impl CSV for Object {
             exit(&format!("Expected column, found {}", data[0].user_print(line)), line);
             len = 0; // Unreachable
         }
-        str = Self::format_datatable_csv_data(data, str, len, line);
+
+        let mut added_columns = 0;
+
+        for (i, col) in data.iter().enumerate() {
+            if let Object::Column(a) = col {
+                if let Object::Uncertain{value: _, uncertainty: _} = a[0] {
+                    names.insert(i + added_columns + 1, format!("uncertainty{}", names[i + added_columns]));
+
+                    let mut vals = Vec::new();
+                    let mut uncerts = Vec::new();
+                    for obj in a {
+                        if let Object::Uncertain{value, uncertainty} = obj {
+                            vals.push(Object::Float(*value));
+                            uncerts.push(Object::Float(*uncertainty));   
+                        }
+                    }
+                    new_data[i + added_columns] = Object::Column(vals);
+                    new_data.insert(i + 1 + added_columns, Object::Column(uncerts));
+
+                    added_columns += 1;
+                }
+            } else {
+                exit(&format!("Expected column, found {}", data[0].user_print(line)), line);
+            }
+        }
+
+        str = Self::format_datatable_csv_column_names(names, str);
+        str = Self::format_datatable_csv_data(new_data, str, len, line);
         str
     }
 

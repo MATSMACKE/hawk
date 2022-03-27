@@ -116,12 +116,14 @@ impl Interpreter {
 
     fn run_process(
         &mut self, readfile: Box<Expression>, writefile: Box<Expression>, block: Box<Statement>,
-    ) {
+) {
         self.scopes.push(HashMap::new());
         if let Object::String(readfile) = self.eval_expression(readfile) {
             self.open_datatable(readfile);
         }
+
         self.run_statement(*block);
+
         let mut columns: Vec<String> = Vec::new();
         let mut values: Vec<Object> = Vec::new();
         for (key, value) in &self.scopes[self.scopes.len() - 1] {
@@ -130,6 +132,7 @@ impl Interpreter {
                 values.push(value.clone());
             }
         }
+
         let filename = self.eval_expression(writefile);
         self.run_fn_std(
             String::from("write"),

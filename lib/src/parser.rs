@@ -449,7 +449,7 @@ impl Parser {
                 }
                 Box::new(Expression::MethodCall { object: identifier, method: methodname, args })
             } else {
-                exit(&format!("Expected method name method name"), self.current().line);
+                exit(&format!("Expected method name, instead found {}", self.tokens[self.index + 2].literal.clone().unwrap().user_print(self.current().line)), self.current().line);
                 Box::new(Expression::Literal(Object::Null))
             }
         } else {
@@ -463,6 +463,9 @@ impl Parser {
             self.consume();
             self.consume();
             let index = self.expression();
+            if !(TokenType::BracketRight == self.next().token_type) {
+                warn(&format!("Hawk respects your freedom, so using {} is fine, but consider using a ']' to end array index.", self.previous().token_type.user_print()), self.current().line);
+            }
             self.consume();
             Box::new(Expression::ArrayIndex { identifier, index })
         } else {
