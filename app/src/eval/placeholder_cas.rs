@@ -1,7 +1,6 @@
 #![allow(unused)]
 
 use hawk_common::{tree::Expression, object::Object, token::TokenType};
-use hawk_cli_io::error::exit;
 
 pub struct Equation {
     lhs: Expression,
@@ -10,13 +9,13 @@ pub struct Equation {
 }
 
 impl Equation {
-    pub fn solve_for(lhs: Expression, rhs: Expression, var: String) -> Expression {
+    pub fn solve_for(lhs: Expression, rhs: Expression, var: String) -> Result<Expression, (String, usize)> {
         use Expression::*;
 
         match (lhs.clone(), rhs.clone()) {
             (Binary{operand1, operand2, operator}, Literal(rh)) => {
-                if rhs.contains(var.to_owned()) {
-                    return lhs
+                if rhs.contains(var.to_owned())? {
+                    return Ok(lhs)
                 }
                 match operator {
                     TokenType::Asterisk => {
@@ -24,15 +23,14 @@ impl Equation {
                             if str == var {
                                 // x * a = b
                                 // return b / a
-                                Expression::Binary{operand1: Box::new(rhs), operand2, operator: TokenType::Slash}
+                                Ok(Expression::Binary{operand1: Box::new(rhs), operand2, operator: TokenType::Slash})
                             } else {
                                 // a * x = b
                                 // return b / a
-                                Expression::Binary{operand1: Box::new(rhs), operand2: operand1, operator: TokenType::Slash}
+                                Ok(Expression::Binary{operand1: Box::new(rhs), operand2: operand1, operator: TokenType::Slash})
                             }
                         } else {
-                            exit("Cannot handle this equation", 0);
-                            Expression::Literal(Object::Null)
+                            Err(("Cannot handle this equation".to_string(), 0))
                         }
                     },
 
@@ -41,24 +39,23 @@ impl Equation {
                             if str == var {
                                 // x / a = b
                                 // return b * a
-                                Expression::Binary{operand1: Box::new(rhs), operand2, operator: TokenType::Asterisk}
+                                Ok(Expression::Binary{operand1: Box::new(rhs), operand2, operator: TokenType::Asterisk})
                             } else {
                                 // a / x = b
                                 // return a / b
-                                Expression::Binary{operand1, operand2: Box::new(rhs), operator: TokenType::Slash}
+                                Ok(Expression::Binary{operand1, operand2: Box::new(rhs), operator: TokenType::Slash})
                             }
                         } else {
-                            exit("Cannot handle this equaion", 4);
-                            Expression::Literal(Object::Null)
+                            Err(("Cannot handle this equaion".to_string(), 4))
                         }
                     }
-                    _ => Literal(Object::Int(0))
+                    _ => Ok(Literal(Object::Int(0)))
                 }
             },
 
             (Literal(rh), Binary{operand1, operand2, operator}) => {
-                if lhs.contains(var.to_owned()) {
-                    return rhs
+                if lhs.contains(var.to_owned())? {
+                    return Ok(rhs)
                 }
                 match operator {
                     TokenType::Asterisk => {
@@ -66,15 +63,14 @@ impl Equation {
                             if str == var {
                                 // a = x * b
                                 // return a / b
-                                Expression::Binary{operand1: Box::new(lhs), operand2, operator: TokenType::Slash}
+                                Ok(Expression::Binary{operand1: Box::new(lhs), operand2, operator: TokenType::Slash})
                             } else {
                                 // a = b * x
                                 // return a / b
-                                Expression::Binary{operand1: Box::new(lhs), operand2: operand1, operator: TokenType::Slash}
+                                Ok(Expression::Binary{operand1: Box::new(lhs), operand2: operand1, operator: TokenType::Slash})
                             }
                         } else {
-                            exit("Cannot handle this equaion", 6);
-                            Expression::Literal(Object::Null)
+                            Err(("Cannot handle this equaion".to_string(), 6))
                         }
                     },
 
@@ -83,21 +79,20 @@ impl Equation {
                             if str == var {
                                 // a = x / b
                                 // return a * b
-                                Expression::Binary{operand1: Box::new(lhs), operand2, operator: TokenType::Asterisk}
+                                Ok(Expression::Binary{operand1: Box::new(lhs), operand2, operator: TokenType::Asterisk})
                             } else {
                                 // a = b / x
                                 // return b / a
-                                Expression::Binary{operand1: operand1, operand2: Box::new(lhs), operator: TokenType::Slash}
+                                Ok(Expression::Binary{operand1: operand1, operand2: Box::new(lhs), operator: TokenType::Slash})
                             }
                         } else {
-                            exit("Cannot handle this equaion", 9);
-                            Expression::Literal(Object::Null)
+                            Err(("Cannot handle this equaion".to_string(), 9))
                         }
                     }
-                    _ => Literal(Object::Null)
+                    _ => Ok(Literal(Object::Null))
                 }
             },
-            _ => Literal(Object::Int(0))
+            _ => Ok(Literal(Object::Int(0)))
         }
     }
 }
@@ -114,11 +109,11 @@ fn basic_cas() {
         String::from("x")
         ), 
         
-        Expression::Binary{
+        Ok(Expression::Binary{
             operand1: Box::new(Expression::Literal(Object::Int(4))),
             operand2: Box::new(Expression::Literal(Object::Int(2))),
             operator: TokenType::Slash
-        });
+        }));
 
     assert_eq!(
         Equation::solve_for(
@@ -130,11 +125,11 @@ fn basic_cas() {
         String::from("x")
         ), 
         
-        Expression::Binary{
+        Ok(Expression::Binary{
             operand1: Box::new(Expression::Literal(Object::Int(4))),
             operand2: Box::new(Expression::Literal(Object::Int(2))),
             operator: TokenType::Slash
-        });
+        }));
     
     assert_eq!(
         Equation::solve_for(
@@ -146,11 +141,11 @@ fn basic_cas() {
         String::from("x")
         ), 
         
-        Expression::Binary{
+        Ok(Expression::Binary{
             operand1: Box::new(Expression::Literal(Object::Int(4))),
             operand2: Box::new(Expression::Literal(Object::Int(2))),
             operator: TokenType::Asterisk
-        });
+        }));
 
     assert_eq!(
         Equation::solve_for(
@@ -162,11 +157,11 @@ fn basic_cas() {
         String::from("x")
         ), 
         
-        Expression::Binary{
+        Ok(Expression::Binary{
             operand1: Box::new(Expression::Literal(Object::Int(4))),
             operand2: Box::new(Expression::Literal(Object::Int(2))),
             operator: TokenType::Asterisk
-        });
+        }));
 
     assert_eq!(
         Equation::solve_for(
@@ -178,11 +173,11 @@ fn basic_cas() {
         String::from("x")
         ), 
         
-        Expression::Binary{
+        Ok(Expression::Binary{
             operand1: Box::new(Expression::Literal(Object::Int(2))),
             operand2: Box::new(Expression::Literal(Object::Int(4))),
             operator: TokenType::Slash
-        });
+        }));
 
     assert_eq!(
         Equation::solve_for(
@@ -194,25 +189,25 @@ fn basic_cas() {
         String::from("x")
         ), 
         
-        Expression::Binary{
+        Ok(Expression::Binary{
             operand1: Box::new(Expression::Literal(Object::Int(2))),
             operand2: Box::new(Expression::Literal(Object::Int(4))),
             operator: TokenType::Slash
-        });
+        }));
 }
 
 pub trait GetVars {
-    fn get_variables(&self) -> Vec<String>;
-    fn contains(&self, var: String) -> bool;
+    fn get_variables(&self) -> Result<Vec<String>, (String, usize)> ;
+    fn contains(&self, var: String) -> Result<bool, (String, usize)>;
 }
 
 impl GetVars for Expression {
-    fn get_variables(&self) -> Vec<String> {
+    fn get_variables(&self) -> Result<Vec<String>, (String, usize)> {
         let mut in_self: Vec<String> = Vec::new();
         match self {
             Self::Binary { operand1, operand2, operator } => {
-                in_self.append(&mut operand1.get_variables().to_owned());
-                in_self.append(&mut operand2.get_variables().to_owned());
+                in_self.append(&mut operand1.get_variables()?.to_owned());
+                in_self.append(&mut operand2.get_variables()?.to_owned());
             },
             Self::Literal(x) => {
                 if let Object::Identifier(var) = x.to_owned() {
@@ -220,14 +215,14 @@ impl GetVars for Expression {
                 }
             }
             _ => {
-                exit("Expression not supported in finder", 1);
+                return Err(("Expression not supported in finder".to_string(), 1));
             }
         }
-        in_self
+        Ok(in_self)
     }
 
-    fn contains(&self, var: String) -> bool {
-        let vars = self.get_variables();
+    fn contains(&self, var: String) -> Result<bool, (String, usize)> {
+        let vars = self.get_variables()?;
         let mut contains = false;
 
         for x in vars {
@@ -236,6 +231,6 @@ impl GetVars for Expression {
             }
         }
 
-        contains
+        Ok(contains)
     }
 }

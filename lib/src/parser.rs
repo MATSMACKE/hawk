@@ -4,7 +4,7 @@ use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
 use hawk_common::tree::{Expression, Statement};
 
-use hawk_cli_io::error::{exit, warn};
+use hawk_cli_io::error::{error, warn};
 use hawk_cli_io::object::UserPrintObject;
 use hawk_cli_io::tokentype::UserPrint;
 
@@ -73,22 +73,22 @@ impl Parser {
                 self.consume();
                 while !(self.current().token_type == TokenType::BraceRight) {
                     if !self.expect(TokenType::Equation) {
-                        exit("Expected 'equation'", self.current().line);
+                        error("Expected 'equation'", self.current().line);
                     }
                     let lhs = self.expression();
                     if !self.expect(TokenType::Assign) {
-                        exit("Expected '='", self.current().line);
+                        error("Expected '='", self.current().line);
                     }
                     let rhs = self.expression();
                     equations.push((*lhs, *rhs));
                 }
                 self.consume();
             } else {
-                exit("Expected curly brace after ", self.current().line);
+                error("Expected curly brace after ", self.current().line);
             }
             Statement::Finder { identifier, equations }
         } else {
-            exit(&format!("Finder needs identifier"), self.current().line);
+            error(&format!("Finder needs identifier"), self.current().line);
             Statement::EOF
         }
     }
@@ -98,7 +98,7 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.previous().literal {
             name = x
         } else {
-            exit(&format!("Expected identifier as left hand side of assignment, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
+            error(&format!("Expected identifier as left hand side of assignment, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
             name = String::new();
         }
         self.consume();
@@ -111,7 +111,7 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.previous().literal {
             name = x
         } else {
-            exit(&format!("Expected identifier for array assignment, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
+            error(&format!("Expected identifier for array assignment, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
             name = String::new();
         }
         self.consume();
@@ -133,7 +133,7 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.current().literal {
             name = x
         } else {
-            exit(&format!("Expected identifier after 'let', found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
+            error(&format!("Expected identifier after 'let', found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line);
             name = String::new();
         }
         self.consume();
@@ -203,7 +203,7 @@ impl Parser {
                         if let Some(Object::Identifier(identifier)) = self.current().literal {
                             params.push(identifier)
                         } else {
-                            exit(&format!("Expected identifier as function parameter, found {}", self.current().literal.unwrap().user_print(self.current().line)), self.current().line);
+                            error(&format!("Expected identifier as function parameter, found {}", self.current().literal.unwrap().user_print(self.current().line)), self.current().line);
                         }
                         self.consume();
                         self.consume()
@@ -212,11 +212,11 @@ impl Parser {
                 let block = Box::new(self.statement());
                 Statement::Function { identifier, params, block }
             } else {
-                exit(&format!("Expected parentheses after function identifier"), self.current().line);
+                error(&format!("Expected parentheses after function identifier"), self.current().line);
                 Statement::EOF
             }
         } else {
-            exit(&format!("Function needs identifier"), self.current().line);
+            error(&format!("Function needs identifier"), self.current().line);
             Statement::EOF
         }
     }
@@ -418,7 +418,7 @@ impl Parser {
         if let TokenType::ParenthesisRight = self.current().token_type {
             self.consume();
         } else {
-            exit(&format!("Expected closing parenthesis, instead found {}", self.current().token_type), self.current().line);
+            error(&format!("Expected closing parenthesis, instead found {}", self.current().token_type), self.current().line);
         }
 
         expression
@@ -429,7 +429,7 @@ impl Parser {
             self.consume();
             Box::new(Expression::Literal(x))
         } else {
-            exit(&format!("Couldn't parse literal"), self.current().line);
+            error(&format!("Couldn't parse literal"), self.current().line);
             Box::new(Expression::Literal(Object::Null))
         }
     }
@@ -449,11 +449,11 @@ impl Parser {
                 }
                 Box::new(Expression::MethodCall { object: identifier, method: methodname, args })
             } else {
-                exit(&format!("Expected method name, instead found {}", self.tokens[self.index + 2].literal.clone().unwrap().user_print(self.current().line)), self.current().line);
+                error(&format!("Expected method name, instead found {}", self.tokens[self.index + 2].literal.clone().unwrap().user_print(self.current().line)), self.current().line);
                 Box::new(Expression::Literal(Object::Null))
             }
         } else {
-            exit(&format!("Expected object identifier, found {}", self.current()), self.current().line);
+            error(&format!("Expected object identifier, found {}", self.current()), self.current().line);
             Box::new(Expression::Literal(Object::Null))
         }
     }
@@ -469,7 +469,7 @@ impl Parser {
             self.consume();
             Box::new(Expression::ArrayIndex { identifier, index })
         } else {
-            exit(&format!("Couldn't get array index"), self.current().line);
+            error(&format!("Couldn't get array index"), self.current().line);
                 Box::new(Expression::Literal(Object::Null))
         }
     }
@@ -502,7 +502,7 @@ impl Parser {
 
             Box::new(Expression::FinderCall { identifier, given, to_find })
         } else {
-            exit(&format!("Couldn't get finder parameters"), self.current().line);
+            error(&format!("Couldn't get finder parameters"), self.current().line);
             Box::new(Expression::Literal(Object::Null))
         }
     }
@@ -524,7 +524,7 @@ impl Parser {
             }
             Box::new(Expression::FunctionCall { identifier, args })
         } else {
-            exit(&format!("Couldn't get function parameters"), self.current().line);
+            error(&format!("Couldn't get function parameters"), self.current().line);
             Box::new(Expression::Literal(Object::Null))
         }
     }

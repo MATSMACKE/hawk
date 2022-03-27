@@ -1,6 +1,6 @@
 use std::fs::{read_to_string, write};
 
-use crate::error::exit;
+use crate::error::error;
 
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -14,7 +14,7 @@ pub fn csv_to_datatable(filename: String, line: usize) -> Object {
         let tokens = Lexer::lex(csvfile.as_str());
         parse_csv(tokens, line)
     } else {
-        exit(&format!("Couldn't read file: {}", filename), line)
+        error(&format!("Couldn't read file: {}", filename), line)
     }
 }
 
@@ -73,9 +73,9 @@ fn parse_titles(tokens: &Vec<Token>, line: usize) -> (usize, Vec<String>) {
         } else if tokens[i].token_type == TokenType::Comma {
             
         } else if let Some(x) = tokens[i].literal.clone() {
-            exit(&format!("Expected identifier as title of CSV column, found {}", x), line);
+            error(&format!("Expected identifier as title of CSV column, found {}", x), line);
         } else {
-            exit("Expected a literal, found None (there's probably 2 commas without a value in between in your CSV)", line);
+            error("Expected a literal, found None (there's probably 2 commas without a value in between in your CSV)", line);
         }
 
         i += 1
@@ -218,10 +218,10 @@ pub fn datatable_to_csv(filename: String, datatable: Object, line: usize) {
         if let Ok(()) = write(&filename, str) {
             ()
         } else {
-            exit(&format!("Couldn't write to file {}", filename), line);
+            error(&format!("Couldn't write to file {}", filename), line);
         }
     } else {
-        exit(&format!("Expected datatable, found {}", datatable.user_print(line)), line);
+        error(&format!("Expected datatable, found {}", datatable.user_print(line)), line);
     }
 }
 
@@ -245,7 +245,7 @@ impl CSV for Object {
                 Self::format_datatable_csv(names, data, line)
             },
             _ => {
-                exit(&format!("Can't write {} to CSV", self), line);
+                error(&format!("Can't write {} to CSV", self), line);
                 String::new()
             }
         }
@@ -260,7 +260,7 @@ impl CSV for Object {
         if let Object::Column(vals) = data[0].clone() {
             len = vals.len()
         } else {
-            exit(&format!("Expected column, found {}", data[0].user_print(line)), line);
+            error(&format!("Expected column, found {}", data[0].user_print(line)), line);
             len = 0; // Unreachable
         }
 
@@ -285,7 +285,7 @@ impl CSV for Object {
                     added_columns += 1;
                 }
             } else {
-                exit(&format!("Expected column, found {}", data[0].user_print(line)), line);
+                error(&format!("Expected column, found {}", data[0].user_print(line)), line);
             }
         }
 

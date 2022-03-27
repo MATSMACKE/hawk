@@ -23,7 +23,7 @@ impl Interpreter {
     /// Create an `Interpreter` and run code. `global_state` is used to store the state of the REPL.
     pub fn interpret(
         statements: Vec<Statement>, global_state: HashMap<String, Object>, in_repl: bool
-    ) -> HashMap<String, Object> {
+    ) -> Result<HashMap<String, Object>, (String, usize)> {
         let mut interpreter = Interpreter {
             statements,
             globals: global_state,
@@ -34,9 +34,9 @@ impl Interpreter {
         };
 
         for index in 0..interpreter.statements.len() {
-            interpreter.run_statement(interpreter.statements[index].clone())
+            interpreter.run_statement(interpreter.statements[index].clone())?
         }
 
-        interpreter.globals
+        Ok(interpreter.globals)
     }
 }

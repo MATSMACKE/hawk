@@ -1,5 +1,6 @@
 use std::{collections::HashMap, env};
 
+use hawk_cli_io::error::error;
 // Import lib crate
 pub use hawk_lib::*;
 pub use hawk_common::*;
@@ -29,10 +30,10 @@ fn main() {
 
         // Expect either 1 argument for REPL or 2 for executing a file
         _ => {
-            println!(
+            error(
                 "Incorrect args: expected either:
 No arguments (open REPL) or
-1 Argument (run a .hawk file)"
+1 Argument (run a .hawk file)", 0
             );
             std::process::exit(1)
         }
@@ -43,9 +44,17 @@ No arguments (open REPL) or
 fn run_script(filename: String, global_state: HashMap<String, Object>) -> HashMap<String, Object> {
     let source = std::fs::read_to_string(filename.clone());
     match source {
-        Result::Ok(source) => run::run(source, global_state, false),
+        Result::Ok(source) => {
+            match run::run(source, global_state, false) {
+                Ok(globals) => {globals},
+                Err((message, line)) => {
+                    error(&message, line);
+                    std::process::exit(1)
+                }
+            }
+        },
         Result::Err(_) => {
-            println!("Couldn't read file {filename}");
+            error("Couldn't read file {filename}", 0);
             std::process::exit(1)
         }
     }
@@ -69,7 +78,13 @@ fn repl() {
         if line == "exit" {
             break;
         } else {
-            state = run::run(line, state, true)
+            let result = run::run(line, state.clone(), true);
+            match result {
+                Ok(result) => state = result,
+                Err((message, _)) => {
+                    error(&message, 0);
+                }
+            }
         }
 
         println!();

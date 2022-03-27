@@ -8,8 +8,10 @@
 - [x] reading CSV
 - [x] writing CSV
 - [x] very basic CAS
-- [ ] column uncertainty handling
+- [x] column uncertainty handling
 - [x] error handling
 - [ ] stdlib finders
 - [ ] scientific notation
 - [ ] don't quit on error in REPL
+- [ ] slightly more advanced cas
+- [ ] fix import (currently overrides global scope)

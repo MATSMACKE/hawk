@@ -1,7 +1,5 @@
 use std::fs::{read_to_string, write};
 
-use crate::error::exit;
-
 use hawk_cli_io::{csv::{csv_to_datatable, datatable_to_csv}, object::UserPrintObject};
 
 use crate::{eval::Interpreter, Object};
@@ -9,20 +7,20 @@ use crate::{eval::Interpreter, Object};
 use std::f64::consts::{E, LN_10, PI, TAU};
 
 impl Interpreter {
-    pub fn get_std_rs_fn(&mut self, identifier: String, args: Vec<Object>) -> Option<Object> {
+    pub fn get_std_rs_fn(&mut self, identifier: String, args: Vec<Object>) -> Result<Option<Object>, (String, usize)> {
         match identifier.as_str() {
             "readfile" => {
                 if let Object::String(file) = args[0].clone() {
                     if let Ok(str) = read_to_string(&file) {
-                        Some(Object::String(str))
+                        Ok(Some(Object::String(str)))
                     } else {
-                        Some(exit(
-                            &format!("Expected string as filename, found {}", file),
+                        Err((
+                            format!("Expected string as filename, found {}", file),
                             self.line,
                         ))
                     }
                 } else {
-                    Some(Object::Null)
+                    Ok(Some(Object::Null))
                 }
             }
             "writefile" => {
@@ -32,21 +30,21 @@ impl Interpreter {
                     if let Object::String(filename) = file {
                         if let Ok(()) = write(&filename, str) {
                         } else {
-                            exit(&format!("Couldn't write file: {}", filename), self.line);
+                            return Err((format!("Couldn't write file: {}", filename), self.line))
                         }
                     } else {
-                        exit(&format!("Expected string as filename, found {}", file), self.line);
+                        return Err((format!("Expected string as filename, found {}", file), self.line))
                     }
                 }
-                Some(Object::Null)
+                Ok(Some(Object::Null))
             }
             "read" => {
                 let filename = args[0].clone();
                 if let Object::String(filename) = filename {
-                    Some(csv_to_datatable(filename, self.line))
+                    Ok(Some(csv_to_datatable(filename, self.line)))
                 } else {
-                    Some(exit(
-                        &format!("Expected string as filename, found {}", filename),
+                    Err((
+                        format!("Expected string as filename, found {}", filename),
                         self.line,
                     ))
                 }
@@ -58,13 +56,13 @@ impl Interpreter {
                     if let Object::String(filename) = file {
                         datatable_to_csv(filename, val, self.line);
                     } else {
-                        exit(&format!("Expected string as filename, found {}", file), self.line);
+                        return Err((format!("Expected string as filename, found {}", file), self.line))
                     }
                 }
-                Some(Object::Null)
+                Ok(Some(Object::Null))
             }
-            "pi" => Some(Object::Float(PI)),
-            "ln10" => Some(Object::Float(LN_10)),
+            "pi" => Ok(Some(Object::Float(PI))),
+            "ln10" => Ok(Some(Object::Float(LN_10))),
             "ln" => {
                 let x;
                 if let Object::Float(val) = args[0] {
@@ -72,12 +70,12 @@ impl Interpreter {
                 } else if let Object::Int(val) = args[0] {
                     x = val as f64
                 } else {
-                    return None;
+                    return Ok(None);
                 }
 
-                Some(Object::Float(ln(x)))
+                Ok(Some(Object::Float(ln(x))))
             }
-            "e" => Some(Object::Float(E)),
+            "e" => Ok(Some(Object::Float(E))),
             "sin" => {
                 let x;
                 if let Object::Float(val) = args[0] {
@@ -85,115 +83,112 @@ impl Interpreter {
                 } else if let Object::Int(val) = args[0] {
                     x = val as f64
                 } else {
-                    exit(
-                        &format!("Expected number as argument to sin, found {}", args[0]),
+                    return Err((
+                        format!("Expected number as argument to sin, found {}", args[0]),
                         self.line,
-                    );
-                    x = 0.
+                    ))
                 }
 
-                Some(Object::Float(sin(x)))
+                Ok(Some(Object::Float(sin(x))))
             },
             "len" => {
                 if let Object::Array(data) = args[0].to_owned() {
-                    Some(Object::Int(data.len() as i128))
+                    Ok(Some(Object::Int(data.len() as i128)))
                 } else {
-                    exit(
-                        &format!("Expected array as argument to len, found {}", args[0]),
+                    Err((
+                        format!("Expected array as argument to len, found {}", args[0]),
                         self.line,
-                    );
-                    None
+                    ))
                 }
             },
             "str" | "string" => {
                 if args.len() == 1 {
-                    Some(Object::String(args[0].user_print(self.line)))
+                    Ok(Some(Object::String(args[0].user_print(self.line))))
                 } else {
-                    exit(
-                        &format!("Expected exactly 1 input to str, got {:?}", args),
+                    Err((
+                        format!("Expected exactly 1 input to str, got {:?}", args),
                         self.line,
-                    );
-                    None
+                    ))
                 }
             },
             "isfloat" | "is_float" | "isFloat" => {
                 if args.len() == 1 {
                     if let Object::Float(_) = args[0] {
-                        Some(Object::Boolean(true))
+                        Ok(Some(Object::Boolean(true)))
                     } else {
-                        Some(Object::Boolean(false))
+                        Ok(Some(Object::Boolean(false)))
                     }
                 } else {
-                    Some(Object::Boolean(false))
+                    Ok(Some(Object::Boolean(false)))
                 }
             },
             "isint" | "is_int" | "isInt" => {
                 if args.len() == 1 {
                     if let Object::Int(_) = args[0] {
-                        Some(Object::Boolean(true))
+                        Ok(Some(Object::Boolean(true)))
                     } else {
-                        Some(Object::Boolean(false))
+                        Ok(Some(Object::Boolean(false)))
                     }
                 } else {
-                    Some(Object::Boolean(false))
+                    Ok(Some(Object::Boolean(false)))
                 }
             },
             "isbool" | "is_bool" | "isBool" => {
                 if args.len() == 1 {
                     if let Object::Boolean(_) = args[0] {
-                        Some(Object::Boolean(true))
+                        Ok(Some(Object::Boolean(true)))
                     } else {
-                        Some(Object::Boolean(false))
+                        Ok(Some(Object::Boolean(false)))
                     }
                 } else {
-                    Some(Object::Boolean(false))
+                    Ok(Some(Object::Boolean(false)))
                 }
             },
             "isstring" | "is_str" | "isStr" | "isstr" | "is_string" | "isString" => {
                 if args.len() == 1 {
                     if let Object::String(_) = args[0] {
-                        Some(Object::Boolean(true))
+                        Ok(Some(Object::Boolean(true)))
                     } else {
-                        Some(Object::Boolean(false))
+                        Ok(Some(Object::Boolean(false)))
                     }
                 } else {
-                    Some(Object::Boolean(false))
+                    Ok(Some(Object::Boolean(false)))
                 }
             },
             "isuncertain" | "is_uncertain" | "isUncertain" | "hasuncertainty" | "has_uncertainty" | "hasUncertainty" => {
                 if args.len() == 1 {
                     if let Object::Uncertain{value: _, uncertainty: _} = args[0] {
-                        Some(Object::Boolean(true))
+                        Ok(Some(Object::Boolean(true)))
                     } else {
-                        Some(Object::Boolean(false))
+                        Ok(Some(Object::Boolean(false)))
                     }
                 } else {
-                    Some(Object::Boolean(false))
+                    Ok(Some(Object::Boolean(false)))
                 }
             },
             "isarray" | "is_arr" | "isArr" | "isarr" | "is_array" | "isArray" => {
                 if args.len() == 1 {
                     if let Object::Array(_) = args[0] {
-                        Some(Object::Boolean(true))
+                        Ok(Some(Object::Boolean(true)))
                     } else {
-                        Some(Object::Boolean(false))
+                        Ok(Some(Object::Boolean(false)))
                     }
                 } else {
-                    Some(Object::Boolean(false))
+                    Ok(Some(Object::Boolean(false)))
                 }
             },
             "isnull" | "is_null" | "isNull" => {
                 if args.len() == 1 {
                     if let Object::Null = args[0] {
-                        Some(Object::Boolean(true))
+                        Ok(Some(Object::Boolean(true)))
                     } else {
-                        Some(Object::Boolean(false))
+                        Ok(Some(Object::Boolean(false)))
                     }
                 } else {
-                    Some(Object::Boolean(false))
+                    Ok(Some(Object::Boolean(false)))
                 }
             },
-            _ => None,
+            _ => Ok(None),
         }
     }
 }

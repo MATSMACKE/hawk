@@ -5,7 +5,7 @@ use crate::{eval, lexer, parser};
 
 //use crate::token::Tokens;
 
-pub fn run(source: String, global_state: HashMap<String, Object>, in_repl: bool) -> HashMap<String, Object> {
+pub fn run(source: String, global_state: HashMap<String, Object>, in_repl: bool) -> Result<HashMap<String, Object>, (String, usize)> {
     let tokens = lexer::Lexer::lex(&source);
 
     //println!("{}", Tokens(tokens.clone()));
@@ -14,5 +14,7 @@ pub fn run(source: String, global_state: HashMap<String, Object>, in_repl: bool)
 
     //println!("{:?}\n", statements);
 
-    eval::Interpreter::interpret(statements, global_state, in_repl)
+    let result = eval::Interpreter::interpret(statements, global_state, in_repl)?;
+    
+    Ok(result)
 }

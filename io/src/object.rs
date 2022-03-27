@@ -3,7 +3,7 @@ use term_table::{Table, TableStyle};
 
 use hawk_common::object::Object;
 
-use crate::error::exit;
+use crate::error::error;
 
 pub trait UserPrintObject {
     fn user_print(&self, line: usize) -> String;
@@ -52,7 +52,7 @@ impl UserPrintObject for Object {
                     if let Object::Column(objs) = column {
                         row.push(objs[i].user_print(line))
                     } else {
-                        exit(&format!("Expected column found {}", column), line);
+                        error(&format!("Expected column found {}", column), line);
                     }
                 }
                 table.add_row(Row::new(row))
