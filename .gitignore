@@ -8,6 +8,8 @@
 /io/Cargo.lock
 /common/target
 /common/Cargo.lock
+/interpreter/target
+/interpreter/Cargo.lock
 .DS_Store
 .vscode
 .VSCodeCounter
