@@ -6,5 +6,4 @@ edition = "2021"
 [dependencies]
 unicode-segmentation = "1.9.0"
 float-cmp = "0.9.0"
-hawk_cli_io = {path = "../io"}
 hawk_common = {path = "../common"}

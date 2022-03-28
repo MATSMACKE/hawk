@@ -118,7 +118,6 @@ name = "hawk_lib"
 version = "0.1.0"
 dependencies = [
  "float-cmp",
- "hawk_cli_io",
  "hawk_common",
  "unicode-segmentation",
 ]

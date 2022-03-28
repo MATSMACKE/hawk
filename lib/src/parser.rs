@@ -4,7 +4,7 @@ use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
 use hawk_common::tree::{Expression, Statement};
 
-use hawk_cli_io::tokentype::UserPrint;
+use hawk_common::token::UserPrint;
 
 pub struct Parser {
     tokens: Vec<Token>,
