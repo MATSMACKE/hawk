@@ -1,19 +1,19 @@
 use hawk_common::tree::Expression;
 use std::collections::HashMap;
 
-use crate::eval::Interpreter;
+use crate::Interpreter;
 
 // Common types used throughout the interpreter
 use hawk_common::object::Object;
-use hawk_cli_io::object::UserPrintObject;
-use crate::tree::Statement;
+use hawk_common::tree::Statement;
 
 impl Interpreter {
     /// Executes a given statement
     pub fn run_statement(&mut self, statement: Statement) -> Result<(), (String, usize)> {
         match statement {
             Statement::Print(expr) => {
-                hawk_cli_io::output::output(self.eval_expression(expr)?.user_print(self.line));
+                let text = self.eval_expression(expr)?.user_print(self.line)?;
+                (self.output_fn)(text);
                 Ok(())
             }
 
@@ -62,7 +62,8 @@ impl Interpreter {
 
             Statement::Expression(expr) => {
                 if self.in_repl {
-                    hawk_cli_io::output::output(self.eval_expression(expr)?.user_print(self.line))
+                    let text = self.eval_expression(expr)?.user_print(self.line)?;
+                    (self.output_fn)(text)
                 } else {
                     self.eval_expression(expr)?;
                 }
@@ -149,7 +150,7 @@ impl Interpreter {
     }
 
     fn open_datatable(&mut self, readfile: String) -> Result<(), (String, usize)> {
-        let datatable = hawk_cli_io::csv::csv_to_datatable(readfile, self.line);
+        let datatable = crate::csv::csv_to_datatable(readfile, self.line, self.filein_fn)?;
 
         if let Object::DataTable { names, data } = datatable.clone() {
             self.insert_top_scope(String::from("datatable"), datatable)?;
@@ -166,7 +167,7 @@ impl Interpreter {
     fn run_import(&mut self, expr: Box<Expression>) -> Result<(), (String, usize)> {
         let evaled_filename = self.eval_expression(expr)?;
         if let Object::String(filename) = evaled_filename {
-            self.globals = crate::run_script(filename, self.globals.clone());
+            self.globals = crate::run::run_script(filename, self.globals.clone(), self.filein_fn, self.fileout_fn, self.warn_fn, self.err_fn, self.output_fn);
         } else {
             return Err((
                 format!("Expected filename to be a string, found {}", evaled_filename),

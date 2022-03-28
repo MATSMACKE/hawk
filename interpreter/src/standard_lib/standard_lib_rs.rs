@@ -1,8 +1,7 @@
-use std::fs::{read_to_string, write};
+use crate::csv::{csv_to_datatable, datatable_to_csv};
 
-use hawk_cli_io::{csv::{csv_to_datatable, datatable_to_csv}, object::UserPrintObject};
-
-use crate::{eval::Interpreter, Object};
+use crate::Interpreter;
+use hawk_common::object::Object;
 
 use std::f64::consts::{E, LN_10, PI, TAU};
 
@@ -11,7 +10,7 @@ impl Interpreter {
         match identifier.as_str() {
             "readfile" => {
                 if let Object::String(file) = args[0].clone() {
-                    if let Ok(str) = read_to_string(&file) {
+                    if let Ok(str) = (self.filein_fn)(file.clone()) {
                         Ok(Some(Object::String(str)))
                     } else {
                         Err((
@@ -28,7 +27,7 @@ impl Interpreter {
                 let file = args[0].clone();
                 if let Object::String(str) = val {
                     if let Object::String(filename) = file {
-                        if let Ok(()) = write(&filename, str) {
+                        if let Ok(()) = (self.fileout_fn)(filename.clone(), str) {
                         } else {
                             return Err((format!("Couldn't write file: {}", filename), self.line))
                         }
@@ -41,7 +40,7 @@ impl Interpreter {
             "read" => {
                 let filename = args[0].clone();
                 if let Object::String(filename) = filename {
-                    Ok(Some(csv_to_datatable(filename, self.line)))
+                    Ok(Some(csv_to_datatable(filename, self.line, self.filein_fn)?))
                 } else {
                     Err((
                         format!("Expected string as filename, found {}", filename),
@@ -54,7 +53,7 @@ impl Interpreter {
                 let file = args[0].clone();
                 if let Object::DataTable { names: _, data: _ } = val {
                     if let Object::String(filename) = file {
-                        datatable_to_csv(filename, val, self.line);
+                        datatable_to_csv(filename, val, self.line, self.fileout_fn)?;
                     } else {
                         return Err((format!("Expected string as filename, found {}", file), self.line))
                     }
@@ -103,7 +102,7 @@ impl Interpreter {
             },
             "str" | "string" => {
                 if args.len() == 1 {
-                    Ok(Some(Object::String(args[0].user_print(self.line))))
+                    Ok(Some(Object::String(args[0].user_print(self.line)?)))
                 } else {
                     Err((
                         format!("Expected exactly 1 input to str, got {:?}", args),

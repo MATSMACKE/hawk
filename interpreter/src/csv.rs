@@ -1,31 +1,25 @@
-use std::fs::{read_to_string, write};
-
-use crate::error::error;
-
 use unicode_segmentation::UnicodeSegmentation;
-
-use crate::object::UserPrintObject;
 
 use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
 
-pub fn csv_to_datatable(filename: String, line: usize) -> Object {
-    if let Ok(csvfile) = read_to_string(&filename) {
+pub fn csv_to_datatable(filename: String, line: usize, filein_fn: fn(String) -> Result<String, String>) -> Result<Object, (String, usize)> {
+    if let Ok(csvfile) = filein_fn(filename.clone()) {
         let tokens = Lexer::lex(csvfile.as_str());
         parse_csv(tokens, line)
     } else {
-        error(&format!("Couldn't read file: {}", filename), line)
+        Err((format!("Couldn't read file: {}", filename), line))
     }
 }
 
-fn parse_csv(tokens: Vec<Token>, line: usize) -> Object {
-    let (i, titles) = parse_titles(&tokens, line);
+fn parse_csv(tokens: Vec<Token>, line: usize) -> Result<Object, (String, usize)> {
+    let (i, titles) = parse_titles(&tokens, line)?;
 
     let values = parse_values(&tokens, i);
 
     let columns = values_to_columns(&titles, values);
     
-    Object::DataTable{names: titles, data: columns}
+    Ok(Object::DataTable{names: titles, data: columns})
 }
 
 fn values_to_columns(titles: &Vec<String>, values: Vec<Vec<Object>>) -> Vec<Object> {
@@ -63,7 +57,7 @@ fn parse_values(tokens: &Vec<Token>, mut i: usize) -> Vec<Vec<Object>> {
     values
 }
 
-fn parse_titles(tokens: &Vec<Token>, line: usize) -> (usize, Vec<String>) {
+fn parse_titles(tokens: &Vec<Token>, line: usize) -> Result<(usize, Vec<String>), (String, usize)> {
     let mut titles: Vec<String> = Vec::new();
     let mut i = 0;
 
@@ -73,9 +67,9 @@ fn parse_titles(tokens: &Vec<Token>, line: usize) -> (usize, Vec<String>) {
         } else if tokens[i].token_type == TokenType::Comma {
             
         } else if let Some(x) = tokens[i].literal.clone() {
-            error(&format!("Expected identifier as title of CSV column, found {}", x), line);
+            return Err((format!("Expected identifier as title of CSV column, found {}", x), line));
         } else {
-            error("Expected a literal, found None (there's probably 2 commas without a value in between in your CSV)", line);
+            return Err(("Expected a literal, found None (there's probably 2 commas without a value in between in your CSV)".to_string(), line));
         }
 
         i += 1
@@ -83,7 +77,7 @@ fn parse_titles(tokens: &Vec<Token>, line: usize) -> (usize, Vec<String>) {
 
     i += 1;
 
-    (i, titles)
+    Ok((i, titles))
 }
 
 struct Lexer<'a> {
@@ -212,47 +206,50 @@ impl<'a> Lexer<'a> {
 }
 
 /// Writes an `Object::DataTable` to a `.csv` file
-pub fn datatable_to_csv(filename: String, datatable: Object, line: usize) {
+pub fn datatable_to_csv(filename: String, datatable: Object, line: usize, fileout_fn: fn(String, String) -> Result<(), ()>) -> Result<(), (String, usize)> {
     if let Object::DataTable{names: _, data: _} = &datatable {
-        let str = datatable.format_for_csv(line);
-        if let Ok(()) = write(&filename, str) {
+        let str = datatable.format_for_csv(line)?;
+        if let Ok(()) = fileout_fn(filename.clone(), str) {
             ()
         } else {
-            error(&format!("Couldn't write to file {}", filename), line);
+            return Err((format!("Couldn't write to file {}", filename), line));
         }
     } else {
-        error(&format!("Expected datatable, found {}", datatable.user_print(line)), line);
+        return Err((format!("Expected datatable, found {}", datatable.user_print(line)?), line));
     }
+
+    Ok(())
 }
 
 pub trait CSV {
-    fn format_for_csv(&self, line: usize) -> String;
-    fn format_datatable_csv(names: Vec<String>, data: Vec<Object>, line: usize) -> String;
-    fn format_datatable_csv_data(data: Vec<Object>, str: String, len: usize, line: usize) -> String;
-    fn format_datatable_csv_column_names(names: Vec<String>, str: String) -> String;
+    fn format_for_csv(&self, line: usize) -> Result<String, (String, usize)>;
+    fn format_datatable_csv(names: Vec<String>, data: Vec<Object>, line: usize) -> Result<String, (String, usize)>;
+    fn format_datatable_csv_data(data: Vec<Object>, str: String, len: usize, line: usize) -> Result<String, (String, usize)>;
+    fn format_datatable_csv_column_names(names: Vec<String>, str: String) -> Result<String, (String, usize)>;
 }
 
 impl CSV for Object {
     /// Generates a string representation of the Object that is suitable for a `.csv` file
-    fn format_for_csv(&self, line: usize) -> String {
+    fn format_for_csv(&self, line: usize) -> Result<String, (String, usize)> {
         match self.clone() {
-            Self::Boolean(x) =>format!("{x}"),
-            Self::Float(x) => format!("{x}"),
-            Self::Int(x) => format!("{x}"),
-            Self::String(x) => format!("{x}"),
-            Self::Uncertain{value, uncertainty: _} => format!("{value}"),
+            Self::Boolean(x) => Ok(format!("{x}")),
+            Self::Float(x) => Ok(format!("{x}")),
+            Self::Int(x) => Ok(format!("{x}")),
+            Self::String(x) => Ok(format!("{x}")),
+            Self::Uncertain{value, uncertainty: _} => Ok(format!("{value}")),
             Self::DataTable{names, data} => {
                 Self::format_datatable_csv(names, data, line)
             },
             _ => {
-                error(&format!("Can't write {} to CSV", self), line);
-                String::new()
+                Err((format!("Can't write {} to CSV", self), line))
             }
         }
     }
 
-    fn format_datatable_csv(mut names: Vec<String>, data: Vec<Object>, line: usize) -> String {
+    fn format_datatable_csv(names: Vec<String>, data: Vec<Object>, line: usize) -> Result<String, (String, usize)> {
         let mut str = String::from("");
+
+        let mut names = names.clone();
 
         let mut new_data = data.clone();
 
@@ -260,8 +257,7 @@ impl CSV for Object {
         if let Object::Column(vals) = data[0].clone() {
             len = vals.len()
         } else {
-            error(&format!("Expected column, found {}", data[0].user_print(line)), line);
-            len = 0; // Unreachable
+            return Err((format!("Expected column, found {}", data[0].user_print(line)?), line))
         }
 
         let mut added_columns = 0;
@@ -285,32 +281,32 @@ impl CSV for Object {
                     added_columns += 1;
                 }
             } else {
-                error(&format!("Expected column, found {}", data[0].user_print(line)), line);
+                return Err((format!("Expected column, found {}", data[0].user_print(line)?), line));
             }
         }
 
-        str = Self::format_datatable_csv_column_names(names, str);
-        str = Self::format_datatable_csv_data(new_data, str, len, line);
-        str
+        str = Self::format_datatable_csv_column_names(names, str)?;
+        str = Self::format_datatable_csv_data(new_data, str, len, line)?;
+        Ok(str)
     }
 
-    fn format_datatable_csv_data(data: Vec<Object>, mut str: String, len: usize, line: usize) -> String {
+    fn format_datatable_csv_data(data: Vec<Object>, mut str: String, len: usize, line: usize) -> Result<String, (String, usize)> {
         for i in 0..len {
             str = format!("{str}\n");
             for (idx, column) in data.iter().enumerate() {
                 if let Object::Column(vals) = column {
                     if idx < data.len() - 1 {
-                        str = format!("{str}{}, ", vals[i].format_for_csv(line));
+                        str = format!("{str}{}, ", vals[i].format_for_csv(line)?);
                     } else {
-                        str = format!("{str}{}", vals[i].format_for_csv(line));
+                        str = format!("{str}{}", vals[i].format_for_csv(line)?);
                     }
                 }
             }
         }
-        str
+        Ok(str)
     }
 
-    fn format_datatable_csv_column_names(names: Vec<String>, mut str: String) -> String {
+    fn format_datatable_csv_column_names(names: Vec<String>, mut str: String) -> Result<String, (String, usize)> {
         for (idx, name) in names.iter().enumerate() {
             if idx < names.len() - 1 {
                 str = format!("{str}{name}, ");
@@ -318,6 +314,6 @@ impl CSV for Object {
                 str = format!("{str}{name}");
             }
         }
-        str
+        Ok(str)
     }
 }

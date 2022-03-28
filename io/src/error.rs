@@ -6,7 +6,7 @@ use crossterm::style::{Color::{Red, Yellow}, Colors, Print, SetColors};
 use hawk_common::object::Object;
 
 /// Exit the program with an error message. Returns Null just to appease Rust
-pub fn error<'a>(message: &'a str, line: usize) -> Object {
+pub fn error(message: String, line: usize) -> Object {
     let in_repl = line == 0;
 
     execute!(
@@ -30,14 +30,17 @@ pub fn error<'a>(message: &'a str, line: usize) -> Object {
 }
 
 /// Exit the program with an error message. Returns Null just to appease Rust
-pub fn warn<'a>(message: &'a str, line: usize) -> Object {
+pub fn warn(message: String, line: usize) -> Object {
+    let in_repl = line == 0;
 
     execute!(
         stdout(),
         SetColors(Colors{ foreground: Some(Yellow), background: None}),
-        Print(format!("Warning on line {line}: {message}")),
+        Print(if !in_repl {
+            format!("Warning on line {line}: {message}\n")
+        } else {
+            format!("Warning: {message}\n")
+        } ),
     ).unwrap();
-    eprintln!(
-"");
     Object::Null
 }

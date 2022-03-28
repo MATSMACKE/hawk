@@ -1,4 +1,4 @@
-use crate::{Object, token::TokenType, tree::{Expression, Statement}};
+use hawk_common::{object::Object, token::TokenType, tree::{Expression, Statement}};
 
 pub fn get_std_hawk_fn(identifier: String) -> Option<Object> {
 match identifier.as_str() {

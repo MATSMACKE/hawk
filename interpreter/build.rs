@@ -8,7 +8,7 @@ use hawk_lib::*;
 fn main() {
     let dest_path = Path::new("./src/standard_lib/").join("standard_lib_hawk.rs");
     let contents = String::from(
-        "use crate::{Object, token::TokenType, tree::{Expression, Statement}};
+        "use hawk_common::{object::Object, token::TokenType, tree::{Expression, Statement}};
 
 pub fn get_std_hawk_fn(identifier: String) -> Option<Object> {
 match identifier.as_str() {",
@@ -48,7 +48,7 @@ fn create_match_fn() -> String {
 fn create_match_arms_fn(path: DirEntry) -> String {
     let source = fs::read_to_string(path.path()).unwrap();
     let lexed = lexer::Lexer::lex(source.as_str());
-    let parsed = parser::Parser::parse(&lexed);
+    let parsed = parser::Parser::parse(&lexed, |_, _| ());
 
     let mut matcharms = String::new();
 
@@ -84,7 +84,7 @@ fn create_match_find() -> String {
 fn create_match_arms_find(path: DirEntry) -> String {
     let source = fs::read_to_string(path.path()).unwrap();
     let lexed = lexer::Lexer::lex(source.as_str());
-    let parsed = parser::Parser::parse(&lexed);
+    let parsed = parser::Parser::parse(&lexed, |_, _| ());
 
     let mut matcharms = String::new();
 

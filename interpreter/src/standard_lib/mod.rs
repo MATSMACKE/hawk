@@ -1,5 +1,5 @@
-use crate::eval::Interpreter;
-use crate::Object;
+use crate::Interpreter;
+use hawk_common::object::Object;
 
 pub mod standard_lib_hawk;
 mod standard_lib_rs;

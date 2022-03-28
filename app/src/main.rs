@@ -1,31 +1,41 @@
 use std::{collections::HashMap, env};
 
 use hawk_cli_io::error::error;
-// Import lib crate
-pub use hawk_lib::*;
 pub use hawk_common::*;
 pub use hawk_cli_io::*;
 
 // Used extremely often, so brought into scope
 use hawk_common::object::Object;
 
-mod run;
 mod utils;
 
-// Needs to execute from run.rs
-pub mod eval;
-
-pub mod standard_lib;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+
+    let filein_fn = |filename: String| {
+        match std::fs::read_to_string(filename) {
+            Ok(file) => Ok(file),
+            Err(_) => Err("Unable to read file".to_string())
+        }
+    };
+    let fileout_fn = |filename, data| {
+        match std::fs::write(filename, data) {
+            Ok(()) => Ok(()),
+            Err(_) => Err(())
+        }
+    };
+    let warn_fn = |message: String, line: usize| {hawk_cli_io::error::warn(message, line);};
+    let err_fn = |message: String, line: usize| {hawk_cli_io::error::error(message, line);};
+    let output_fn = |text| hawk_cli_io::output::output(text);
+    
     match args.len() {
         // 1 argument, that being the name of the application
         1 => repl(),
 
         // 2 arguments: the name of the application and the name of the file to run
         2 => {
-            run_script(args[1].clone(), HashMap::new());
+            hawk_interpreter::run::run_script(args[1].clone(), HashMap::new(), filein_fn, fileout_fn, warn_fn, err_fn, output_fn);
         }
 
         // Expect either 1 argument for REPL or 2 for executing a file
@@ -33,28 +43,8 @@ fn main() {
             error(
 "Incorrect args: expected either:
 No arguments (open REPL) or
-1 Argument (run a .hawk file)", 0
+1 Argument (run a .hawk file)".to_string(), 0
             );
-            std::process::exit(1)
-        }
-    }
-}
-
-/// Runs Hawk code from a file given by `filename`, returning the global scope after execution
-fn run_script(filename: String, global_state: HashMap<String, Object>) -> HashMap<String, Object> {
-    let source = std::fs::read_to_string(filename.clone());
-    match source {
-        Result::Ok(source) => {
-            match run::run(source, global_state, false) {
-                Ok(globals) => {globals},
-                Err((message, line)) => {
-                    error(&message, line);
-                    std::process::exit(1)
-                }
-            }
-        },
-        Result::Err(_) => {
-            error(&format!("Couldn't read file {filename}"), 0);
             std::process::exit(1)
         }
     }
@@ -62,6 +52,22 @@ fn run_script(filename: String, global_state: HashMap<String, Object>) -> HashMa
 
 /// Manages the Hawk REPL
 fn repl() {
+    let filein_fn = |filename: String| {
+        match std::fs::read_to_string(filename) {
+            Ok(file) => Ok(file),
+            Err(_) => Err("Unable to read file".to_string())
+        }
+    };
+    let fileout_fn = |filename, data| {
+        match std::fs::write(filename, data) {
+            Ok(()) => Ok(()),
+            Err(_) => Err(())
+        }
+    };
+    let warn_fn = |message: String, line: usize| {hawk_cli_io::error::warn(message, line);};
+    let err_fn = |message: String, line: usize| {hawk_cli_io::error::error(message, line);};
+    let output_fn = |text| hawk_cli_io::output::output(text);
+
     // Global state that will be kept throughout the REPL session
     let mut state: HashMap<String, Object> = HashMap::new();
 
@@ -78,11 +84,11 @@ fn repl() {
         if line == "exit" {
             break;
         } else {
-            let result = run::run(line, state.clone(), true);
+            let result = hawk_interpreter::run::run(line, state.clone(), true, filein_fn, fileout_fn, warn_fn, err_fn, output_fn);
             match result {
                 Ok(result) => state = result,
                 Err((message, _)) => {
-                    error(&message, 0);
+                    error(message, 0);
                 }
             }
         }
@@ -92,6 +98,3 @@ fn repl() {
 
     hawk_cli_io::shell::print_exit_message();
 }
-
-#[cfg(test)]
-mod test;

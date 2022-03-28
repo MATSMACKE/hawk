@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use crate::eval::Interpreter;
-use crate::eval::placeholder_cas::GetVars;
+use crate::Interpreter;
+use crate::placeholder_cas::GetVars;
 use hawk_common::object::Object;
 
 // Common types used throughout the interpreter
-use crate::token::TokenType;
-use crate::tree::Expression;
+use hawk_common::token::TokenType;
+use hawk_common::tree::Expression;
 
 impl Interpreter {
     /// Traverses an expression tree to evaluate it and return an Object
@@ -158,7 +158,7 @@ impl Interpreter {
                 self.insert_top_scope(key, value)?;
             }
 
-            let result = self.eval_expression(Box::new(crate::eval::placeholder_cas::Equation::solve_for(viable_eq.0, viable_eq.1, to_find)?))?;
+            let result = self.eval_expression(Box::new(crate::placeholder_cas::Equation::solve_for(viable_eq.0, viable_eq.1, to_find)?))?;
 
             self.scopes.pop();
 
@@ -239,7 +239,7 @@ impl Interpreter {
                 uncertainty: ((max - min) / 2.).abs(),
             })
         } else {
-            panic!("`AAAAH why in the world is this not an uncertain that's literally impossible Rust just forced me to include this panic here don't mind me. Most likely explanation is that your computer was struck by lightning or particles from outer space. ")
+            Err(("`AAAAH why in the world is this not an uncertain that's literally impossible Rust just forced me to include this error here don't mind me. Most likely explanation is that your computer was struck by lightning or particles from outer space.".to_string(), self.line))
         }
     }
 

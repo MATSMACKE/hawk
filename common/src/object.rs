@@ -1,6 +1,9 @@
-use std::{fmt::{Display, Error, Formatter, Result}, i128};
+use std::{fmt::{Display, Error, Formatter, self}, i128};
 
 use float_cmp::approx_eq;
+
+use term_table::row::Row;
+use term_table::{Table, TableStyle};
 
 use crate::tree::{Statement, Expression};
 
@@ -35,7 +38,7 @@ pub enum Object {
 
 // Display object to Rust source code, used to build the standard library
 impl Display for Object {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match &self {
             Self::Null => write!(f, "Object::Null"),
             Self::Int(x) => write!(f, "Object::Int({})", x),
@@ -57,7 +60,7 @@ impl Display for Object {
 
 // For outputting a list of objects to Rust source code
 impl Display for Objects {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut problem = false;
         for object in self.0.iter() {
             if let Ok(_) = writeln!(f, "{},", object) {
@@ -72,7 +75,7 @@ impl Display for Objects {
 
 // For outputting a list of objects to Rust source code
 impl Display for Equations {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut problem = false;
         for eqn in self.0.iter() {
             if let Ok(_) = writeln!(f, "({}, {}),", eqn.0, eqn.1) {
@@ -124,3 +127,78 @@ pub struct Objects(Vec<Object>);
 
 /// A utility struct to work around inability to `impl Display for Vec<(Expression, Expression)>`
 pub struct Equations(Vec<(Expression, Expression)>);
+
+
+impl Object {
+    /// Nicely formatted output for displaying objects with `print`
+    pub fn user_print(&self, line: usize) -> Result<String, (String, usize)> {
+        match self.clone() {
+            Self::Boolean(x) => Ok(format!("{x}")),
+            Self::Float(x) => Ok(format!("{x}")),
+            Self::Int(x) => Ok(format!("{x}")),
+            Self::String(x) => Ok(format!("{x}")),
+            Self::Identifier(x) => Ok(format!("{x}")),
+            Self::Function{params, block} => Ok(format!("Function: params: {:?}, block: {block}", params)),
+            Self::Array(x) => {
+                Self::user_print_array(x, line)
+            },
+            Self::Null => Ok(String::from("Null")),
+            Self::Uncertain{value, uncertainty} => Ok(format!("{value} ± {uncertainty}")),
+            Self::Column(x) => {
+                Self::user_print_column(x, line)
+            },
+            Self::DataTable{names, data} => {
+                Self::user_print_datatable(names, data, line)
+            },
+            Self::Finder(_) => Ok(format!("finder function"))
+        }
+    }
+
+    fn user_print_datatable(names: Vec<String>, data: Vec<Object>, line: usize) -> Result<String, (String, usize)> {
+        let mut table = Table::new();
+        table.style = TableStyle::extended();
+        if let Object::Column(_) = data[0].clone() {
+            let mut title_row = Vec::new();
+            for name in names {
+                title_row.push(name)
+            }
+            table.add_row(Row::new(title_row));
+            for i in 0..data.len() {
+                let mut row = Vec::new();
+                for column in data.clone() {
+                    if let Object::Column(objs) = column {
+                        row.push(objs[i].user_print(line)?)
+                    } else {
+                        return Err((format!("Expected column found {}", column), line));
+                    }
+                }
+                table.add_row(Row::new(row))
+            }
+        }
+        Ok(table.render())
+    }
+
+    fn user_print_column(x: Vec<Object>, line: usize) -> Result<String, (String, usize)> {
+        let mut str = String::from("[");
+        for (idx, obj) in x.iter().enumerate() {
+            if idx < x.len() - 1 {
+                str = format!("{str}{}, ", obj.user_print(line)?);
+            } else {
+                str = format!("{str}{}", obj.user_print(line)?);
+            }
+        }
+        Ok(format!("{str}]"))
+    }
+
+    fn user_print_array(x: Vec<Object>, line: usize) -> Result<String, (String, usize)> {
+        let mut str = String::from("[");
+        for (idx, obj) in x.iter().enumerate() {
+            if idx < x.len() - 1 {
+                str = format!("{str}{}, ", obj.user_print(line)?);
+            } else {
+                str = format!("{str}{}", obj.user_print(line)?);
+            }
+        }
+        Ok(format!("{str}]"))
+    }
+}

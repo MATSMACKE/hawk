@@ -84,6 +84,24 @@ Then to use it:
 2
 ```
 
+#### Testing and Peace of Mind
+
+##### Expect
+
+The `expect` keyword (synonomous with `assert`) exists to give Hawk programmers some peace of mind. Using expect tests to make sure operations worked as expected.
+
+If the expression after `expect` evaluates to true, nothing happens and the program happily goes about its day.
+
+```
+expect 1 == 1
+```
+
+If the expression evaluates to false, a warning will be thrown
+```
+>> expect 1 == 2
+Warning: Expect failed (expected 1 == 2)
+```
+
 
 
 #### Building projects

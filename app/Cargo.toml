@@ -8,17 +8,12 @@ description = "The original implementation of the Hawk programming language"
 repository = "https://github.com/MATSMACKE/hawk/"
 homepage = "https://github.com/MATSMACKE/hawk/"
 authors = ["Mats Macke"]
-build = "build.rs"
 
 [dependencies]
-hawk_lib = {path = "../lib"}
 hawk_common = {path = "../common"}
 hawk_cli_io = {path = "../io"}
+hawk_interpreter = {path = "../interpreter"}
 float-cmp = "0.9.0"
-
-[build-dependencies]
-hawk_lib = {path = "../lib"}
-hawk_common = {path = "../common"}
 
 [profile.release]
 strip = "debuginfo"

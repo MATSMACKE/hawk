@@ -4,19 +4,22 @@ use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
 use hawk_common::tree::{Expression, Statement};
 
-use hawk_cli_io::error::warn;
-use hawk_cli_io::object::UserPrintObject;
 use hawk_cli_io::tokentype::UserPrint;
 
 pub struct Parser {
     tokens: Vec<Token>,
-    index: usize
+    index: usize,
+    warn: fn(String, usize) -> ()
 }
 
 impl Parser {
     /// Constructs a `Parser` and parses a vec of tokens
-    pub fn parse(tokens: &Vec<Token>) -> Result<Vec<Statement>, (String, usize)> {
-        let mut parser = Parser{tokens: tokens.clone(), index: 0};
+    pub fn parse(tokens: &Vec<Token>, warn: fn(String, usize) -> ()) -> Result<Vec<Statement>, (String, usize)> {
+        let mut parser = Parser {
+            tokens: tokens.clone(),
+            index: 0,
+            warn
+        };
         let mut statements: Vec<Statement> = Vec::new();
 
         while !parser.at_end() {
@@ -49,7 +52,7 @@ impl Parser {
             TokenType::Import => Ok(Statement::Import(self.expression()?)),
             TokenType::Process => self.parse_process_block(),
             TokenType::Finder => self.parse_finder(),
-            _ => self.parse_other()
+            _ => self.parse_other(),
         }
     }
 
@@ -73,20 +76,26 @@ impl Parser {
                 self.consume();
                 while !(self.current().token_type == TokenType::BraceRight) {
                     if !self.expect(TokenType::Equation) {
-                        return Err(("Expected 'equation'".to_string(), self.current().line))
+                        return Err(("Expected 'equation'".to_string(), self.current().line));
                     }
                     let lhs = self.expression()?;
                     if !self.expect(TokenType::Assign) {
-                        return Err(("Expected '='".to_string(), self.current().line))
+                        return Err(("Expected '='".to_string(), self.current().line));
                     }
                     let rhs = self.expression()?;
                     equations.push((*lhs, *rhs));
                 }
                 self.consume();
             } else {
-                return Err(("Expected curly brace after ".to_string(), self.current().line))
+                return Err((
+                    "Expected curly brace after ".to_string(),
+                    self.current().line,
+                ));
             }
-            Ok(Statement::Finder { identifier, equations })
+            Ok(Statement::Finder {
+                identifier,
+                equations,
+            })
         } else {
             Err((format!("Finder needs identifier"), self.current().line))
         }
@@ -97,7 +106,16 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.previous().literal {
             name = x
         } else {
-            return Err((format!("Expected identifier as left hand side of assignment, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line))
+            return Err((
+                format!(
+                    "Expected identifier as left hand side of assignment, found {}",
+                    self.previous()
+                        .literal
+                        .unwrap()
+                        .user_print(self.previous().line)?
+                ),
+                self.previous().line,
+            ));
         }
         self.consume();
         let value = self.expression()?;
@@ -109,7 +127,16 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.previous().literal {
             name = x
         } else {
-            return Err((format!("Expected identifier for array assignment, found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line))
+            return Err((
+                format!(
+                    "Expected identifier for array assignment, found {}",
+                    self.previous()
+                        .literal
+                        .unwrap()
+                        .user_print(self.previous().line)?
+                ),
+                self.previous().line,
+            ));
         }
         self.consume();
         let idx = self.expression()?;
@@ -117,7 +144,7 @@ impl Parser {
         self.consume();
         let value = self.expression()?;
 
-        Ok(Statement::ArrayAssign{name, idx, value})
+        Ok(Statement::ArrayAssign { name, idx, value })
     }
 
     fn parse_loop(&mut self) -> Result<Statement, (String, usize)> {
@@ -130,7 +157,16 @@ impl Parser {
         if let Some(Object::Identifier(x)) = self.current().literal {
             name = x
         } else {
-            return Err((format!("Expected identifier after 'let', found {}", self.previous().literal.unwrap().user_print(self.previous().line)), self.previous().line))
+            return Err((
+                format!(
+                    "Expected identifier after 'let', found {}",
+                    self.previous()
+                        .literal
+                        .unwrap()
+                        .user_print(self.previous().line)?
+                ),
+                self.previous().line,
+            ));
         }
         self.consume();
         let value: Box<Expression>;
@@ -150,7 +186,11 @@ impl Parser {
         if let TokenType::Else = self.current().token_type {
             self.consume();
             let else_block = Box::new(self.statement()?);
-            Ok(Statement::IfElse { condition, if_block: block, else_block })
+            Ok(Statement::IfElse {
+                condition,
+                if_block: block,
+                else_block,
+            })
         } else {
             Ok(Statement::If { condition, block })
         }
@@ -159,7 +199,10 @@ impl Parser {
     fn parse_while_loop(&mut self) -> Result<Statement, (String, usize)> {
         let condition = self.expression()?;
         let block = self.statement()?;
-        Ok(Statement::While { condition, block: Box::new(block) })
+        Ok(Statement::While {
+            condition,
+            block: Box::new(block),
+        })
     }
 
     fn parse_block(&mut self) -> Result<Statement, (String, usize)> {
@@ -183,7 +226,11 @@ impl Parser {
         let writefile = self.expression()?;
 
         let block = Box::new(self.statement()?);
-        Ok(Statement::Process { readfile, writefile, block })
+        Ok(Statement::Process {
+            readfile,
+            writefile,
+            block,
+        })
     }
 
     fn parse_function(&mut self) -> Result<Statement, (String, usize)> {
@@ -195,20 +242,38 @@ impl Parser {
                 if let TokenType::ParenthesisRight = self.current().token_type {
                     self.consume();
                 } else {
-                    while let TokenType::Comma | TokenType::ParenthesisRight = self.next().token_type {
+                    while let TokenType::Comma | TokenType::ParenthesisRight =
+                        self.next().token_type
+                    {
                         if let Some(Object::Identifier(identifier)) = self.current().literal {
                             params.push(identifier)
                         } else {
-                            return Err((format!("Expected identifier as function parameter, found {}", self.current().literal.unwrap().user_print(self.current().line)), self.current().line))
+                            return Err((
+                                format!(
+                                    "Expected identifier as function parameter, found {}",
+                                    self.current()
+                                        .literal
+                                        .unwrap()
+                                        .user_print(self.current().line)?
+                                ),
+                                self.current().line,
+                            ));
                         }
                         self.consume();
                         self.consume()
                     }
                 }
                 let block = Box::new(self.statement()?);
-                Ok(Statement::Function { identifier, params, block })
+                Ok(Statement::Function {
+                    identifier,
+                    params,
+                    block,
+                })
             } else {
-                Err((format!("Expected parentheses after function identifier"), self.current().line))
+                Err((
+                    format!("Expected parentheses after function identifier"),
+                    self.current().line,
+                ))
             }
         } else {
             Err((format!("Function needs identifier"), self.current().line))
@@ -222,13 +287,16 @@ impl Parser {
     fn or(&mut self) -> Result<Box<Expression>, (String, usize)> {
         let mut temp = self.and()?;
 
-        while let 
-                  TokenType::Or = self.current().token_type {
+        while let TokenType::Or = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();
             let operand2 = self.and()?;
 
-            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+            temp = Box::new(Expression::Binary {
+                operand1: temp,
+                operator,
+                operand2,
+            });
         }
 
         Ok(temp)
@@ -242,7 +310,11 @@ impl Parser {
             self.consume();
             let operand2 = self.equality()?;
 
-            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+            temp = Box::new(Expression::Binary {
+                operand1: temp,
+                operator,
+                operand2,
+            });
         }
 
         Ok(temp)
@@ -251,14 +323,16 @@ impl Parser {
     fn equality(&mut self) -> Result<Box<Expression>, (String, usize)> {
         let mut temp = self.comparison()?;
 
-        while let 
-                  TokenType::EqualEqual 
-                | TokenType::NotEqual = self.current().token_type {
+        while let TokenType::EqualEqual | TokenType::NotEqual = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();
             let operand2 = self.comparison()?;
 
-            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+            temp = Box::new(Expression::Binary {
+                operand1: temp,
+                operator,
+                operand2,
+            });
         }
 
         Ok(temp)
@@ -267,16 +341,20 @@ impl Parser {
     fn comparison(&mut self) -> Result<Box<Expression>, (String, usize)> {
         let mut temp = self.term()?;
 
-        while let 
-                  TokenType::LessThan 
-                | TokenType::LessThanEqual 
-                | TokenType::GreaterThan 
-                | TokenType::GreaterThanEqual = self.current().token_type {
+        while let TokenType::LessThan
+        | TokenType::LessThanEqual
+        | TokenType::GreaterThan
+        | TokenType::GreaterThanEqual = self.current().token_type
+        {
             let operator = self.current().token_type;
             self.consume();
             let operand2 = self.term()?;
 
-            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+            temp = Box::new(Expression::Binary {
+                operand1: temp,
+                operator,
+                operand2,
+            });
         }
 
         Ok(temp)
@@ -285,14 +363,16 @@ impl Parser {
     fn term(&mut self) -> Result<Box<Expression>, (String, usize)> {
         let mut temp = self.factor()?;
 
-        while let 
-                TokenType::Minus 
-                | TokenType::Plus = self.current().token_type {
+        while let TokenType::Minus | TokenType::Plus = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();
             let operand2 = self.factor()?;
 
-            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+            temp = Box::new(Expression::Binary {
+                operand1: temp,
+                operator,
+                operand2,
+            });
         }
 
         Ok(temp)
@@ -301,14 +381,16 @@ impl Parser {
     fn factor(&mut self) -> Result<Box<Expression>, (String, usize)> {
         let mut temp = self.power()?;
 
-        while let 
-                TokenType::Slash 
-                | TokenType::Asterisk = self.current().token_type {
+        while let TokenType::Slash | TokenType::Asterisk = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();
             let operand2 = self.power()?;
 
-            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+            temp = Box::new(Expression::Binary {
+                operand1: temp,
+                operator,
+                operand2,
+            });
         }
 
         Ok(temp)
@@ -322,7 +404,11 @@ impl Parser {
             self.consume();
             let operand2 = self.uncertainty()?;
 
-            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+            temp = Box::new(Expression::Binary {
+                operand1: temp,
+                operator,
+                operand2,
+            });
         }
 
         Ok(temp)
@@ -336,58 +422,58 @@ impl Parser {
             self.consume();
             let operand2 = self.unary()?;
 
-            temp = Box::new(Expression::Binary{operand1: temp, operator, operand2});
+            temp = Box::new(Expression::Binary {
+                operand1: temp,
+                operator,
+                operand2,
+            });
         }
 
         Ok(temp)
     }
 
     fn unary(&mut self) -> Result<Box<Expression>, (String, usize)> {
-        if let 
-                  TokenType::Not 
-                | TokenType::Minus = self.current().token_type {
+        if let TokenType::Not | TokenType::Minus = self.current().token_type {
             let operator = self.current().token_type;
             self.consume();
             let operand = self.unary()?;
-            Ok(Box::new(Expression::Unary{operator, operand}))
-        }
-        else {
+            Ok(Box::new(Expression::Unary { operator, operand }))
+        } else {
             self.primary()
         }
     }
 
     fn primary(&mut self) -> Result<Box<Expression>, (String, usize)> {
-        if let 
-              TokenType::Int 
-            | TokenType::Float 
-            | TokenType::True 
-            | TokenType::False
-            | TokenType::String
-            | TokenType::Identifier 
-                = self.current().token_type {
+        if let TokenType::Int
+        | TokenType::Float
+        | TokenType::True
+        | TokenType::False
+        | TokenType::String
+        | TokenType::Identifier = self.current().token_type
+        {
             if let TokenType::ParenthesisLeft = self.next().token_type {
                 self.parse_functioncall()
-            }
-            else if let TokenType::BracketLeft = self.next().token_type {
+            } else if let TokenType::BracketLeft = self.next().token_type {
                 self.parse_array_index()
-            }
-            else if let TokenType::Dot = self.next().token_type {
+            } else if let TokenType::Dot = self.next().token_type {
                 self.parse_methodcall()
-            }
-            else {
+            } else {
                 self.parse_literal()
             }
-        }
-        else if let TokenType::ParenthesisLeft = self.current().token_type {
+        } else if let TokenType::ParenthesisLeft = self.current().token_type {
             self.parse_parenthesized()
-        }
-        else if let TokenType::BracketLeft = self.current().token_type {
+        } else if let TokenType::BracketLeft = self.current().token_type {
             self.parse_array_literal()
         } else if let TokenType::Find = self.current().token_type {
             self.parse_finder_call()
-        }
-        else {
-            warn(&format!("Unexpected token '{}'", self.current().token_type.user_print()), self.current().line);
+        } else {
+            (self.warn)(
+                format!(
+                    "Unexpected token '{}'",
+                    self.current().token_type.user_print()
+                ),
+                self.current().line,
+            );
             self.consume();
             Ok(Box::new(Expression::Literal(Object::Null)))
         }
@@ -408,11 +494,17 @@ impl Parser {
     fn parse_parenthesized(&mut self) -> Result<Box<Expression>, (String, usize)> {
         self.consume();
         let expression = self.expression()?;
-        
+
         if let TokenType::ParenthesisRight = self.current().token_type {
             self.consume();
         } else {
-            return Err((format!("Expected closing parenthesis, instead found {}", self.current().token_type), self.current().line))
+            return Err((
+                format!(
+                    "Expected closing parenthesis, instead found {}",
+                    self.current().token_type
+                ),
+                self.current().line,
+            ));
         }
 
         Ok(expression)
@@ -429,7 +521,9 @@ impl Parser {
 
     fn parse_methodcall(&mut self) -> Result<Box<Expression>, (String, usize)> {
         if let Some(Object::Identifier(identifier)) = self.current().literal {
-            if let Some(Object::Identifier(methodname)) = self.tokens[self.index + 2].literal.clone() {
+            if let Some(Object::Identifier(methodname)) =
+                self.tokens[self.index + 2].literal.clone()
+            {
                 self.consume();
                 self.consume();
                 self.consume();
@@ -440,12 +534,29 @@ impl Parser {
 
                     self.consume()
                 }
-                Ok(Box::new(Expression::MethodCall { object: identifier, method: methodname, args }))
+                Ok(Box::new(Expression::MethodCall {
+                    object: identifier,
+                    method: methodname,
+                    args,
+                }))
             } else {
-                Err((format!("Expected method name, instead found {}", self.tokens[self.index + 2].literal.clone().unwrap().user_print(self.current().line)), self.current().line))
+                Err((
+                    format!(
+                        "Expected method name, instead found {}",
+                        self.tokens[self.index + 2]
+                            .literal
+                            .clone()
+                            .unwrap()
+                            .user_print(self.current().line)?
+                    ),
+                    self.current().line,
+                ))
             }
         } else {
-            Err((format!("Expected object identifier, found {}", self.current()), self.current().line))
+            Err((
+                format!("Expected object identifier, found {}", self.current()),
+                self.current().line,
+            ))
         }
     }
 
@@ -455,7 +566,7 @@ impl Parser {
             self.consume();
             let index = self.expression()?;
             if !(TokenType::BracketRight == self.next().token_type) {
-                warn(&format!("Hawk respects your freedom, so using {} is fine, but consider using a ']' to end array index.", self.previous().token_type.user_print()), self.current().line);
+                (self.warn)(format!("Hawk respects your freedom, so using {} is fine, but consider using a ']' to end array index.", self.current().token_type.user_print()), self.current().line);
             }
             self.consume();
             Ok(Box::new(Expression::ArrayIndex { identifier, index }))
@@ -469,7 +580,7 @@ impl Parser {
         if let Some(Object::Identifier(identifier)) = self.current().literal {
             self.consume();
             self.consume();
-            
+
             let mut given: HashMap<String, Expression> = HashMap::new();
             let mut to_find = String::new();
 
@@ -490,9 +601,16 @@ impl Parser {
                 self.consume();
             }
 
-            Ok(Box::new(Expression::FinderCall { identifier, given, to_find }))
+            Ok(Box::new(Expression::FinderCall {
+                identifier,
+                given,
+                to_find,
+            }))
         } else {
-            Err((format!("Couldn't get finder parameters"), self.current().line))
+            Err((
+                format!("Couldn't get finder parameters"),
+                self.current().line,
+            ))
         }
     }
 
@@ -505,7 +623,7 @@ impl Parser {
             if !(self.current().token_type == TokenType::ParenthesisRight) {
                 while self.previous().token_type != TokenType::ParenthesisRight {
                     args.push(self.expression()?);
-    
+
                     self.consume()
                 }
             } else {
@@ -513,12 +631,16 @@ impl Parser {
             }
             Ok(Box::new(Expression::FunctionCall { identifier, args }))
         } else {
-            Err((format!("Couldn't get function parameters"), self.current().line))
+            Err((
+                format!("Couldn't get function parameters"),
+                self.current().line,
+            ))
         }
     }
 
     pub fn at_end(&self) -> bool {
-        self.index.saturating_sub(1) == self.tokens.len() || self.current().token_type == TokenType::EOF
+        self.index.saturating_sub(1) == self.tokens.len()
+            || self.current().token_type == TokenType::EOF
     }
 
     fn current(&self) -> Token {
@@ -532,7 +654,7 @@ impl Parser {
     fn next(&self) -> Token {
         self.tokens[self.index + 1].clone()
     }
-    
+
     fn consume(&mut self) {
         self.index += 1;
     }

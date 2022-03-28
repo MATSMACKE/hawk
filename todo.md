@@ -1,17 +1,32 @@
+## Completed
 - [x] import
 - [x] array
 - [x] reading and writing data
 - [x] uncertain
-- [ ] methods
 - [x] data table type
-- [ ] data table methods
 - [x] reading CSV
 - [x] writing CSV
 - [x] very basic CAS
 - [x] column uncertainty handling
 - [x] error handling
-- [ ] stdlib finders
-- [ ] scientific notation
-- [ ] don't quit on error in REPL
-- [ ] slightly more advanced cas
+- [x] support finders in std
+- [x] don't quit on error in REPL
+
+## Next up
+- [ ] scientific notation (language)
 - [ ] fix import (currently overrides global scope)
+- [ ] expect statements
+- [ ] error handling: no line number on warn in REPL
+
+## Near future
+- [ ] methods
+- [ ] data table methods
+- [ ] decimal without fp error (scientific notation)
+- [ ] reimplement lexer with regex
+- [ ] slightly more advanced cas
+- [ ] maintain data (e.g. in_repl) throughout interpreter
+
+## Far future
+- [ ] online interpreter
+- [ ] integrate lexer into parser
+- [ ] run lexer and parser in parallel threads

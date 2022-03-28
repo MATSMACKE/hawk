@@ -81,7 +81,7 @@ dependencies = [
  "float-cmp",
  "hawk_cli_io",
  "hawk_common",
- "hawk_lib",
+ "hawk_interpreter",
 ]
 
 [[package]]
@@ -100,6 +100,17 @@ name = "hawk_common"
 version = "0.1.0"
 dependencies = [
  "float-cmp",
+ "term-table",
+]
+
+[[package]]
+name = "hawk_interpreter"
+version = "0.1.0"
+dependencies = [
+ "float-cmp",
+ "hawk_common",
+ "hawk_lib",
+ "unicode-segmentation",
 ]
 
 [[package]]
