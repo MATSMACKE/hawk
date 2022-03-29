@@ -2,21 +2,47 @@ use wasm_bindgen::prelude::*;
 
 use std::collections::HashMap;
 
-// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-// allocator.
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-#[wasm_bindgen]
-extern {
-    fn alert(s: &str);
+#[wasm_bindgen(module = "/hawk_interface.ts")]
+extern "C" {
+    fn print(message: &str);
+    fn warn(message: &str);
+    fn error(message: &str);
+    fn writefile(name: &str, content: &str);
+    fn readfile(name: &str) -> String;
 }
 
 #[wasm_bindgen]
-pub fn run(code: &str) {
-    match hawk_interpreter::run::run(code.to_string(), HashMap::new(), true, |_| Ok("hi".to_owned()), |_, _| Ok(()), |message: String, _| alert(&format!("Warning: {message}")), |message: String, _| alert(&format!("Error: {message}")), |message: String| alert(&format!("{message}"))) {
+pub fn run(code: &str, in_repl: bool) {
+    let filein_fn = |name: String| {
+        Ok(readfile(&name))
+    };
+
+    let fileout_fn = |name: String, content: String| {
+        writefile(&name, &content);
+        Ok(())
+    };
+
+    let warn_fn = |message: String, line: usize| {
+        if line == 0 {
+            warn(&format!("Warning: {message}"));
+        } else {
+            warn(&format!("Warning on line {line}: {message}"));
+        }
+    };
+
+    let err_fn = |message: String, line: usize| {
+        if line == 0 {
+            error(&format!("Error: {message}"));
+        } else {
+            error(&format!("Error on line {line}: {message}"));
+        }
+    };
+
+    let output_fn = |message: String| print(&message);
+
+
+    match hawk_interpreter::run::run(code.to_string(), HashMap::new(), in_repl, filein_fn, fileout_fn, warn_fn, err_fn, output_fn) {
         Ok(_) => (),
-        Err((_, _)) => ()
+        Err((message, line)) => (err_fn(message, line))
     }
 }

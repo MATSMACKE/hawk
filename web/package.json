@@ -1,16 +1,20 @@
 {
-  "name": "web",
+  "name": "hawk-web",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --port 5050",
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@codemirror/state": "^0.19.9",
+    "@codemirror/theme-one-dark": "^0.19.1",
+    "codemirror": "^5.65.2",
     "vue": "^3.2.31"
   },
   "devDependencies": {
+    "@types/codemirror": "^5.60.5",
     "@types/node": "^16.11.25",
     "@vitejs/plugin-vue": "^2.2.2",
     "@vue/tsconfig": "^0.1.3",

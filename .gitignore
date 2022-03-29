@@ -18,3 +18,4 @@ testfile.hawk
 library.hawk
 test.csv
 app/out.csv
+/web/package-lock.json
