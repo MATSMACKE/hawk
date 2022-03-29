@@ -14,6 +14,7 @@ default = ["console_error_panic_hook"]
 wasm-bindgen = "0.2.63"
 console_error_panic_hook = { version = "0.1.6", optional = true }
 hawk_interpreter = {path = "../../../interpreter"}
+hawk_common = {path = "../../../common"}
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"

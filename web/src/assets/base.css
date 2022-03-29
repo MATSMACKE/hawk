@@ -6,6 +6,7 @@
 
   --black: #21252b;
   --black-soft: #282c34;
+  --black-medium: #24272e;
   --black-mute: #353a42;
 
   --indigo: #2c3e50;
@@ -24,6 +25,7 @@
 /* semantic color variables for this project */
 :root {
   --color-background: var(--white);
+  --color-background: var(--vt-c-white-soft);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
 
@@ -39,6 +41,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: var(--black);
+    --color-background-medium: var(--black-medium);
     --color-background-soft: var(--black-soft);
     --color-background-mute: var(--black-mute);
 

@@ -11,6 +11,7 @@
 - [x] error handling
 - [x] support finders in std
 - [x] don't quit on error in REPL
+- [x] online interpreter
 
 ## Next up
 - [ ] scientific notation (language)
@@ -27,6 +28,5 @@
 - [ ] maintain data (e.g. in_repl) throughout interpreter
 
 ## Far future
-- [ ] online interpreter
 - [ ] integrate lexer into parser
 - [ ] run lexer and parser in parallel threads

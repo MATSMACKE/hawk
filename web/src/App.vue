@@ -11,6 +11,8 @@ import './assets/pastel-on-dark.css'
 
 let code = ref("")
 
+let command = ref("")
+
 const editor = ref()
 
 let codeEditor: CodeMirror.EditorFromTextArea;
@@ -56,8 +58,16 @@ onMounted(() => {
 })
 
 function run_code() {
-    console.log(codeEditor.getValue())
-    hawk_run.run_code(codeEditor.getValue())
+    hawk_run.run_code(codeEditor.getValue(), false)
+}
+
+function run_code_repl() {
+    if (command.value === "clear" || command.value === "exit") {
+        hawk.output.value = []
+    } else {
+        hawk_run.run_code(command.value, true)
+    }
+    command.value = ""
 }
 
 let currentFile = ref(0)
@@ -73,6 +83,9 @@ function select_file(i: number, content: string) {
 function new_file() {
     if (new_file_name.value !== "") {
         hawk.files.value.push({name: new_file_name.value, content: ""})
+    }
+    if (currentFile.value == -1) {
+        currentFile.value = 0
     }
     window.localStorage.setItem("hawk_files", JSON.stringify(hawk.files.value))
 }
@@ -111,8 +124,13 @@ function delete_file() {
             <h4 v-for="x in hawk.output.value" :class="{
                 print: x.type == hawk.OutputType.Print,
                 warn: x.type == hawk.OutputType.Warn,
-                err: x.type == hawk.OutputType.Err
+                err: x.type == hawk.OutputType.Err,
+                output: true
             }">{{x.text}}</h4>
+                
+            <div id="repl-input-inner">
+                <input type="text" id="repl-input" v-model="command" @keydown.enter="run_code_repl" placeholder=">> Enter a REPL command">
+            </div>
         </div>
 
     </div>
@@ -164,12 +182,33 @@ input[type=text] {
 
 #files {
     width: 200px;
+    min-height: calc(100vh - 60px);
+    background-color: var(--color-background-soft);
 }
 
 #output {
+    display: flex;
     margin-left: 15px;
     flex-direction: column;
+    flex-grow: 1;
+    flex-basis: calc(100vh - 60px);
+    min-height: calc(100vh - 60px);
+    background-color: var(--color-background-soft);
 }
+
+#repl-input-inner {
+    display: flex;
+    margin-top: auto;
+    flex-direction: row;
+}
+
+#repl-input {
+    flex-grow: 1;
+    border: none;
+    border-radius: 0;
+    background-color: var(--color-background-medium);
+}
+
 
 button {
     font-family: jb_mono;
@@ -238,8 +277,17 @@ h4 {
     margin-bottom: 0;
     padding-bottom: 3px;
 }
+
+.output {
+    margin-left: 10px;
+    font-size: 0.8rem;
+}
+
 .file {
+    padding-top: 3px;
+    padding-bottom: 4px;
     padding-left: 15px;
+    font-size: 0.92rem;
 }
 
 .highlighted {
