@@ -1,0 +1,30 @@
+function range(arr) {
+    let length = len(arr)
+    let i = 1
+    let min = arr[0]
+    let max = arr[0]
+
+    while i < length {
+        if arr[i] < min {
+            min = arr[i]
+        } else if arr[i] > max {
+            max = arr[i]
+        }
+        i = i + 1
+    }
+
+    return max - min
+}
+
+function mean(arr) {
+    let length = len(arr)
+    let i = 0
+    let sum = 0
+
+    while i < length {
+        sum = sum + arr[i]
+        i = i + 1
+    }
+
+    return sum / length
+}

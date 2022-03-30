@@ -116,12 +116,12 @@ impl<'a> Lexer<'a> {
 
     fn match_char(&mut self, c: &str) {
         match c {
-            " " | "\r" | "\t" => {},
+            " " | "\r" => {},
             "\n" => {
                 self.line = self.line + 1;
                 self.add_token(TokenType::NewLine, None)
             },
-            "," => self.add_token(TokenType::Comma, None),
+            "," | "\t" => self.add_token(TokenType::Comma, None),
             _ => {
                 if let Ok(_) = c.parse::<usize>() {
                     self.parse_number()

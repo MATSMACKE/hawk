@@ -92,6 +92,8 @@ impl Interpreter {
         let mut evaled_args: Vec<Object> = Vec::new();
         let mut columns: Vec<usize> = Vec::new();
 
+        let mut arr_of_cols = -1;
+
         for (index, arg) in args.iter().enumerate() {
             let arg = self.eval_expression(arg.clone())?;
             if let Object::Uncertain { value, uncertainty } = arg {
@@ -104,11 +106,42 @@ impl Interpreter {
             } else if let Object::Column(vals) = arg {
                 columns.push(index);
                 evaled_args.push(Object::Column(vals))
+            } else if let Object::Array(vals) = arg.clone() {
+                if let Object::Column(_) = vals[0] {
+                    arr_of_cols = index as isize;
+                    evaled_args.push(arg)
+                }
             } else {
                 evaled_args.push(arg)
             }
         }
-        if columns.len() > 0 {
+
+        if arr_of_cols >= 0 {
+            let mut final_params: Vec<Vec<Object>> = Vec::new();
+            if let Object::Array(cols) = evaled_args[arr_of_cols as usize].clone() {
+                for col in cols {
+                    if let Object::Column(vals) = col {
+                        final_params.push(vals);
+                    }
+                }
+            } else {
+                return Err((format!("Unreachable error"), self.line))
+            }
+
+            let mut results: Vec<Object> = Vec::new();
+
+            for (i, _) in final_params[0].iter().enumerate() {
+                let mut args: Vec<Object> = Vec::new();
+                for col in final_params.iter() {
+                    args.push(col[i].clone())
+                }
+                let result = self.eval_function_call(identifier.clone(), vec![Box::new(Expression::Literal(Object::Array(args)))])?;
+                results.push(result)
+            }
+
+            Ok(Object::Column(results))
+        }
+        else if columns.len() > 0 {
             Ok(Object::Null)
         } else if has_uncertain {
             self.call_function_with_uncertainty(identifier, evaled_args, uncertain_index)
@@ -187,10 +220,10 @@ impl Interpreter {
         if let Object::Int(index) = index {
             if index >= 0 {
                 let array = self.get_variable(identifier);
-                if let Object::Array(array) = array {
+                if let Object::Array(array) | Object::Column(array) = array {
                     Ok(array[index as usize].clone())
                 } else {
-                    Err(("Can only index an array".to_string(), self.line))
+                    Err(("Can only index an array or column".to_string(), self.line))
                 }
             } else {
                 Err(("Index must be 0 or above".to_string(), self.line))

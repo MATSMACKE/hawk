@@ -310,6 +310,23 @@ impl Interpreter {
                 }),
                 _ => Err((format!("Can't raise Uncertain to {}", operand2.user_print(line)?), line)),
             },
+            Object::Column(operand1_data) => {
+                let mut results: Vec<Object> = Vec::new();
+                if let Object::Column(operand2_data) = operand2 {
+                    for (index, operand1) in operand1_data.iter().enumerate() {
+                        results.push(Interpreter::exponent(
+                            operand1.clone(),
+                            operand2_data[index].clone(),
+                            line,
+                        )?)
+                    }
+                } else {
+                    for operand1 in operand1_data {
+                        results.push(Interpreter::exponent(operand1, operand2.clone(), line)?)
+                    }
+                }
+                Ok(Object::Column(results))
+            }
             _ => Err((format!("Can't exponentiate {}", operand1.user_print(line)?), line)),
         }
     }

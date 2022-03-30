@@ -177,6 +177,17 @@ impl Interpreter {
                     Ok(Some(Object::Boolean(false)))
                 }
             },
+            "iscolumn" | "is_col" | "isCol" | "iscol" | "is_column" | "isColumn" => {
+                if args.len() == 1 {
+                    if let Object::Column(_) = args[0] {
+                        Ok(Some(Object::Boolean(true)))
+                    } else {
+                        Ok(Some(Object::Boolean(false)))
+                    }
+                } else {
+                    Ok(Some(Object::Boolean(false)))
+                }
+            },
             "isnull" | "is_null" | "isNull" => {
                 if args.len() == 1 {
                     if let Object::Null = args[0] {

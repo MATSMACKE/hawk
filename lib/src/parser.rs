@@ -565,7 +565,7 @@ impl Parser {
             self.consume();
             self.consume();
             let index = self.expression()?;
-            if !(TokenType::BracketRight == self.next().token_type) {
+            if !(TokenType::BracketRight == self.current().token_type) {
                 (self.warn)(format!("Hawk respects your freedom, so using {} is fine, but consider using a ']' to end array index.", self.current().token_type.user_print()), self.current().line);
             }
             self.consume();

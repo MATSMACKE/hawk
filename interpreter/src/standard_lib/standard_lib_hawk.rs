@@ -9,6 +9,7 @@ match identifier.as_str() {
 
 
 
+
 "sort" => Some(Object::Function{params: vec!["arr"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Definition{name: "i".to_owned(), value: Box::new(Expression::Literal(Object::Int(0)))}
 ,
 Statement::While{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_owned()))), operand2: Box::new(Expression::FunctionCall{identifier: "len".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("arr".to_owned()))),
@@ -88,6 +89,54 @@ Statement::Return(Box::new(Expression::Literal(Object::Identifier("x".to_owned()
 "lcm" => Some(Object::Function{params: vec!["x", "y"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("x".to_owned()))), operand2: Box::new(Expression::Literal(Object::Identifier("y".to_owned()))), operator: TokenType::Asterisk}), operand2: Box::new(Expression::FunctionCall{identifier: "gcd".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("x".to_owned()))),
 Box::new(Expression::Literal(Object::Identifier("y".to_owned()))),
 ]}), operator: TokenType::Slash}))
+)}),
+
+
+"range" => Some(Object::Function{params: vec!["arr"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Definition{name: "length".to_owned(), value: Box::new(Expression::FunctionCall{identifier: "len".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("arr".to_owned()))),
+]})}
+,
+Statement::Definition{name: "i".to_owned(), value: Box::new(Expression::Literal(Object::Int(1)))}
+,
+Statement::Definition{name: "min".to_owned(), value: Box::new(Expression::ArrayIndex{identifier: "arr".to_owned(), index: Box::new(Expression::Literal(Object::Int(0)))})}
+,
+Statement::Definition{name: "max".to_owned(), value: Box::new(Expression::ArrayIndex{identifier: "arr".to_owned(), index: Box::new(Expression::Literal(Object::Int(0)))})}
+,
+Statement::While{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_owned()))), operand2: Box::new(Expression::Literal(Object::Identifier("length".to_owned()))), operator: TokenType::LessThan}), block: Box::new(Statement::Block(vec![Statement::IfElse{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::ArrayIndex{identifier: "arr".to_owned(), index: Box::new(Expression::Literal(Object::Identifier("i".to_owned())))}), operand2: Box::new(Expression::Literal(Object::Identifier("min".to_owned()))), operator: TokenType::LessThan}), if_block: Box::new(Statement::Block(vec![Statement::Definition{name: "min".to_owned(), value: Box::new(Expression::ArrayIndex{identifier: "arr".to_owned(), index: Box::new(Expression::Literal(Object::Identifier("i".to_owned())))})}
+,
+])
+), else_block: Box::new(Statement::If{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::ArrayIndex{identifier: "arr".to_owned(), index: Box::new(Expression::Literal(Object::Identifier("i".to_owned())))}), operand2: Box::new(Expression::Literal(Object::Identifier("max".to_owned()))), operator: TokenType::GreaterThan}), block: Box::new(Statement::Block(vec![Statement::Definition{name: "max".to_owned(), value: Box::new(Expression::ArrayIndex{identifier: "arr".to_owned(), index: Box::new(Expression::Literal(Object::Identifier("i".to_owned())))})}
+,
+])
+)}
+)}
+,
+Statement::Definition{name: "i".to_owned(), value: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_owned()))), operand2: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::Plus})}
+,
+])
+)}
+,
+Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("max".to_owned()))), operand2: Box::new(Expression::Literal(Object::Identifier("min".to_owned()))), operator: TokenType::Minus}))
+,
+])
+)}),
+
+"mean" => Some(Object::Function{params: vec!["arr"].iter().map(std::string::ToString::to_string).collect(), block: Box::new(Statement::Block(vec![Statement::Definition{name: "length".to_owned(), value: Box::new(Expression::FunctionCall{identifier: "len".to_owned(), args: vec![Box::new(Expression::Literal(Object::Identifier("arr".to_owned()))),
+]})}
+,
+Statement::Definition{name: "i".to_owned(), value: Box::new(Expression::Literal(Object::Int(0)))}
+,
+Statement::Definition{name: "sum".to_owned(), value: Box::new(Expression::Literal(Object::Int(0)))}
+,
+Statement::While{condition: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_owned()))), operand2: Box::new(Expression::Literal(Object::Identifier("length".to_owned()))), operator: TokenType::LessThan}), block: Box::new(Statement::Block(vec![Statement::Definition{name: "sum".to_owned(), value: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("sum".to_owned()))), operand2: Box::new(Expression::ArrayIndex{identifier: "arr".to_owned(), index: Box::new(Expression::Literal(Object::Identifier("i".to_owned())))}), operator: TokenType::Plus})}
+,
+Statement::Definition{name: "i".to_owned(), value: Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("i".to_owned()))), operand2: Box::new(Expression::Literal(Object::Int(1))), operator: TokenType::Plus})}
+,
+])
+)}
+,
+Statement::Return(Box::new(Expression::Binary{operand1: Box::new(Expression::Literal(Object::Identifier("sum".to_owned()))), operand2: Box::new(Expression::Literal(Object::Identifier("length".to_owned()))), operator: TokenType::Slash}))
+,
+])
 )}),
 
 
@@ -177,6 +226,8 @@ _ => None
     pub fn get_std_finder(identifier: String) -> Option<Object> {
         match identifier.as_str() {
             
+
+
 
 
 
