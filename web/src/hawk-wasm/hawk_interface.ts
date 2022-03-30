@@ -18,12 +18,14 @@ export interface File {
 
 export let output = ref(<Output[]>[])
 
-export let files = ref([{name: "main.hawk", content: ""}])
+export let files = ref(<File[]>[])
 
 let local = window.localStorage.getItem("hawk_files")
 
 if (local !== null) {
     files.value = JSON.parse(local ?? "")
+    console.log(files.value);
+    
 }
 
 export function print(message: string) {

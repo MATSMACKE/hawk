@@ -305,8 +305,7 @@ impl Interpreter {
                     uncertainty: x.powd(Decimal::from(y as i64)) * (Decimal::from(y as i64)) * (u1 / x),
                 }),
                 Object::Decimal(y) => Ok(Object::Uncertain {
-                    value: x.powd(y),
-                    uncertainty: x.powd(y) * y * (u1 / x),
+                    value: x.powd(y),uncertainty: x.powd(y) * y * (u1 / x),
                 }),
                 _ => Err((format!("Can't raise Uncertain to {}", operand2.user_print(line)?), line)),
             },
@@ -330,6 +329,10 @@ impl Interpreter {
             _ => Err((format!("Can't exponentiate {}", operand1.user_print(line)?), line)),
         }
     }
+
+
+
+    
 
     /// Checks if object is greater than or equal to another object
     pub fn greaterthanequal(operand1: Object, operand2: Object, line: usize) -> Result<Object, (String, usize)> {

@@ -67,14 +67,18 @@ function run_code_repl() {
     command.value = ""
 }
 
-let current_file = ref(0)
+let current_file = ref(-1)
 let new_file_name = ref("")
 
 function select_file(i: number) {
-    hawk.files.value[current_file.value].content = codeEditor.getValue()
+    if (current_file.value !== -1) {
+        hawk.files.value[current_file.value].content = codeEditor.getValue()
+    }
     current_file.value = i
     codeEditor.setValue(hawk.files.value[current_file.value].content)
     window.localStorage.setItem("hawk_files", JSON.stringify(hawk.files.value))
+    console.log(hawk.files.value);
+    
 }
 
 function new_file() {
@@ -99,7 +103,7 @@ function delete_file() {
 
 function run_code() {
     hawk.files.value[current_file.value].content = codeEditor.getValue()
-    hawk_run.run_code((hawk.files.value.find(el => el.name == "main.hawk") ?? {name: "", content: ""}).content, false)
+    hawk_run.run_code((hawk.files.value.find(el => el.name == "main.hawk") ?? {name: "", content: codeEditor.getValue()}).content, false)
 }
 
 </script>
@@ -107,7 +111,7 @@ function run_code() {
 <template>
 <div id="main">
     <div id="top-bar">
-        <input type="text" placeholder="New File Name" v-model="new_file_name">
+        <input type="text" placeholder="New File Name" @keydown.enter="new_file" v-model="new_file_name">
         <button class="button-newfile" @click="new_file">New File</button>
         <button class="button-deletefile" @click="delete_file">Delete File</button>
         <div id="button-run-container">

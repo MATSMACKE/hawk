@@ -267,7 +267,7 @@ impl CSV for Object {
         for (i, col) in data.iter().enumerate() {
             if let Object::Column(a) = col {
                 if let Object::Uncertain{value: _, uncertainty: _} = a[0] {
-                    names.insert(i + added_columns + 1, format!("uncertainty{}", names[i + added_columns]));
+                    names.insert(i + added_columns + 1, format!("uncertainty_{}", names[i + added_columns]));
 
                     let mut vals = Vec::new();
                     let mut uncerts = Vec::new();
