@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 float-cmp = "0.9.0"
 term-table = "1.3.2"
+decimal = "2.1.0"

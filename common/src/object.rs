@@ -2,6 +2,8 @@ use std::{fmt::{Display, Error, Formatter, self}, i128};
 
 use float_cmp::approx_eq;
 
+use decimal::d128;
+
 use term_table::row::Row;
 use term_table::{Table, TableStyle};
 
@@ -14,14 +16,13 @@ pub enum Object {
     Null,
     /// Number stored as 128 bit integer
     Int(i128),
-    /// Number stored as 64 bit float
-    Float(f64),
+    Decimal(d128),
     /// A string literal
     String(String),
     /// A boolean (given by comparison operators or the keywords `true` and `false`)
     Boolean(bool),
     /// A number stored as 64 bit float with an uncertainty (also stored as 64 bit float)
-    Uncertain{value: f64, uncertainty: f64},
+    Uncertain{value: d128, uncertainty: d128},
     /// A function object that is stored in the scope where the function is defined, with parameter
     /// names as a vector of strings and the code of the actual function as a Statement
     Function{params: Vec<String>, block: Box<Statement>},
@@ -42,7 +43,7 @@ impl Display for Object {
         match &self {
             Self::Null => write!(f, "Object::Null"),
             Self::Int(x) => write!(f, "Object::Int({})", x),
-            Self::Float(x) => write!(f, "Object::Float({})", x),
+            Self::Decimal(x) => write!(f, "Object::Decimal(d128!({}))", x),
             Self::String(x) => write!(f, "Object::String(\"{}\".to_owned())", x),
             Self::Boolean(x) => write!(f, "Object::Boolean({})", x),
             Self::Uncertain{value, uncertainty} => write!(f, "Object::Uncertain{{value: {}, uncertainty: {}}}", value, uncertainty),
@@ -94,10 +95,10 @@ impl PartialEq for Object {
         use Object::*;
         match (self, other) {
             (Int(a), Int(b)) => a == b,
-            (Float(a), Float(b)) => a == b,
-            (Int(a), Float(b)) | (Float(b), Int(a)) => approx_eq!(f64, *a as f64, *b, ulps = 3),
+            (Decimal(a), Decimal(b)) => a == b,
+            (Int(a), Decimal(b)) | (Decimal(b), Int(a)) => &d128::from(*a as i64) == b,
             (Uncertain { value, uncertainty }, Int(i)) 
-            | (Int(i), Uncertain { value, uncertainty }) => (value + uncertainty) > (*i as f64) && (value - uncertainty) < (*i as f64),
+            | (Int(i), Uncertain { value, uncertainty }) => (value + uncertainty) > d128::from(*i as i64) && (value - uncertainty) < d128::from(*i as i64),
             (String(a), String(b)) => a == b,
             (Uncertain { value: v1, uncertainty: u1 }, Uncertain { value: v2, uncertainty: u2 }) => v1 + u1 > v2 - u2 && v2 + u2 > v1 - u1,
             (Array(a), Array(b)) => {
@@ -134,7 +135,7 @@ impl Object {
     pub fn user_print(&self, line: usize) -> Result<String, (String, usize)> {
         match self.clone() {
             Self::Boolean(x) => Ok(format!("{x}")),
-            Self::Float(x) => Ok(format!("{x}")),
+            Self::Decimal(x) => Ok(format!("{x}")),
             Self::Int(x) => Ok(format!("{x}")),
             Self::String(x) => Ok(format!("{x}")),
             Self::Identifier(x) => Ok(format!("{x}")),

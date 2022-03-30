@@ -3,6 +3,8 @@ use unicode_segmentation::UnicodeSegmentation;
 use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
 
+use decimal::d128;
+
 pub fn csv_to_datatable(filename: String, line: usize, filein_fn: fn(String) -> Result<String, String>) -> Result<Object, (String, usize)> {
     if let Ok(csvfile) = filein_fn(filename.clone()) {
         let tokens = Lexer::lex(csvfile.as_str());
@@ -178,6 +180,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn parse_float(&mut self, int: usize) {
+        let mut decimal: d128 = d128!(0);
         let mut decimal_digits: Vec<usize> = Vec::new();
 
         while let Ok(num) = self.characters[self.index].parse::<usize>() {
@@ -185,15 +188,13 @@ impl<'a> Lexer<'a> {
             self.consume_char()
         }
 
-        let mut decimal = 0.;
-
         for i in decimal_digits.iter() {
-            decimal = (decimal + *i as f64) / 10.;
+            decimal = (decimal + d128::from(*i as i64)) / d128!(10);
         }
 
-        let number = int as f64 + decimal;
+        let number = d128::from(int as i64) + decimal;
 
-        self.add_token(TokenType::Float, Some(Object::Float(number)));
+        self.add_token(TokenType::Decimal, Some(Object::Decimal(number)));
     }
 
     fn consume_char(&mut self) {
@@ -233,7 +234,7 @@ impl CSV for Object {
     fn format_for_csv(&self, line: usize) -> Result<String, (String, usize)> {
         match self.clone() {
             Self::Boolean(x) => Ok(format!("{x}")),
-            Self::Float(x) => Ok(format!("{x}")),
+            Self::Decimal(x) => Ok(format!("{x}")),
             Self::Int(x) => Ok(format!("{x}")),
             Self::String(x) => Ok(format!("{x}")),
             Self::Uncertain{value, uncertainty: _} => Ok(format!("{value}")),
@@ -271,8 +272,8 @@ impl CSV for Object {
                     let mut uncerts = Vec::new();
                     for obj in a {
                         if let Object::Uncertain{value, uncertainty} = obj {
-                            vals.push(Object::Float(*value));
-                            uncerts.push(Object::Float(*uncertainty));   
+                            vals.push(Object::Decimal(*value));
+                            uncerts.push(Object::Decimal(*uncertainty));   
                         }
                     }
                     new_data[i + added_columns] = Object::Column(vals);

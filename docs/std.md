@@ -73,6 +73,6 @@ Convert to a different type, error if not possible.
 
 These functions return a boolean representing whether or not the argument is the given type. Quite self-explanatory.
 
-Please note different kinds of formatting are allowed (e.g. `isfloat(x)`, `is_float(x)` and `isFloat(x)` all do the same thing)
+Please note different kinds of formatting are allowed (e.g. `isfloat(x)`, `is_float(x)` and `isDecimal(x)` all do the same thing)
 
 `is_float(x)`, `is_int(x)`, `is_bool(x)`, `is_uncertain(x)` or `has_uncertainty(x)` (not yet working), `is_string(x)` or `is_str(x)`, `is_array(x)` or `is_arr(x)`, `is_null(x)`

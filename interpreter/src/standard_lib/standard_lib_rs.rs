@@ -3,7 +3,7 @@ use crate::csv::{csv_to_datatable, datatable_to_csv};
 use crate::Interpreter;
 use hawk_common::object::Object;
 
-use std::f64::consts::{E, LN_10, PI, TAU};
+use decimal::d128;
 
 impl Interpreter {
     pub fn get_std_rs_fn(&mut self, identifier: String, args: Vec<Object>) -> Result<Option<Object>, (String, usize)> {
@@ -60,27 +60,27 @@ impl Interpreter {
                 }
                 Ok(Some(Object::Null))
             }
-            "pi" => Ok(Some(Object::Float(PI))),
-            "ln10" => Ok(Some(Object::Float(LN_10))),
+            "pi" => Ok(Some(Object::Decimal(d128!(3.1415926535897932384626433832795)))),
+            "ln10" => Ok(Some(Object::Decimal(d128!(2.30258509299)))),
             "ln" => {
                 let x;
-                if let Object::Float(val) = args[0] {
+                if let Object::Decimal(val) = args[0] {
                     x = val
                 } else if let Object::Int(val) = args[0] {
-                    x = val as f64
+                    x = d128::from(val as i64)
                 } else {
                     return Ok(None);
                 }
 
-                Ok(Some(Object::Float(ln(x))))
+                Ok(Some(Object::Decimal(ln(x))))
             }
-            "e" => Ok(Some(Object::Float(E))),
+            "e" => Ok(Some(Object::Decimal(d128!(2.718281828459045235360287471352)))),
             "sin" => {
                 let x;
-                if let Object::Float(val) = args[0] {
+                if let Object::Decimal(val) = args[0] {
                     x = val
                 } else if let Object::Int(val) = args[0] {
-                    x = val as f64
+                    x = d128::from(val as i64)
                 } else {
                     return Err((
                         format!("Expected number as argument to sin, found {}", args[0]),
@@ -88,7 +88,7 @@ impl Interpreter {
                     ))
                 }
 
-                Ok(Some(Object::Float(sin(x))))
+                Ok(Some(Object::Decimal(sin(x))))
             },
             "len" => {
                 if let Object::Array(data) = args[0].to_owned() {
@@ -110,9 +110,9 @@ impl Interpreter {
                     ))
                 }
             },
-            "isfloat" | "is_float" | "isFloat" => {
+            "isfloat" | "is_float" | "isDecimal" => {
                 if args.len() == 1 {
-                    if let Object::Float(_) = args[0] {
+                    if let Object::Decimal(_) = args[0] {
                         Ok(Some(Object::Boolean(true)))
                     } else {
                         Ok(Some(Object::Boolean(false)))
@@ -192,49 +192,41 @@ impl Interpreter {
     }
 }
 
-fn ln(mut x: f64) -> f64 {
-    let mut decimal = 0.;
-    while x > 1. {
-        x = x / 10.;
-        decimal = decimal + 1.
-    }
-    let mut sum = 0.;
-    let mut i = 1.;
-    while i < 100. {
-        sum = sum + ((((x - 1.) as f64).powf(i)) * ((-1_f64).powf(i - 1.))) / i;
-        i = i + 1.;
-    }
-    sum + decimal * LN_10
+fn ln(x: d128) -> d128 {
+    x.ln()
 }
 
-fn factorial(x: i128) -> i128 {
+fn factorial(x: i32) -> i64 {
     let mut x = x;
-    let mut result: i128 = 1;
+    let mut result: i64 = 1;
     while x > 0 {
-        result *= x;
+        result *= x as i64;
         x -= 1;
     }
     result
 }
 
-fn sin(x: f64) -> f64 {
+fn sin(x: d128) -> d128 {
     let mut x = x;
-    let mut sum = 0.;
-    let mut i = 1.;
+    let mut sum = d128!(0);
+    let mut i = d128!(1);
 
-    if x > 0. {
-        while x > (TAU) {
-            x = x - TAU;
+    let tau = d128!(2) * d128!(3.1415926535897932384626433832795);
+
+    if x > d128!(0) {
+        while x > (tau) {
+            x = x - tau;
         }
     } else {
-        while x < -(TAU) {
-            x = x + TAU
+        while x < -(tau) {
+            x = x + tau
         }
     }
 
-    while i < 20. {
-        sum = sum + ((x.powf(i)) * ((-1_f64).powf((i - 1.) / 2.))) / (factorial(i as i128) as f64);
-        i = i + 2.;
+    while i < d128!(20) {
+        let i_as_i32: i32 = i.into();
+        sum = sum + ((x.pow(i)) * (d128!(-1).pow((i - d128!(1)) / d128!(2)))) / d128::from(factorial(i_as_i32));
+        i = i + d128!(2);
     }
 
     sum

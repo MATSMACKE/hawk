@@ -31,7 +31,7 @@ fn end_to_end_let_float() {
         assert!(false)
     }
 
-    if let Some(&Object::Float(x)) = expected_var {
+    if let Some(&Object::Decimal(x)) = expected_var {
         assert_eq!(x, 5.3)
     } else {
         assert!(false)
@@ -134,7 +134,7 @@ fn end_to_end_ops_float() {
         assert!(false)
     }
 
-    if let Some(&Object::Float(x)) = expected_var {
+    if let Some(&Object::Decimal(x)) = expected_var {
         assert_eq!(x, 8.132927799776015)
     } else {
         assert!(false)
@@ -219,7 +219,7 @@ fn end_to_end_std_sin_0() {
         assert!(false)
     }
 
-    if let Some(&Object::Float(x)) = expected_var {
+    if let Some(&Object::Decimal(x)) = expected_var {
         assert!(x == 0.)
     } else {
         assert!(false)
@@ -235,7 +235,7 @@ fn end_to_end_std_sin_pi() {
         assert!(false)
     }
 
-    if let Some(&Object::Float(x)) = expected_var {
+    if let Some(&Object::Decimal(x)) = expected_var {
         assert!(x == 1.)
     } else {
         assert!(false)

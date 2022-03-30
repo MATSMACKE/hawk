@@ -8,6 +8,8 @@ use hawk_common::object::Object;
 use hawk_common::token::TokenType;
 use hawk_common::tree::Expression;
 
+use decimal::d128;
+
 impl Interpreter {
     /// Traverses an expression tree to evaluate it and return an Object
     pub fn eval_expression(&mut self, expression: Box<Expression>) -> Result<Object, (String, usize)> {
@@ -203,40 +205,40 @@ impl Interpreter {
     ) -> Result<Object, (String, usize)> {
         if let Object::Uncertain { value, uncertainty } = evaled_args[uncertain_index].clone() {
             // Change uncertain arg to `value + uncertainty` to find max
-            evaled_args[uncertain_index] = Object::Float(value + uncertainty);
+            evaled_args[uncertain_index] = Object::Decimal(value + uncertainty);
             let max;
             match self.call_function(identifier.clone(), evaled_args.clone())? {
-                Object::Float(x) => max = x,
-                Object::Int(x) => max = x as f64,
+                Object::Decimal(x) => max = x,
+                Object::Int(x) => max = d128::from(x as i64),
                 x => {
-                    return Err((format!("Expected Float or Int, got {x}"), self.line));
+                    return Err((format!("Expected Decimal or Int, got {x}"), self.line));
                 }
             }
 
             // Change uncertain arg to `value - uncertainty` to find min
-            evaled_args[uncertain_index] = Object::Float(value - uncertainty);
+            evaled_args[uncertain_index] = Object::Decimal(value - uncertainty);
             let min;
             match self.call_function(identifier.clone(), evaled_args.clone())? {
-                Object::Float(x) => min = x,
-                Object::Int(x) => min = x as f64,
+                Object::Decimal(x) => min = x,
+                Object::Int(x) => min = d128::from(x as i64),
                 x => {
-                    return Err((format!("Expected Float or Int, got {x}"), self.line));
+                    return Err((format!("Expected Decimal or Int, got {x}"), self.line));
                 }
             }
 
             // Change uncertain arg to `value` to find value
-            evaled_args[uncertain_index] = Object::Float(value);
+            evaled_args[uncertain_index] = Object::Decimal(value);
             let val;
             match self.call_function(identifier, evaled_args)? {
-                Object::Float(x) => val = x,
-                Object::Int(x) => val = x as f64,
+                Object::Decimal(x) => val = x,
+                Object::Int(x) => val = d128::from(x as i64),
                 x => {
-                    return Err((format!("Expected Float or Int, got {x}"), self.line));
+                    return Err((format!("Expected Decimal or Int, got {x}"), self.line));
                 }
             }
             Ok(Object::Uncertain {
                 value: val,
-                uncertainty: ((max - min) / 2.).abs(),
+                uncertainty: ((max - min) / d128!(2)).abs(),
             })
         } else {
             Err(("`AAAAH why in the world is this not an uncertain that's literally impossible Rust just forced me to include this error here don't mind me. Most likely explanation is that your computer was struck by lightning or particles from outer space.".to_string(), self.line))

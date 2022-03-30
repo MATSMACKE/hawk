@@ -18,6 +18,8 @@
 - [ ] fix import (currently overrides global scope)
 - [ ] expect statements
 - [ ] error handling: no line number on warn in REPL
+- [ ] switch to d128
+- [ ] switch uncertainties to d128
 
 ## Near future
 - [ ] methods

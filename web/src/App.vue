@@ -57,9 +57,6 @@ onMounted(() => {
     codeEditor.setSize("50%", "100%")
 })
 
-function run_code() {
-    hawk_run.run_code(codeEditor.getValue(), false)
-}
 
 function run_code_repl() {
     if (command.value === "clear" || command.value === "exit") {
@@ -70,13 +67,13 @@ function run_code_repl() {
     command.value = ""
 }
 
-let currentFile = ref(0)
+let current_file = ref(0)
 let new_file_name = ref("")
 
-function select_file(i: number, content: string) {
-    hawk.files.value[currentFile.value].content = codeEditor.getValue()
-    currentFile.value = i
-    codeEditor.setValue(content)
+function select_file(i: number) {
+    hawk.files.value[current_file.value].content = codeEditor.getValue()
+    current_file.value = i
+    codeEditor.setValue(hawk.files.value[current_file.value].content)
     window.localStorage.setItem("hawk_files", JSON.stringify(hawk.files.value))
 }
 
@@ -84,18 +81,25 @@ function new_file() {
     if (new_file_name.value !== "") {
         hawk.files.value.push({name: new_file_name.value, content: ""})
     }
-    if (currentFile.value == -1) {
-        currentFile.value = 0
+    if (current_file.value == -1) {
+        current_file.value = 0
     }
+    new_file_name.value  = ""
     window.localStorage.setItem("hawk_files", JSON.stringify(hawk.files.value))
 }
 
 function delete_file() {
-    hawk.files.value.splice(currentFile.value, 1)
-    if (currentFile.value == hawk.files.value.length) {
-        currentFile.value--
+    hawk.files.value.splice(current_file.value, 1)
+    if (current_file.value == hawk.files.value.length) {
+        current_file.value--
     }
+    codeEditor.setValue(hawk.files.value[current_file.value].content)
     window.localStorage.setItem("hawk_files", JSON.stringify(hawk.files.value))
+}
+
+function run_code() {
+    hawk.files.value[current_file.value].content = codeEditor.getValue()
+    hawk_run.run_code((hawk.files.value.find(el => el.name == "main.hawk") ?? {name: "", content: ""}).content, false)
 }
 
 </script>
@@ -112,9 +116,9 @@ function delete_file() {
     </div>
     <div id="content">
         <div id="files">
-            <h4 v-for="(file, i) in hawk.files.value" @click="select_file(i, file.content)" :class="{
+            <h4 v-for="(file, i) in hawk.files.value" @click="select_file(i)" :class="{
                 file: true,
-                highlighted: i == currentFile
+                highlighted: i == current_file
             }">{{file.name}}</h4>
         </div>
 
@@ -132,7 +136,6 @@ function delete_file() {
                 <input type="text" id="repl-input" v-model="command" @keydown.enter="run_code_repl" placeholder=">> Enter a REPL command">
             </div>
         </div>
-
     </div>
 </div>
 

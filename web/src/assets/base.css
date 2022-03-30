@@ -21,37 +21,19 @@
   --text-dark-1: var(--white);
   --text-dark-2: #5c6370;
 }
-
-/* semantic color variables for this project */
 :root {
-  --color-background: var(--white);
-  --color-background: var(--vt-c-white-soft);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
+  --color-background: var(--black);
+  --color-background-medium: var(--black-medium);
+  --color-background-soft: var(--black-soft);
+  --color-background-mute: var(--black-mute);
 
-  --color-border: var(--divider-light-2);
-  --color-border-hover: var(--divider-light-1);
+  --color-border: var(--divider-dark-2);
+  --color-border-hover: var(--divider-dark-1);
 
-  --color-heading: var(--text-light-1);
-  --color-text: var(--text-light-1);
-
-  --section-gap: 160px;
+  --color-heading: var(--vt-c-text-dark-1);
+  --color-text: var(--text-dark-1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--black);
-    --color-background-medium: var(--black-medium);
-    --color-background-soft: var(--black-soft);
-    --color-background-mute: var(--black-mute);
-
-    --color-border: var(--divider-dark-2);
-    --color-border-hover: var(--divider-dark-1);
-
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--text-dark-1);
-  }
-}
 
 @font-face {
   src: url(./jb_mono/JetBrainsMono-VariableFont_wght.ttf);
@@ -62,7 +44,6 @@ body {
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
-  transition: color 0.5s, background-color 0.5s;
   line-height: 1.6;
   font-family: jb_mono;
   font-size: 15px;

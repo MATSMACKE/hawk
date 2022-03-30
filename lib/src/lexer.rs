@@ -3,6 +3,8 @@ use unicode_segmentation::UnicodeSegmentation;
 use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
 
+use decimal::d128;
+
 pub struct Lexer<'a> {
     characters: Vec<&'a str>,
     num_chars: usize,
@@ -154,7 +156,7 @@ impl<'a> Lexer<'a> {
 
     /// Parses decimal part of a float
     fn parse_float(&mut self, int: usize) {
-        let mut decimal: f64 = 0.;
+        let mut decimal: d128 = d128!(0);
         let mut decimal_digits: Vec<usize> = Vec::new();
 
         while let Ok(num) = self.characters[self.index].parse::<usize>() {
@@ -163,12 +165,12 @@ impl<'a> Lexer<'a> {
         }
 
         for i in decimal_digits.iter() {
-            decimal = (decimal + *i as f64) / 10.;
+            decimal = (decimal + d128::from(*i as i64)) / d128!(10);
         }
 
-        let number = int as f64 + decimal;
+        let number = d128::from(int as i64) + decimal;
 
-        self.add_token(TokenType::Float, Some(Object::Float(number)));
+        self.add_token(TokenType::Decimal, Some(Object::Decimal(number)));
     }
 
     /// Checks for keywords, otherwise adds identifier
