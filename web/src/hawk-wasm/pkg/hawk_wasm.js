@@ -162,8 +162,14 @@ async function init(input) {
     }
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbg_print_ddb2fea1d2654360 = function(arg0, arg1) {
+        print(getStringFromWasm0(arg0, arg1));
+    };
     imports.wbg.__wbg_warn_95ed2a59dc77f45f = function(arg0, arg1) {
         warn(getStringFromWasm0(arg0, arg1));
+    };
+    imports.wbg.__wbg_writefile_8c1ac62c1203258c = function(arg0, arg1, arg2, arg3) {
+        writefile(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3));
     };
     imports.wbg.__wbg_readfile_7f8503265af5d3c7 = function(arg0, arg1, arg2) {
         var ret = readfile(getStringFromWasm0(arg1, arg2));
@@ -171,12 +177,6 @@ async function init(input) {
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
-    };
-    imports.wbg.__wbg_print_ddb2fea1d2654360 = function(arg0, arg1) {
-        print(getStringFromWasm0(arg0, arg1));
-    };
-    imports.wbg.__wbg_writefile_8c1ac62c1203258c = function(arg0, arg1, arg2, arg3) {
-        writefile(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3));
     };
     imports.wbg.__wbg_error_5fbf3002cef9d38a = function(arg0, arg1) {
         error(getStringFromWasm0(arg0, arg1));

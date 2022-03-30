@@ -3,7 +3,8 @@ use crate::csv::{csv_to_datatable, datatable_to_csv};
 use crate::Interpreter;
 use hawk_common::object::Object;
 
-use decimal::d128;
+use rust_decimal::{Decimal, MathematicalOps};
+use rust_decimal_macros::dec;
 
 impl Interpreter {
     pub fn get_std_rs_fn(&mut self, identifier: String, args: Vec<Object>) -> Result<Option<Object>, (String, usize)> {
@@ -60,27 +61,27 @@ impl Interpreter {
                 }
                 Ok(Some(Object::Null))
             }
-            "pi" => Ok(Some(Object::Decimal(d128!(3.1415926535897932384626433832795)))),
-            "ln10" => Ok(Some(Object::Decimal(d128!(2.30258509299)))),
+            "pi" => Ok(Some(Object::Decimal(Decimal::PI))),
+            "ln10" => Ok(Some(Object::Decimal(dec!(2.30258509299)))),
             "ln" => {
                 let x;
                 if let Object::Decimal(val) = args[0] {
                     x = val
                 } else if let Object::Int(val) = args[0] {
-                    x = d128::from(val as i64)
+                    x = Decimal::from(val as i64)
                 } else {
                     return Ok(None);
                 }
 
                 Ok(Some(Object::Decimal(ln(x))))
             }
-            "e" => Ok(Some(Object::Decimal(d128!(2.718281828459045235360287471352)))),
+            "e" => Ok(Some(Object::Decimal(Decimal::E))),
             "sin" => {
                 let x;
                 if let Object::Decimal(val) = args[0] {
                     x = val
                 } else if let Object::Int(val) = args[0] {
-                    x = d128::from(val as i64)
+                    x = Decimal::from(val as i64)
                 } else {
                     return Err((
                         format!("Expected number as argument to sin, found {}", args[0]),
@@ -192,42 +193,10 @@ impl Interpreter {
     }
 }
 
-fn ln(x: d128) -> d128 {
+fn ln(x: Decimal) -> Decimal {
     x.ln()
 }
 
-fn factorial(x: i32) -> i64 {
-    let mut x = x;
-    let mut result: i64 = 1;
-    while x > 0 {
-        result *= x as i64;
-        x -= 1;
-    }
-    result
-}
-
-fn sin(x: d128) -> d128 {
-    let mut x = x;
-    let mut sum = d128!(0);
-    let mut i = d128!(1);
-
-    let tau = d128!(2) * d128!(3.1415926535897932384626433832795);
-
-    if x > d128!(0) {
-        while x > (tau) {
-            x = x - tau;
-        }
-    } else {
-        while x < -(tau) {
-            x = x + tau
-        }
-    }
-
-    while i < d128!(20) {
-        let i_as_i32: i32 = i.into();
-        sum = sum + ((x.pow(i)) * (d128!(-1).pow((i - d128!(1)) / d128!(2)))) / d128::from(factorial(i_as_i32));
-        i = i + d128!(2);
-    }
-
-    sum
+fn sin(x: Decimal) -> Decimal {
+    x.sin()
 }

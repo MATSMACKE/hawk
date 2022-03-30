@@ -9,7 +9,8 @@ build = "build.rs"
 [dependencies]
 hawk_common = {path = "../common"}
 hawk_lib = {path = "../lib"}
-decimal = "2.1.0"
+rust_decimal = {version = "1.23.1", optional = false, features = ["maths"]}
+rust_decimal_macros = "1.23.1"
 float-cmp = "0.9.0"
 unicode-segmentation = "1.9.0"
 

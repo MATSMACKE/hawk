@@ -3,7 +3,10 @@ use crate::Interpreter;
 // Common types used throughout the interpreter
 use hawk_common::object::Object;
 
-use decimal::d128;
+use rust_decimal::{Decimal, MathematicalOps};
+
+#[allow(unused_imports)]
+use rust_decimal_macros::dec;
 
 impl Interpreter {
     /// Adds two numbers or strings
@@ -11,18 +14,18 @@ impl Interpreter {
         match operand1 {
             Object::Int(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Int(x + y)),
-                Object::Decimal(y) => Ok(Object::Decimal(d128::from(x as i64) + y)),
+                Object::Decimal(y) => Ok(Object::Decimal(Decimal::from(x as i64) + y)),
                 Object::Uncertain {
                     value: y,
                     uncertainty: u,
                 } => Ok(Object::Uncertain {
-                    value: d128::from(x as i64) + y,
+                    value: Decimal::from(x as i64) + y,
                     uncertainty: u,
                 }),
                 _ => Err((format!("Can't add Int to {}", operand2.user_print(line)?), line)),
             },
             Object::Decimal(x) => match operand2 {
-                Object::Int(y) => Ok(Object::Decimal(x + d128::from(y as i64))),
+                Object::Int(y) => Ok(Object::Decimal(x + Decimal::from(y as i64))),
                 Object::Decimal(y) => Ok(Object::Decimal(x + y)),
                 Object::Uncertain {
                     value: y,
@@ -38,7 +41,7 @@ impl Interpreter {
                 uncertainty: u1,
             } => match operand2 {
                 Object::Int(y) => Ok(Object::Uncertain {
-                    value: x + (d128::from(y as i64)),
+                    value: x + (Decimal::from(y as i64)),
                     uncertainty: u1,
                 }),
                 Object::Decimal(y) => Ok(Object::Uncertain {
@@ -84,18 +87,18 @@ impl Interpreter {
         match operand1 {
             Object::Int(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Int(x - y)),
-                Object::Decimal(y) => Ok(Object::Decimal(d128::from(x as i64) - y)),
+                Object::Decimal(y) => Ok(Object::Decimal(Decimal::from(x as i64) - y)),
                 Object::Uncertain {
                     value: y,
                     uncertainty: u,
                 } => Ok(Object::Uncertain {
-                    value: (d128::from(x as i64)) - y,
+                    value: (Decimal::from(x as i64)) - y,
                     uncertainty: u,
                 }),
                 _ => Err((format!("Can't subtract {} from Int", operand2.user_print(line)?), line)),
             },
             Object::Decimal(x) => match operand2 {
-                Object::Int(y) => Ok(Object::Decimal(x - (d128::from(y as i64)))),
+                Object::Int(y) => Ok(Object::Decimal(x - (Decimal::from(y as i64)))),
                 Object::Decimal(y) => Ok(Object::Decimal(x - y)),
                 Object::Uncertain {
                     value: y,
@@ -111,7 +114,7 @@ impl Interpreter {
                 uncertainty: u1,
             } => match operand2 {
                 Object::Int(y) => Ok(Object::Uncertain {
-                    value: x - (d128::from(y as i64)),
+                    value: x - (Decimal::from(y as i64)),
                     uncertainty: u1,
                 }),
                 Object::Decimal(y) => Ok(Object::Uncertain {
@@ -153,15 +156,15 @@ impl Interpreter {
         match operand1 {
             Object::Int(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Int(x * y)),
-                Object::Decimal(y) => Ok(Object::Decimal(d128::from(x as i64) * y)),
+                Object::Decimal(y) => Ok(Object::Decimal(Decimal::from(x as i64) * y)),
                 Object::Uncertain { value, uncertainty } => Ok(Object::Uncertain {
-                    value: value * (d128::from(x as i64)),
-                    uncertainty: uncertainty * (d128::from(x as i64)),
+                    value: value * (Decimal::from(x as i64)),
+                    uncertainty: uncertainty * (Decimal::from(x as i64)),
                 }),
                 _ => Err((format!("Can't multiply Int by {}", operand2.user_print(line)?), line)),
             },
             Object::Decimal(x) => match operand2 {
-                Object::Int(y) => Ok(Object::Decimal(x * (d128::from(y as i64)))),
+                Object::Int(y) => Ok(Object::Decimal(x * (Decimal::from(y as i64)))),
                 Object::Decimal(y) => Ok(Object::Decimal(x * y)),
                 Object::Uncertain { value, uncertainty } => Ok(Object::Uncertain {
                     value: value * x,
@@ -174,8 +177,8 @@ impl Interpreter {
                 uncertainty: u1,
             } => match operand2 {
                 Object::Int(y) => Ok(Object::Uncertain {
-                    value: x * (d128::from(y as i64)),
-                    uncertainty: u1 * (d128::from(y as i64)),
+                    value: x * (Decimal::from(y as i64)),
+                    uncertainty: u1 * (Decimal::from(y as i64)),
                 }),
                 Object::Decimal(y) => Ok(Object::Uncertain {
                     value: x * y,
@@ -216,18 +219,18 @@ impl Interpreter {
         match operand1 {
             Object::Int(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Int(x / y)),
-                Object::Decimal(y) => Ok(Object::Decimal(d128::from(x as i64) / y)),
+                Object::Decimal(y) => Ok(Object::Decimal(Decimal::from(x as i64) / y)),
                 Object::Uncertain {
                     value: y,
                     uncertainty: u,
                 } => Ok(Object::Uncertain {
-                    value: (d128::from(x as i64)) / y,
-                    uncertainty: (d128::from(x as i64)) * u / (y * y),
+                    value: (Decimal::from(x as i64)) / y,
+                    uncertainty: (Decimal::from(x as i64)) * u / (y * y),
                 }),
                 _ => Err((format!("Can't divide Int by {}", operand2.user_print(line)?), line)),
             },
             Object::Decimal(x) => match operand2 {
-                Object::Int(y) => Ok(Object::Decimal(x / (d128::from(y as i64)))),
+                Object::Int(y) => Ok(Object::Decimal(x / (Decimal::from(y as i64)))),
                 Object::Decimal(y) => Ok(Object::Decimal(x / y)),
                 Object::Uncertain {
                     value: y,
@@ -243,8 +246,8 @@ impl Interpreter {
                 uncertainty: u1,
             } => match operand2 {
                 Object::Int(y) => Ok(Object::Uncertain {
-                    value: x / (d128::from(y as i64)),
-                    uncertainty: u1 / (d128::from(y as i64)),
+                    value: x / (Decimal::from(y as i64)),
+                    uncertainty: u1 / (Decimal::from(y as i64)),
                 }),
                 Object::Decimal(y) => Ok(Object::Uncertain {
                     value: x / y,
@@ -285,12 +288,12 @@ impl Interpreter {
         match operand1 {
             Object::Int(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Int(x.pow(y as u32))),
-                Object::Decimal(y) => Ok(Object::Decimal((d128::from(x as i64)).pow(y))),
+                Object::Decimal(y) => Ok(Object::Decimal((Decimal::from(x as i64)).powd(y))),
                 _ => Err((format!("Can't raise Int to {}", operand2.user_print(line)?), line)),
             },
             Object::Decimal(x) => match operand2 {
-                Object::Int(y) => Ok(Object::Decimal(x.pow(d128::from(y as i64)))),
-                Object::Decimal(y) => Ok(Object::Decimal(x.pow(y))),
+                Object::Int(y) => Ok(Object::Decimal(x.powi(y as i64))),
+                Object::Decimal(y) => Ok(Object::Decimal(x.powd(y))),
                 _ => Err((format!("Can't raise Decimal to {}", operand2.user_print(line)?), line)),
             },
             Object::Uncertain {
@@ -298,12 +301,12 @@ impl Interpreter {
                 uncertainty: u1,
             } => match operand2 {
                 Object::Int(y) => Ok(Object::Uncertain {
-                    value: x.pow(d128::from(y as i64)),
-                    uncertainty: x.pow(d128::from(y as i64)) * (d128::from(y as i64)) * (u1 / x),
+                    value: x.powd(Decimal::from(y as i64)),
+                    uncertainty: x.powd(Decimal::from(y as i64)) * (Decimal::from(y as i64)) * (u1 / x),
                 }),
                 Object::Decimal(y) => Ok(Object::Uncertain {
-                    value: x.pow(y),
-                    uncertainty: x.pow(y) * y * (u1 / x),
+                    value: x.powd(y),
+                    uncertainty: x.powd(y) * y * (u1 / x),
                 }),
                 _ => Err((format!("Can't raise Uncertain to {}", operand2.user_print(line)?), line)),
             },
@@ -317,13 +320,13 @@ impl Interpreter {
             if let Object::Int(y) = operand2 {
                 Ok(Object::Boolean(x >= y))
             } else if let Object::Decimal(y) = operand2 {
-                Ok(Object::Boolean((d128::from(x as i64)) >= y))
+                Ok(Object::Boolean((Decimal::from(x as i64)) >= y))
             } else {
                 Err((format!("Can't compare Int to {}", operand2.user_print(line)?), line))
             }
         } else if let Object::Decimal(x) = operand1 {
             if let Object::Int(y) = operand2 {
-                Ok(Object::Boolean(x >= d128::from(y as i64)))
+                Ok(Object::Boolean(x >= Decimal::from(y as i64)))
             } else if let Object::Decimal(y) = operand2 {
                 Ok(Object::Boolean(x >= y))
             } else {
@@ -340,13 +343,13 @@ impl Interpreter {
             if let Object::Int(y) = operand2 {
                 Ok(Object::Boolean(x > y))
             } else if let Object::Decimal(y) = operand2 {
-                Ok(Object::Boolean((d128::from(x as i64)) > y))
+                Ok(Object::Boolean((Decimal::from(x as i64)) > y))
             } else {
                 Err((format!("Can't compare Int to {}", operand2.user_print(line)?), line))
             }
         } else if let Object::Decimal(x) = operand1 {
             if let Object::Int(y) = operand2 {
-                Ok(Object::Boolean(x > d128::from(y as i64)))
+                Ok(Object::Boolean(x > Decimal::from(y as i64)))
             } else if let Object::Decimal(y) = operand2 {
                 Ok(Object::Boolean(x > y))
             } else {
@@ -363,13 +366,13 @@ impl Interpreter {
             if let Object::Int(y) = operand2 {
                 Ok(Object::Boolean(x <= y))
             } else if let Object::Decimal(y) = operand2 {
-                Ok(Object::Boolean((d128::from(x as i64)) <= y))
+                Ok(Object::Boolean((Decimal::from(x as i64)) <= y))
             } else {
                 Err((format!("Can't compare Int to {}", operand2.user_print(line)?), line))
             }
         } else if let Object::Decimal(x) = operand1 {
             if let Object::Int(y) = operand2 {
-                Ok(Object::Boolean(x <= d128::from(y as i64)))
+                Ok(Object::Boolean(x <= Decimal::from(y as i64)))
             } else if let Object::Decimal(y) = operand2 {
                 Ok(Object::Boolean(x <= y))
             } else {
@@ -386,13 +389,13 @@ impl Interpreter {
             if let Object::Int(y) = operand2 {
                 Ok(Object::Boolean(x < y))
             } else if let Object::Decimal(y) = operand2 {
-                Ok(Object::Boolean((d128::from(x as i64)) < y))
+                Ok(Object::Boolean((Decimal::from(x as i64)) < y))
             } else {
                 Err((format!("Can't compare Int to {}", operand2.user_print(line)?), line))
             }
         } else if let Object::Decimal(x) = operand1 {
             if let Object::Int(y) = operand2 {
-                Ok(Object::Boolean(x < d128::from(y as i64)))
+                Ok(Object::Boolean(x < Decimal::from(y as i64)))
             } else if let Object::Decimal(y) = operand2 {
                 Ok(Object::Boolean(x < y))
             } else {
@@ -409,13 +412,13 @@ impl Interpreter {
             if let Object::Int(y) = operand2 {
                 Ok(Object::Boolean(x != y))
             } else if let Object::Decimal(y) = operand2 {
-                Ok(Object::Boolean((d128::from(x as i64)) != y))
+                Ok(Object::Boolean((Decimal::from(x as i64)) != y))
             } else {
                 Err((format!("Can't compare Int to {}", operand2.user_print(line)?), line))
             }
         } else if let Object::Decimal(x) = operand1 {
             if let Object::Int(y) = operand2 {
-                Ok(Object::Boolean(x != d128::from(y as i64)))
+                Ok(Object::Boolean(x != Decimal::from(y as i64)))
             } else if let Object::Decimal(y) = operand2 {
                 Ok(Object::Boolean(x != y))
             } else {
@@ -432,13 +435,13 @@ impl Interpreter {
             if let Object::Int(y) = operand2 {
                 Ok(Object::Boolean(x == y))
             } else if let Object::Decimal(y) = operand2 {
-                Ok(Object::Boolean((d128::from(x as i64)) == y))
+                Ok(Object::Boolean((Decimal::from(x as i64)) == y))
             } else {
                 Err((format!("Can't compare Int to {}", operand2.user_print(line)?), line))
             }
         } else if let Object::Decimal(x) = operand1 {
             if let Object::Int(y) = operand2 {
-                Ok(Object::Boolean(x == d128::from(y as i64)))
+                Ok(Object::Boolean(x == Decimal::from(y as i64)))
             } else if let Object::Decimal(y) = operand2 {
                 Ok(Object::Boolean(x == y))
             } else {
@@ -526,11 +529,11 @@ impl Interpreter {
         match operand1 {
             Object::Int(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Uncertain {
-                    value: d128::from(x as i64),
-                    uncertainty: d128::from(y as i64),
+                    value: Decimal::from(x as i64),
+                    uncertainty: Decimal::from(y as i64),
                 }),
                 Object::Decimal(y) => Ok(Object::Uncertain {
-                    value: d128::from(x as i64),
+                    value: Decimal::from(x as i64),
                     uncertainty: y,
                 }),
                 _ => Err((format!("Can't add {} as uncertainty", operand2.user_print(line)?), line)),
@@ -538,7 +541,7 @@ impl Interpreter {
             Object::Decimal(x) => match operand2 {
                 Object::Int(y) => Ok(Object::Uncertain {
                     value: x,
-                    uncertainty: d128::from(y as i64),
+                    uncertainty: Decimal::from(y as i64),
                 }),
                 Object::Decimal(y) => Ok(Object::Uncertain {
                     value: x,
@@ -571,19 +574,19 @@ impl Interpreter {
 #[test]
 fn addition() {
     assert_eq!(Interpreter::add(Object::Int(4), Object::Int(5), 0), Ok(Object::Int(9)));
-    assert_eq!(Interpreter::add(Object::Int(4), Object::Decimal(d128!(5.1)), 0), Ok(Object::Decimal(d128!(9.1))));
-    assert_eq!(Interpreter::add(Object::Decimal(d128!(4.2)), Object::Int(5), 0), Ok(Object::Decimal(d128!(9.2))));
-    assert_eq!(Interpreter::add(Object::Decimal(d128!(4.3)), Object::Decimal(d128!(5.2)), 0),Ok(Object::Decimal(d128!(9.5))));
+    assert_eq!(Interpreter::add(Object::Int(4), Object::Decimal(dec!(5.1)), 0), Ok(Object::Decimal(dec!(9.1))));
+    assert_eq!(Interpreter::add(Object::Decimal(dec!(4.2)), Object::Int(5), 0), Ok(Object::Decimal(dec!(9.2))));
+    assert_eq!(Interpreter::add(Object::Decimal(dec!(4.3)), Object::Decimal(dec!(5.2)), 0),Ok(Object::Decimal(dec!(9.5))));
     if let Ok(Object::Uncertain { value, uncertainty }) = Interpreter::add(
         Object::Uncertain {
-            value: d128!(1.0),
-            uncertainty: d128!(0.1),
+            value: dec!(1.0),
+            uncertainty: dec!(0.1),
         },
         Object::Int(3),
         1,
     ) {
-        assert_eq!(value, d128!(4.0));
-        assert_eq!(uncertainty, d128!(0.1))
+        assert_eq!(value, dec!(4.0));
+        assert_eq!(uncertainty, dec!(0.1))
     }
     assert_eq!(
         Interpreter::add(
@@ -598,24 +601,24 @@ fn addition() {
 #[test]
 fn multiply() {
     assert_eq!(Interpreter::multiply(Object::Int(4), Object::Int(5), 0), Ok(Object::Int(20)));
-    assert_eq!(Interpreter::multiply(Object::Int(4), Object::Decimal(d128!(5.1)), 0), Ok(Object::Decimal(d128!(20.4))));
-    assert_eq!(Interpreter::multiply(Object::Decimal(d128!(1.5)), Object::Int(2), 0), Ok(Object::Decimal(d128!(3.0))));
+    assert_eq!(Interpreter::multiply(Object::Int(4), Object::Decimal(dec!(5.1)), 0), Ok(Object::Decimal(dec!(20.4))));
+    assert_eq!(Interpreter::multiply(Object::Decimal(dec!(1.5)), Object::Int(2), 0), Ok(Object::Decimal(dec!(3.0))));
     assert_eq!(
-        Interpreter::multiply(Object::Decimal(d128!(1.5)), Object::Decimal(d128!(1.5)), 0),
-        Ok(Object::Decimal(d128!(2.25)))
+        Interpreter::multiply(Object::Decimal(dec!(1.5)), Object::Decimal(dec!(1.5)), 0),
+        Ok(Object::Decimal(dec!(2.25)))
     );
     if let Ok(Object::Uncertain { value, uncertainty }) = Interpreter::multiply(
         Object::Uncertain {
-            value: d128!(6.8),
-            uncertainty: d128!(0.2),
+            value: dec!(6.8),
+            uncertainty: dec!(0.2),
         },
         Object::Uncertain {
-            value: d128!(3.75),
-            uncertainty: d128!(0.05),
+            value: dec!(3.75),
+            uncertainty: dec!(0.05),
         },
         1,
     ) {
-        assert_eq!(value, d128!(25.5));
-        assert_eq!(uncertainty, d128!(1.09))
+        assert_eq!(value, dec!(25.5));
+        assert_eq!(uncertainty, dec!(1.09))
     }
 }

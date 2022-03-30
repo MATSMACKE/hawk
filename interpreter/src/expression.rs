@@ -8,7 +8,8 @@ use hawk_common::object::Object;
 use hawk_common::token::TokenType;
 use hawk_common::tree::Expression;
 
-use decimal::d128;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
 impl Interpreter {
     /// Traverses an expression tree to evaluate it and return an Object
@@ -209,7 +210,7 @@ impl Interpreter {
             let max;
             match self.call_function(identifier.clone(), evaled_args.clone())? {
                 Object::Decimal(x) => max = x,
-                Object::Int(x) => max = d128::from(x as i64),
+                Object::Int(x) => max = Decimal::from(x as i64),
                 x => {
                     return Err((format!("Expected Decimal or Int, got {x}"), self.line));
                 }
@@ -220,7 +221,7 @@ impl Interpreter {
             let min;
             match self.call_function(identifier.clone(), evaled_args.clone())? {
                 Object::Decimal(x) => min = x,
-                Object::Int(x) => min = d128::from(x as i64),
+                Object::Int(x) => min = Decimal::from(x as i64),
                 x => {
                     return Err((format!("Expected Decimal or Int, got {x}"), self.line));
                 }
@@ -231,14 +232,14 @@ impl Interpreter {
             let val;
             match self.call_function(identifier, evaled_args)? {
                 Object::Decimal(x) => val = x,
-                Object::Int(x) => val = d128::from(x as i64),
+                Object::Int(x) => val = Decimal::from(x as i64),
                 x => {
                     return Err((format!("Expected Decimal or Int, got {x}"), self.line));
                 }
             }
             Ok(Object::Uncertain {
                 value: val,
-                uncertainty: ((max - min) / d128!(2)).abs(),
+                uncertainty: ((max - min) / dec!(2)).abs(),
             })
         } else {
             Err(("`AAAAH why in the world is this not an uncertain that's literally impossible Rust just forced me to include this error here don't mind me. Most likely explanation is that your computer was struck by lightning or particles from outer space.".to_string(), self.line))

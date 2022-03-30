@@ -1,8 +1,6 @@
 use std::{fmt::{Display, Error, Formatter, self}, i128};
 
-use float_cmp::approx_eq;
-
-use decimal::d128;
+use rust_decimal::prelude::*;
 
 use term_table::row::Row;
 use term_table::{Table, TableStyle};
@@ -16,13 +14,13 @@ pub enum Object {
     Null,
     /// Number stored as 128 bit integer
     Int(i128),
-    Decimal(d128),
+    Decimal(Decimal),
     /// A string literal
     String(String),
     /// A boolean (given by comparison operators or the keywords `true` and `false`)
     Boolean(bool),
     /// A number stored as 64 bit float with an uncertainty (also stored as 64 bit float)
-    Uncertain{value: d128, uncertainty: d128},
+    Uncertain{value: Decimal, uncertainty: Decimal},
     /// A function object that is stored in the scope where the function is defined, with parameter
     /// names as a vector of strings and the code of the actual function as a Statement
     Function{params: Vec<String>, block: Box<Statement>},
@@ -43,7 +41,7 @@ impl Display for Object {
         match &self {
             Self::Null => write!(f, "Object::Null"),
             Self::Int(x) => write!(f, "Object::Int({})", x),
-            Self::Decimal(x) => write!(f, "Object::Decimal(d128!({}))", x),
+            Self::Decimal(x) => write!(f, "Object::Decimal(dec!({}))", x.normalize()),
             Self::String(x) => write!(f, "Object::String(\"{}\".to_owned())", x),
             Self::Boolean(x) => write!(f, "Object::Boolean({})", x),
             Self::Uncertain{value, uncertainty} => write!(f, "Object::Uncertain{{value: {}, uncertainty: {}}}", value, uncertainty),
@@ -96,9 +94,12 @@ impl PartialEq for Object {
         match (self, other) {
             (Int(a), Int(b)) => a == b,
             (Decimal(a), Decimal(b)) => a == b,
-            (Int(a), Decimal(b)) | (Decimal(b), Int(a)) => &d128::from(*a as i64) == b,
+            (Int(a), Decimal(b)) | (Decimal(b), Int(a)) => {
+                let dec: &rust_decimal::Decimal = &(*a as i64).into();
+                dec == b
+            },
             (Uncertain { value, uncertainty }, Int(i)) 
-            | (Int(i), Uncertain { value, uncertainty }) => (value + uncertainty) > d128::from(*i as i64) && (value - uncertainty) < d128::from(*i as i64),
+            | (Int(i), Uncertain { value, uncertainty }) => (value + uncertainty) > (*i as i64).into() && (value - uncertainty) < (*i as i64).into(),
             (String(a), String(b)) => a == b,
             (Uncertain { value: v1, uncertainty: u1 }, Uncertain { value: v2, uncertainty: u2 }) => v1 + u1 > v2 - u2 && v2 + u2 > v1 - u1,
             (Array(a), Array(b)) => {
@@ -135,7 +136,7 @@ impl Object {
     pub fn user_print(&self, line: usize) -> Result<String, (String, usize)> {
         match self.clone() {
             Self::Boolean(x) => Ok(format!("{x}")),
-            Self::Decimal(x) => Ok(format!("{x}")),
+            Self::Decimal(x) => Ok(format!("{}", x.normalize())),
             Self::Int(x) => Ok(format!("{x}")),
             Self::String(x) => Ok(format!("{x}")),
             Self::Identifier(x) => Ok(format!("{x}")),
@@ -144,7 +145,7 @@ impl Object {
                 Self::user_print_array(x, line)
             },
             Self::Null => Ok(String::from("Null")),
-            Self::Uncertain{value, uncertainty} => Ok(format!("{value} ± {uncertainty}")),
+            Self::Uncertain{value, uncertainty} => Ok(format!("{} ± {}", value.normalize(), uncertainty.normalize())),
             Self::Column(x) => {
                 Self::user_print_column(x, line)
             },

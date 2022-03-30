@@ -3,7 +3,8 @@ use unicode_segmentation::UnicodeSegmentation;
 use hawk_common::object::Object;
 use hawk_common::token::{Token, TokenType};
 
-use decimal::d128;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
 pub struct Lexer<'a> {
     characters: Vec<&'a str>,
@@ -156,7 +157,7 @@ impl<'a> Lexer<'a> {
 
     /// Parses decimal part of a float
     fn parse_float(&mut self, int: usize) {
-        let mut decimal: d128 = d128!(0);
+        let mut decimal: Decimal = dec!(0);
         let mut decimal_digits: Vec<usize> = Vec::new();
 
         while let Ok(num) = self.characters[self.index].parse::<usize>() {
@@ -165,10 +166,10 @@ impl<'a> Lexer<'a> {
         }
 
         for i in decimal_digits.iter() {
-            decimal = (decimal + d128::from(*i as i64)) / d128!(10);
+            decimal = (decimal + Decimal::from(*i as i64)) / dec!(10);
         }
 
-        let number = d128::from(int as i64) + decimal;
+        let number = Decimal::from(int as i64) + decimal;
 
         self.add_token(TokenType::Decimal, Some(Object::Decimal(number)));
     }

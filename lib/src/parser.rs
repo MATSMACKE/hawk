@@ -446,7 +446,6 @@ impl Parser {
     fn primary(&mut self) -> Result<Box<Expression>, (String, usize)> {
         if let TokenType::Int
         | TokenType::Decimal
-        | TokenType::Decimal
         | TokenType::True
         | TokenType::False
         | TokenType::String
