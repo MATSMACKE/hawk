@@ -19,3 +19,5 @@ library.hawk
 test.csv
 app/out.csv
 /web/package-lock.json
+app/test.csv
+standard_lib/array.hawk
