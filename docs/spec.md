@@ -16,9 +16,15 @@ Statements in Hawk can either be a single statement using a keyword such as `let
 
 #### Variables
 
-##### Declare mutable
+##### Declare variable
 
 `let var = val`
+
+##### Change variable
+
+`var = new_val`
+
+#### Arrays
 
 #### Conditionals:
 
@@ -84,7 +90,7 @@ Then to use it:
 2
 ```
 
-#### Testing and Peace of Mind
+#### Testing and Peace of Mind (not implemented)
 
 ##### Expect
 
@@ -112,6 +118,42 @@ Warning: Expect failed (expected 1 == 2)
 import "filename.hawk"
 ```
 
+### Data Processing
+
+#### The Process Block
+
+``` 
+process "inputfile.csv" "outputfile.csv" {
+    // Data processing goes here
+}
+```
+
+In the process block, every column in the input file is assigned to a variable of the same name. These can then be handled just like any other variable to process the data per column. 
+
+##### Example:
+
+`"input.csv"`:
+```csv
+a, b
+1, 2
+5, 3
+```
+
+Code:
+```
+process "input.csv" "output.csv" {
+    let c = a + b
+    let d = c ± (b / 4.0)
+}
+```
+
+`"output.csv"`:
+```csv
+a, b, c, d, uncertainty_d
+1, 2, 3, 3, 0.5
+5, 3, 8, 8, 0.75
+```
+
 ### The Physics Engine
 
 #### Physics data types
@@ -130,8 +172,14 @@ To use uncertain without a ± key:
 
 When doing calculations with uncertains, the value will be calculated as expected and the uncertainty will also be updated to be correct as per the calculations that have been performed.
 
-#### Finding unknowns with built in finders (not implemented)
+#### Finding unknowns with built in finders
 
-##### suvat
+##### Force
+
 ```
-let velocity = suvat(s: 5, u: 10, a: 1, v?)
+let acceleration = find force(f: 12, m: 2.3, a?)
+```
+##### suvat  (not implemented)
+```
+let velocity = find suvat(s: 5, u: 10, a: 1, v?)
+```
