@@ -26,6 +26,22 @@ Statements in Hawk can either be a single statement using a keyword such as `let
 
 #### Arrays
 
+Create an array:
+
+`let arr =  [3, 2, 1]`
+
+Get an element of an array:
+
+`print arr[1]` (Prints `2`)
+
+Assign an element of an array:
+
+```
+arr[2] = 5
+print arr // [3, 2, 5]
+```
+
+
 #### Conditionals:
 
 ##### With blocks
